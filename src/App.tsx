@@ -4,7 +4,6 @@ import { Layout } from "./components/Layout";
 import { Home } from "./sections/Home";
 import { Explore } from "./sections/Explore";
 import { Playground } from "./sections/Playground";
-import { Compare } from "./sections/Compare";
 import { Favorites } from "./sections/Favorites";
 import { CodeExport } from "./sections/CodeExport";
 import { Docs } from "./sections/Docs";
@@ -17,7 +16,6 @@ export default function App() {
 
   const go = (id: SectionId) => {
     setSection(id);
-    // On remonte en haut : sinon sur iPhone on arrive au milieu de la page.
     window.scrollTo({ top: 0, behavior: "auto" });
   };
 
@@ -29,7 +27,6 @@ export default function App() {
         {section === "home" && <Home onNavigate={go} />}
         {section === "explore" && <Explore onNavigate={go} />}
         {section === "playground" && <Playground />}
-        {section === "compare" && <Compare />}
         {section === "favorites" && <Favorites onNavigate={go} />}
         {section === "export" && <CodeExport />}
         {section === "docs" && <Docs onNavigate={go} />}
