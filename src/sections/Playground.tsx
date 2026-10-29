@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStudio } from "../state/context";
 import { PATTERN_MAP } from "../data/patterns";
 import { MATERIAL_MAP } from "../data/materials";
@@ -9,10 +9,24 @@ import { PatternPicker, MaterialPicker, ShapePicker, ColorPicker, PatternInfo } 
 
 export function Playground() {
   const { state, reset, saveCreation } = useStudio();
-  const [expanded, setExpanded] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const [name, setName] = useState("");
   const Renderer = PATTERN_RENDERERS[state.pattern];
   const pattern = PATTERN_MAP[state.pattern];
+
+  // Échap ferme le plein écran, et on bloque le défilement de la page derrière.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [fullscreen]);
 
   return (
     <section style={{ display: "grid", gap: "var(--s-5)" }}>
@@ -35,11 +49,11 @@ export function Playground() {
             <div style={{ display: "flex", gap: "var(--s-2)" }}>
               <button
                 type="button"
-                className="btn btn--sm btn--ghost"
-                onClick={() => setExpanded((v) => !v)}
-                aria-pressed={expanded}
+                className="btn btn--sm"
+                onClick={() => setFullscreen(true)}
+                aria-haspopup="dialog"
               >
-                {expanded ? "Réduire" : "Agrandir"}
+                Plein écran
               </button>
               <button type="button" className="btn btn--sm btn--ghost" onClick={reset}>
                 Reset
@@ -47,7 +61,7 @@ export function Playground() {
             </div>
           </div>
           <div className="panel__body">
-            <PhoneFrame expanded={expanded}>
+            <PhoneFrame>
               <Renderer bounce={state.spring} />
             </PhoneFrame>
             <p className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-faint)", textAlign: "center" }}>
@@ -113,6 +127,35 @@ export function Playground() {
           </div>
         </div>
       </div>
+
+      {/* ------------------------------------------------ Plein écran */}
+      {fullscreen && (
+        <div
+          className="preview-fullscreen"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Aperçu en plein écran"
+        >
+          <div className="preview-fullscreen__bar">
+            <span className="eyebrow">
+              {pattern.name} · {MATERIAL_MAP[state.material].name}
+            </span>
+            <button
+              type="button"
+              className="btn btn--sm"
+              onClick={() => setFullscreen(false)}
+              autoFocus
+            >
+              Fermer
+            </button>
+          </div>
+          <div className="preview-fullscreen__stage">
+            <PhoneFrame>
+              <Renderer bounce={state.spring} />
+            </PhoneFrame>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
