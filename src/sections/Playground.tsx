@@ -14,7 +14,6 @@ export function Playground() {
   const Renderer = PATTERN_RENDERERS[state.pattern];
   const pattern = PATTERN_MAP[state.pattern];
 
-  // Échap ferme le plein écran, et on bloque le défilement de la page derrière.
   useEffect(() => {
     if (!fullscreen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -41,18 +40,12 @@ export function Playground() {
         </p>
       </header>
 
-      {/* Maquette collante : elle reste visible pendant qu'on règle. */}
       <div className="studio-preview">
         <div className="panel">
           <div className="panel__head">
             <div className="eyebrow">Live Preview</div>
             <div style={{ display: "flex", gap: "var(--s-2)" }}>
-              <button
-                type="button"
-                className="btn btn--sm"
-                onClick={() => setFullscreen(true)}
-                aria-haspopup="dialog"
-              >
+              <button type="button" className="btn btn--sm" onClick={() => setFullscreen(true)} aria-haspopup="dialog">
                 Plein écran
               </button>
               <button type="button" className="btn btn--sm btn--ghost" onClick={reset}>
@@ -81,7 +74,7 @@ export function Playground() {
             <MaterialPicker />
             <ShapePicker />
             <ColorPicker />
-            <Group title="Advanced" badge="8" defaultOpen={false}>
+            <Group title="Advanced" badge="8 + Anchor" defaultOpen={false}>
               <AdvancedControls />
             </Group>
           </div>
@@ -128,14 +121,8 @@ export function Playground() {
         </div>
       </div>
 
-      {/* ------------------------------------------------ Plein écran */}
       {fullscreen && (
-        <div
-          className="preview-fullscreen"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Aperçu en plein écran"
-        >
+        <div className="preview-fullscreen" role="dialog" aria-modal="true" aria-label="Aperçu en plein écran">
           <div className="preview-fullscreen__bar">
             <span className="eyebrow">
               {pattern.name} · {MATERIAL_MAP[state.material].name}
