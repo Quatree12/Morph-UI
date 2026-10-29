@@ -32,7 +32,7 @@ export default function App() {
         {section === "compare" && <Compare />}
         {section === "favorites" && <Favorites onNavigate={go} />}
         {section === "export" && <CodeExport />}
-        {section === "docs" && {section === "docs" && <Docs onNavigate={go} />}
+        {section === "docs" && <Docs onNavigate={go} />}
         {section === "settings" && <Settings />}
 
         <p className="mono" style={{ color: "var(--text-faint)", marginTop: "var(--s-6)" }}>
