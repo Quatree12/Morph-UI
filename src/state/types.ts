@@ -16,7 +16,11 @@ export type PatternId =
   | "lens"
   | "collapsible"
   | "expressive-motion"
-  | "contextual-toolbar";
+  | "contextual-toolbar"
+  | "sheet-drag"
+  | "parallax-layers"
+  | "swipe-stack"
+  | "ripple-surface";
 
 export type MaterialId =
   | "frosted-glass"
