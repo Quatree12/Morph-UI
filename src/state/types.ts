@@ -46,7 +46,7 @@ export type ControlKey =
   | "size";
 
 export interface StudioState {
-  pattern: PatternId;
+  pattern: PatternId src/state/types.ts;
   material: MaterialId;
   shape: ShapeId;
   /** Couleur d'accent, en hexadécimal (issue d'une pastille ou du picker). */
