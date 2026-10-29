@@ -1,12 +1,37 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useStudio } from "../state/context";
 import { clearAll, storageAvailable } from "../state/storage";
-import { DEFAULT_STATE } from "../state/defaults";
+import { buildDataset, downloadDataset, parseDataset } from "../lib/dataset";
 
 export function Settings() {
-  const { state, reset, reducedMotion, setReducedMotion, favorites, creations } = useStudio();
+  const { state, reset, reducedMotion, setReducedMotion, favorites, creations, replaceAll } = useStudio();
   const [hasStorage] = useState(() => storageAvailable());
   const [confirming, setConfirming] = useState(false);
+  const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const onExport = () => {
+    downloadDataset(buildDataset(favorites, creations, state));
+    setFeedback({ kind: "ok", msg: "Fichier téléchargé." });
+  };
+
+  const onImportFile = async (file: File) => {
+    const text = await file.text();
+    const result = parseDataset(text);
+    if (!result.ok) {
+      setFeedback({ kind: "err", msg: result.error });
+      return;
+    }
+    replaceAll({
+      favorites: result.data.favorites,
+      creations: result.data.creations,
+      currentState: result.data.currentState,
+    });
+    setFeedback({
+      kind: "ok",
+      msg: `Importé : ${result.data.favorites.length} favori(s), ${result.data.creations.length} création(s).`,
+    });
+  };
 
   return (
     <section style={{ display: "grid", gap: "var(--s-5)" }}>
@@ -14,10 +39,64 @@ export function Settings() {
         <div className="eyebrow">Settings / Preferences</div>
         <h1>Préférences</h1>
         <p className="muted" style={{ maxWidth: "62ch" }}>
-          Préférences d'application et état des données locales.
+          Sauvegarde de votre travail et confort visuel.
         </p>
       </header>
 
+      {/* ---------------------------------------------------- Import / export */}
+      <div className="panel">
+        <div className="panel__head">
+          <div className="eyebrow">Sauvegarde · import / export</div>
+        </div>
+        <div className="panel__body">
+          <p className="muted" style={{ fontSize: "0.875rem" }}>
+            Exportez vos favoris, vos créations et votre configuration courante dans un fichier
+            JSON. Réimportez-le sur un autre appareil pour tout retrouver à l'identique.
+          </p>
+
+          <div style={{ display: "flex", gap: "var(--s-3)", flexWrap: "wrap" }}>
+            <button type="button" className="btn btn--primary" onClick={onExport}>
+              Exporter en .json
+            </button>
+
+            <button type="button" className="btn" onClick={() => fileRef.current?.click()}>
+              Importer un .json
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              className="visually-hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void onImportFile(f);
+                e.target.value = "";
+              }}
+            />
+          </div>
+
+          {feedback && (
+            <p
+              role="status"
+              aria-live="polite"
+              className="mono"
+              style={{
+                fontSize: "0.75rem",
+                color: feedback.kind === "ok" ? "var(--lime)" : "#FF6B6B",
+              }}
+            >
+              {feedback.msg}
+            </p>
+          )}
+
+          <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+            Format versionné (v1). Un fichier étranger ou corrompu est refusé avec un message
+            explicite, et vos données existantes ne sont pas écrasées.
+          </p>
+        </div>
+      </div>
+
+      {/* --------------------------------------------------- Confort visuel */}
       <div className="panel">
         <div className="panel__head">
           <div className="eyebrow">Confort visuel</div>
@@ -33,7 +112,8 @@ export function Settings() {
             <span>
               <span style={{ display: "block" }}>Réduire les animations</span>
               <span className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-faint)" }}>
-                Force le mode mouvement réduit sans dépendre du réglage système. Utile pour tester.
+                Force le mode mouvement réduit. Utile pour vérifier qu'un pattern reste
+                compréhensible sans animation.
               </span>
             </span>
           </label>
@@ -44,95 +124,53 @@ export function Settings() {
         </div>
       </div>
 
-      <div className="panel">
-        <div className="panel__head">
-          <div className="eyebrow">Configuration courante</div>
-        </div>
-        <div className="panel__body">
-          <div className="table-scroll">
-            <table className="doc-table">
-              <tbody>
-                <tr><td className="muted">Pattern</td><td className="mono">{state.pattern}</td></tr>
-                <tr><td className="muted">Material</td><td className="mono">{state.material}</td></tr>
-                <tr><td className="muted">Shape</td><td className="mono">{state.shape}</td></tr>
-                <tr><td className="muted">Color</td><td className="mono">{state.color} ({state.colorPreset})</td></tr>
-                <tr><td className="muted">Blur</td><td className="mono">{state.blur}px</td></tr>
-                <tr><td className="muted">Animation Speed</td><td className="mono">{state.speed}×</td></tr>
-                <tr><td className="muted">Border Radius</td><td className="mono">{state.radius}px</td></tr>
-                <tr><td className="muted">Shadow / Glow</td><td className="mono">{state.shadow} / {state.glow}</td></tr>
-                <tr><td className="muted">Transparency</td><td className="mono">{state.transparency}</td></tr>
-                <tr><td className="muted">Spring / Size</td><td className="mono">{state.spring} / {state.size}×</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <button
-            type="button"
-            className="btn"
-            onClick={() => reset()}
-          >
-            Restaurer les valeurs par défaut ({DEFAULT_STATE.pattern}, {DEFAULT_STATE.material}, {DEFAULT_STATE.shape})
-          </button>
-        </div>
-      </div>
-
+      {/* ------------------------------------------------------ Données locales */}
       <div className="panel">
         <div className="panel__head">
           <div className="eyebrow">Données locales</div>
         </div>
         <div className="panel__body">
           <p className="muted" style={{ fontSize: "0.875rem" }}>
-            Stockage local de ce navigateur. <strong>{favorites.length}</strong> favori
-            {favorites.length > 1 ? "s" : ""} et <strong>{creations.length}</strong> création
-            {creations.length > 1 ? "s" : ""} enregistrés.
+            <strong>{favorites.length}</strong> favori{favorites.length > 1 ? "s" : ""} et{" "}
+            <strong>{creations.length}</strong> création{creations.length > 1 ? "s" : ""} enregistrés
+            sur cet appareil.
           </p>
           <p className="mono" style={{ fontSize: "0.6875rem", color: hasStorage ? "var(--lime)" : "#FF6B6B" }}>
             {hasStorage
               ? "localStorage disponible : les données survivent au rechargement."
-              : "localStorage indisponible (navigation privée ?) : les données seront perdues au rechargement."}
-          </p>
-          <p className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-faint)" }}>
-            Aucune synchronisation distante : ce projet n'a ni compte ni serveur. Les données
-            restent sur cet appareil, et rien n'est envoyé ailleurs.
+              : "localStorage indisponible (navigation privée ?) : les données seront perdues. Exportez votre fichier avant de fermer."}
           </p>
 
-          {confirming ? (
-            <div style={{ display: "flex", gap: "var(--s-2)", flexWrap: "wrap", alignItems: "center" }}>
-              <span style={{ fontSize: "0.875rem", color: "var(--text-dim)" }}>
-                Effacer favoris et créations ?
-              </span>
-              <button
-                type="button"
-                className="btn btn--sm"
-                onClick={() => {
-                  clearAll();
-                  window.location.reload();
-                }}
-              >
-                Oui, effacer
-              </button>
-              <button type="button" className="btn btn--sm btn--ghost" onClick={() => setConfirming(false)}>
-                Annuler
-              </button>
-            </div>
-          ) : (
-            <button type="button" className="btn btn--sm btn--ghost" onClick={() => setConfirming(true)}>
-              Effacer favoris et créations
+          <div style={{ display: "flex", gap: "var(--s-3)", flexWrap: "wrap", alignItems: "center" }}>
+            <button type="button" className="btn btn--sm btn--ghost" onClick={reset}>
+              Restaurer les réglages par défaut
             </button>
-          )}
-        </div>
-      </div>
 
-      <div className="panel">
-        <div className="panel__head">
-          <div className="eyebrow">Limites connues de ce prototype</div>
-        </div>
-        <div className="panel__body">
-          <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 8, color: "var(--text-dim)", fontSize: "0.875rem" }}>
-            <li>Pas de backend ni d'authentification : la persistance est locale, il n'y a donc pas de synchronisation entre appareils.</li>
-            <li>L'export React et Framer Motion fournit l'ossature du composant principal, pas les comportements multi-éléments (métaballes, menu radial, dock).</li>
-            <li>Le rendu dépend du support de <code>backdrop-filter</code>, <code>color-mix()</code> et des filtres SVG par le navigateur ; des replis existent mais altèrent l'aspect.</li>
-            <li>Aucun test automatisé n'est fourni : les vérifications manuelles sont documentées dans le README.</li>
-          </ul>
+            {confirming ? (
+              <>
+                <span style={{ fontSize: "0.875rem", color: "var(--text-dim)" }}>
+                  Effacer favoris et créations ?
+                </span>
+                <button
+                  type="button"
+                  className="btn btn--sm"
+                  onClick={() => {
+                    clearAll();
+                    window.location.reload();
+                  }}
+                >
+                  Oui, effacer
+                </button>
+                <button type="button" className="btn btn--sm btn--ghost" onClick={() => setConfirming(false)}>
+                  Annuler
+                </button>
+              </>
+            ) : (
+              <button type="button" className="btn btn--sm btn--ghost" onClick={() => setConfirming(true)}>
+                Effacer favoris et créations
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </section>
