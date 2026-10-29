@@ -1,7 +1,7 @@
 /* ==========================================================================
    MORPH/UI — Modèle d'état partagé
-   Un seul objet StudioState pilote le Playground, le comparateur,
-   le code exporté et les créations sauvegardées.
+   Un seul objet StudioState pilote le Playground, le code exporté et les
+   créations sauvegardées.
    ========================================================================== */
 
 export type PatternId =
@@ -60,7 +60,7 @@ export interface StudioState {
   radius: number;       // 0 → 48  (px)
   shadow: number;       // 0 → 1
   glow: number;         // 0 → 1
-  transparency: number; // 0 → 1  (1 = opaque)
+  transparency: number; // 0.15 → 1  (1 = opaque)
   spring: number;       // 0 → 1  (rebond des animations)
   size: number;         // 0.6 → 1.6 (échelle du composant)
 }
@@ -71,6 +71,13 @@ export interface Creation {
   name: string;
   state: StudioState;
   createdAt: number;
+}
+
+/** Données d'un import JSON : tout est optionnel, on ne remplace que fourni. */
+export interface DatasetPayload {
+  favorites?: PatternId[];
+  creations?: Creation[];
+  currentState?: StudioState;
 }
 
 export interface StudioContextValue {
@@ -90,6 +97,9 @@ export interface StudioContextValue {
   deleteCreation: (id: string) => void;
   duplicateCreation: (id: string) => void;
   loadCreation: (id: string) => void;
+
+  /* Import : remplace tout ou partie du jeu de données */
+  replaceAll: (data: DatasetPayload) => void;
 
   /* Réglages globaux de l'app */
   reducedMotion: boolean;
