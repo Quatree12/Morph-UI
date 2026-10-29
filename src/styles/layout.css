@@ -293,3 +293,21 @@
 }
 
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* Studio mobile : la maquette reste collée en haut pendant qu'on règle. */
+.studio-preview {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding-block: var(--s-3);
+  background: linear-gradient(180deg, var(--bg) 78%, transparent);
+}
+
+@media (min-width: 1080px) {
+  /* Sur desktop, plus besoin d'être collant : les 3 colonnes sont côte à côte. */
+  .studio-preview { position: static; padding-block: 0; }
+}
+
+.studio-controls {
+  display: grid;
+  gap: var(--s-4);
+}
