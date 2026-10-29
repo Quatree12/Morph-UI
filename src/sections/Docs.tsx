@@ -23,7 +23,7 @@ const GLOBAL_GUIDELINES: Array<{ title: string; body: string }> = [
   },
   {
     title: "Attributs ARIA",
-    body: "aria-expanded pour les composants qui se déploient, aria-selected pour les onglets, aria-current=\"page\" pour la navigation, aria-live=\"polite\" pour les changements d'état annoncés (onglet actif, destination du dock).",
+    body: "aria-expanded pour les composants qui se déploient, aria-selected pour les onglets, aria-current=\"page\" pour la navigation, aria-live=\"polite\" pour les changements d'état annoncés.",
   },
   {
     title: "Retours d'état",
@@ -54,7 +54,7 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         <div className="eyebrow">Documentation / Guidelines</div>
         <h1>Interaction Guidelines</h1>
         <p className="muted" style={{ maxWidth: "62ch" }}>
-          Une fiche complète par pattern, plus les règles transverses et le référentiel du Studio.
+          Une fiche par pattern, plus les règles transverses et le référentiel du Studio.
         </p>
       </header>
 
@@ -70,13 +70,7 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
             id="doc-pattern"
             value={active}
             onChange={(e) => setActive(e.target.value as PatternId)}
-            style={{
-              minHeight: 44,
-              padding: "0 var(--s-2)",
-              borderRadius: "var(--r-sm)",
-              border: "1px solid var(--border)",
-              background: "var(--surface-2)",
-            }}
+            style={selectStyle}
           >
             {PATTERNS.map((x) => (
               <option key={x.id} value={x.id}>{x.name}</option>
@@ -95,59 +89,53 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         </div>
       </div>
 
-      {/* ------------------------------------------------------ Fiche pattern */}
-      <article className="panel">
-        <div className="panel__head">
-          <h2>{p.name}</h2>
-        </div>
-        <div className="panel__body">
-          <p className="muted">{p.description}</p>
+      {/* Fiche du pattern, elle-même en accordéon */}
+      <Group title={p.name} badge={p.category} defaultOpen>
+        <p className="muted">{p.description}</p>
 
-          <Section title="Quand l'utiliser">
-            <ul style={ulStyle}>{p.useCases.map((u) => <li key={u}>{u}</li>)}</ul>
-          </Section>
+        <Section title="Quand l'utiliser">
+          <ul style={ulStyle}>{p.useCases.map((u) => <li key={u}>{u}</li>)}</ul>
+        </Section>
 
-          <Section title="Quand l'éviter">
-            <ul style={ulStyle}>{p.cons.map((c) => <li key={c}>{c}</li>)}</ul>
-          </Section>
+        <Section title="Quand l'éviter">
+          <ul style={ulStyle}>{p.cons.map((c) => <li key={c}>{c}</li>)}</ul>
+        </Section>
 
-          <Section title={p.name}>
-            <p style={pStyle}>
-              <strong style={{ color: "var(--text)" }}>Mobile ·</strong> {p.mobile}
-            </p>
-            <p style={pStyle}>
-              <strong style={{ color: "var(--text)" }}>Desktop ·</strong> {p.desktop}
-            </p>
-          </Section>
+        <Section title="Comportement tactile">
+          <p style={pStyle}>{p.mobile}</p>
+        </Section>
 
-          <Section title="Accessibilité">
-            <ul style={ulStyle}>{p.a11y.map((a) => <li key={a}>{a}</li>)}</ul>
-          </Section>
+        <Section title="Compatibilité desktop">
+          <p style={pStyle}>{p.desktop}</p>
+        </Section>
 
-          <Section title="Performance">
-            <p style={pStyle}>{PERFORMANCE[active]}</p>
-          </Section>
+        <Section title="Accessibilité">
+          <ul style={ulStyle}>{p.a11y.map((a) => <li key={a}>{a}</li>)}</ul>
+        </Section>
 
-          <Section title="Réduction de mouvement">
-            <p style={pStyle}>
-              Quand <code>prefers-reduced-motion</code> est actif, les transitions de ce pattern
-              sont neutralisées en durée et les animations bouclées s'arrêtent après un cycle.
-              L'information portée par le mouvement est dans tous les cas doublée par un libellé
-              textuel ou un état ARIA.
-            </p>
-          </Section>
+        <Section title="Performance">
+          <p style={pStyle}>{PERFORMANCE[active]}</p>
+        </Section>
 
-          <Section title="Bonnes pratiques">
-            <ul style={ulStyle}>{p.pros.map((x) => <li key={x}>{x}</li>)}</ul>
-          </Section>
+        <Section title="Réduction de mouvement">
+          <p style={pStyle}>
+            Quand <code>prefers-reduced-motion</code> est actif, les transitions de ce pattern
+            sont neutralisées en durée et les animations bouclées s'arrêtent après un cycle.
+            L'information portée par le mouvement est dans tous les cas doublée par un libellé
+            textuel ou un état ARIA.
+          </p>
+        </Section>
 
-          <Section title="Exemple d'utilisation">
-            <p style={pStyle}>{EXAMPLES[active]}</p>
-          </Section>
-        </div>
-      </article>
+        <Section title="Bonnes pratiques">
+          <ul style={ulStyle}>{p.pros.map((x) => <li key={x}>{x}</li>)}</ul>
+        </Section>
 
-      {/* ------------------------------------------------------- Accordéons */}
+        <Section title="Exemple d'utilisation">
+          <p style={pStyle}>{EXAMPLES[active]}</p>
+        </Section>
+      </Group>
+
+      {/* Accordéons transverses */}
       <div style={{ display: "grid", gap: "var(--s-3)" }}>
         <Group title="Matériaux, formes et accents" badge="9 · 5 · 12" defaultOpen={false}>
           <div style={{ display: "grid", gap: "var(--s-4)" }}>
@@ -171,7 +159,6 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
                     <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
                       {m.tagline}
                     </span>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>{m.details}</span>
                   </div>
                 ))}
               </div>
@@ -267,6 +254,14 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+const selectStyle = {
+  minHeight: 44,
+  padding: "0 var(--s-2)",
+  borderRadius: "var(--r-sm)",
+  border: "1px solid var(--border)",
+  background: "var(--surface-2)",
+} as const;
+
 const ulStyle = {
   margin: 0,
   paddingLeft: 18,
@@ -281,6 +276,7 @@ const pStyle = {
   fontSize: "0.875rem",
 } as const;
 
+/* 16 clés — le Record exige exactement une entrée par membre de PatternId. */
 const PERFORMANCE: Record<PatternId, string> = {
   "liquid-glass": "backdrop-filter est accéléré par le GPU mais impose une passe de composition. Limitez la surface floutée et évitez les surfaces qui défilent en continu.",
   gooey: "Le filtre SVG (flou + seuil alpha) est le point coûteux. Gardez une surface d'effet réduite et ne l'animez pas pendant un scroll.",
@@ -294,8 +290,13 @@ const PERFORMANCE: Record<PatternId, string> = {
   collapsible: "L'animation de grid-template-rows est correcte ; animer height directement provoquerait un relayout à chaque frame.",
   "expressive-motion": "Ressorts peu coûteux, mais n'en faites pas jouer deux en parallèle sur la même zone.",
   "contextual-toolbar": "Léger : le coût vient de backdrop-filter si vous gardez le flou sur la barre.",
+  "sheet-drag": "L'écriture d'une hauteur en pourcentage à chaque frame est ce qui coûte. Passez par transform quand la structure le permet, et n'animez jamais la hauteur d'un conteneur contenant une image.",
+  "parallax-layers": "Trois couches en transform : acceptable. Le coût vient des images, pas du décalage. Utilisez will-change avec parcimonie, il crée une couche GPU par élément.",
+  "swipe-stack": "setPointerCapture évite les événements perdus, mais la rotation calculée à chaque frame doit rester une transform. Ne mesurez pas getBoundingClientRect pendant le glissement.",
+  "ripple-surface": "Une animation de scale sur un élément positionné en absolu est peu coûteuse. Le vrai risque est d'empiler une onde par toucher sans les retirer du DOM : on en garde trois au maximum.",
 };
 
+/* 16 clés — même exigence. */
 const EXAMPLES: Record<PatternId, string> = {
   "liquid-glass": "Une barre de lecture flottant au-dessus d'une pochette d'album : la jaquette reste devinée à travers la surface, le titre reste lisible.",
   gooey: "Un indicateur de chargement à trois billes qui se rejoignent puis se séparent pendant une synchronisation.",
@@ -309,4 +310,8 @@ const EXAMPLES: Record<PatternId, string> = {
   collapsible: "Une fiche produit où seule la description courte s'affiche, le détail technique restant replié.",
   "expressive-motion": "Un toast de confirmation pour un paiement, avec un ressort marqué et borné.",
   "contextual-toolbar": "Une barre qui n'apparaît qu'à partir du moment où deux messages sont sélectionnés.",
+  "sheet-drag": "Une app de cartographie : on déplie la fiche d'un lieu sur trois hauteurs selon ce qu'on veut lire, sans quitter la carte.",
+  "parallax-layers": "Une page produit où le packshot, le titre et le fond doré glissent à trois vitesses différentes au défilement.",
+  "swipe-stack": "Une file de modération : on rejette à gauche, on valide à droite, la carte suivante remonte au premier plan.",
+  "ripple-surface": "Un pavé de commande domotique qui confirme visuellement le toucher par une onde partant du point exact pressé.",
 };
