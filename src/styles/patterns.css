@@ -624,3 +624,49 @@
   box-shadow: 12px 12px 0 -1px rgba(255,255,255,0.06), 24px 24px 0 -2px rgba(255,255,255,0.03);
   transform: rotate(-8deg);
 }
+/* --- 13. Sheet Drag : ancrage bas ou haut, hauteurs en pixels réels --- */
+.sheet-demo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--s-2);
+  align-content: start;
+}
+
+/* Ancrage bas : le panneau colle au bas de la maquette. */
+.sheet-demo:not(.sheet-demo--top) { align-content: end; }
+
+/* Ancrage haut : le panneau colle sous le bouton. */
+.sheet-demo--top { align-content: start; }
+
+.sheet {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-self: end;
+  transition: height calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
+  will-change: height;
+}
+
+.sheet-demo--top .sheet { align-self: start; }
+
+.sheet__handle {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  cursor: grab;
+  touch-action: none;
+  position: relative;
+  z-index: 3;
+}
+.sheet__handle:active { cursor: grabbing; }
+
+.sheet__grip {
+  width: 44px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.4);
+}
