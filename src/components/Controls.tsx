@@ -126,7 +126,7 @@ export function Group({ title, defaultOpen = true, badge, children }: GroupProps
         </span>
         {badge && <span className="chip">{badge}</span>}
       </button>
-      <div id={id} className="group__body" hidden={!open}>
+      <div id={id} className="group__body" style={open ? undefined : { display: "none" }}>
         {children}
       </div>
     </section>
