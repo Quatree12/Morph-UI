@@ -1,7 +1,6 @@
 import { PATTERNS, PATTERN_MAP } from "../data/patterns";
 import { MATERIAL_MAP } from "../data/materials";
 import { useStudio } from "../state/context";
-import type { PatternId } from "../state/types";
 import type { SectionId } from "../nav";
 
 interface Props {
