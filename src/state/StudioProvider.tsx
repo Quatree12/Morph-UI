@@ -3,7 +3,14 @@ import type { ReactNode } from "react";
 import { StudioContext } from "./context";
 import { DEFAULT_STATE } from "./defaults";
 import type { Creation, PatternId, StudioContextValue, StudioState } from "./types";
-import { loadCreations, loadFavorites, loadReducedMotion, saveCreations, saveFavorites, saveReducedMotion } from "./storage";
+import {
+  loadCreations,
+  loadFavorites,
+  loadReducedMotion,
+  saveCreations,
+  saveFavorites,
+  saveReducedMotion,
+} from "./storage";
 import { SHAPE_MAP } from "../data/shapes";
 import { MATERIALS } from "../data/materials";
 
@@ -88,6 +95,28 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  /* ---------------------------------------------- Import : remplacement */
+  const replaceAll = useCallback(
+    (data: {
+      favorites?: PatternId[];
+      creations?: Creation[];
+      currentState?: StudioState;
+    }) => {
+      if (data.favorites) {
+        setFavorites(data.favorites);
+        saveFavorites(data.favorites);
+      }
+      if (data.creations) {
+        setCreations(data.creations);
+        saveCreations(data.creations);
+      }
+      if (data.currentState) {
+        setState({ ...data.currentState });
+      }
+    },
+    []
+  );
+
   /* -------------------------------------------------- Préférence motion */
   const setReducedMotion = useCallback((v: boolean) => {
     setReducedMotionState(v);
@@ -145,6 +174,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       deleteCreation,
       duplicateCreation,
       loadCreation,
+      replaceAll,
       reducedMotion,
       setReducedMotion,
     }),
@@ -161,6 +191,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       deleteCreation,
       duplicateCreation,
       loadCreation,
+      replaceAll,
       reducedMotion,
       setReducedMotion,
     ]
