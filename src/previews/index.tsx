@@ -1,20 +1,26 @@
 /* ==========================================================================
-   MORPH/UI — Les 12 comportements de pattern.
+   MORPH/UI — Les 16 comportements de pattern.
    Chaque composant a une composition, une géométrie et une animation propres.
 
    RÈGLE MATÉRIAU : aucun pattern ne pose de background / box-shadow / border
    en style inline. Ces propriétés appartiennent à la classe .m--<matériau>,
    sinon le style inline écrase le matériau et le sélecteur n'a plus d'effet.
+
+   Les 4 patterns récents (sheet-drag, parallax-layers, swipe-stack,
+   ripple-surface) vivent dans leurs propres modules, importés ci-dessous.
    ========================================================================== */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { PatternId } from "../state/types";
+import type { PatternProps } from "./types";
 
-export interface PatternProps {
-  /** Multiplicateur d'amplitude hérité de Spring/Bounce. */
-  bounce: number;
-}
+import { SheetDrag } from "./sheet-drag";
+import { ParallaxLayers } from "./parallax-layers";
+import { SwipeStack } from "./swipe-stack";
+import { RippleSurface } from "./ripple-surface";
+
+export type { PatternProps };
 
 /* ------------------------------------------------------------- Filtre goo */
 /** Filtre SVG partagé, rendu une seule fois. Décoratif → aria-hidden. */
@@ -239,15 +245,19 @@ function MorphingShapes() {
     <button
       type="button"
       className="subject"
-      style={{ display: "grid", gap: "var(--s-2)", justifyItems: "center", background: "none", border: 0, padding: 0, minWidth: 0 }}
+      style={{
+        display: "grid",
+        gap: "var(--s-2)",
+        justifyItems: "center",
+        background: "none",
+        border: 0,
+        padding: 0,
+        minWidth: 0,
+      }}
       onClick={() => setI((v) => (v + 1) % stages.length)}
       aria-label="Morphing Shapes : toucher pour changer de forme"
     >
-      <span
-        className="morph m"
-        aria-hidden="true"
-        style={{ borderRadius: stages[i] } as CSSProperties}
-      />
+      <span className="morph m" aria-hidden="true" style={{ borderRadius: stages[i] } as CSSProperties} />
       <span className="subject__sub">Forme {i + 1}/{stages.length} — toucher</span>
     </button>
   );
@@ -395,7 +405,15 @@ function ExpressiveMotion({ bounce }: PatternProps) {
     <button
       type="button"
       className="subject"
-      style={{ display: "grid", gap: "var(--s-2)", justifyItems: "center", background: "none", border: 0, padding: 0, minWidth: 0 }}
+      style={{
+        display: "grid",
+        gap: "var(--s-2)",
+        justifyItems: "center",
+        background: "none",
+        border: 0,
+        padding: 0,
+        minWidth: 0,
+      }}
       onClick={() => {
         setFired(false);
         window.requestAnimationFrame(() => setFired(true));
@@ -484,4 +502,8 @@ export const PATTERN_RENDERERS: Record<PatternId, (p: PatternProps) => JSX.Eleme
   collapsible: Collapsible,
   "expressive-motion": ExpressiveMotion,
   "contextual-toolbar": ContextualToolbar,
+  "sheet-drag": SheetDrag,
+  "parallax-layers": ParallaxLayers,
+  "swipe-stack": SwipeStack,
+  "ripple-surface": RippleSurface,
 };
