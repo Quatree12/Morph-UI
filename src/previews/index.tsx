@@ -1,8 +1,10 @@
 /* ==========================================================================
    MORPH/UI — Les 12 comportements de pattern.
    Chaque composant a une composition, une géométrie et une animation propres.
-   Aucun n'est une décoration interchangeable : l'état interactif est local à
-   la maquette, et c'est lui qui est manipulé au doigt dans l'aperçu.
+
+   RÈGLE MATÉRIAU : aucun pattern ne pose de background / box-shadow / border
+   en style inline. Ces propriétés appartiennent à la classe .m--<matériau>,
+   sinon le style inline écrase le matériau et le sélecteur n'a plus d'effet.
    ========================================================================== */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -47,7 +49,6 @@ function LiquidGlass({ bounce }: PatternProps) {
       style={
         {
           "--spec": 0.85,
-          background: "none",
           transform: `scale(var(--size)) rotateX(${tilt}deg)`,
         } as CSSProperties
       }
@@ -82,7 +83,6 @@ function Gooey({ bounce }: PatternProps) {
   const [merged, setMerged] = useState(false);
 
   useEffect(() => {
-    // Fusion / séparation continue, à la vitesse choisie.
     const id = window.setInterval(() => setMerged((v) => !v), 1600 + (1 - bounce) * 900);
     return () => window.clearInterval(id);
   }, [bounce]);
@@ -95,10 +95,10 @@ function Gooey({ bounce }: PatternProps) {
       aria-pressed={merged}
       aria-label={`Métaballes ${merged ? "fusionnées" : "séparées"}. Activer pour inverser.`}
     >
-      <span className="goo__blob" />
-      <span className="goo__blob" />
-      <span className="goo__blob" />
-      <span className="goo__blob" />
+      <span className="goo__blob m" />
+      <span className="goo__blob m" />
+      <span className="goo__blob m" />
+      <span className="goo__blob m" />
     </button>
   );
 }
@@ -196,7 +196,7 @@ function ExperimentalNav() {
 
   return (
     <div style={{ display: "grid", gap: "var(--s-3)", justifyItems: "center" }}>
-      <div className="demo-nav" role="tablist" aria-label="Onglets de démonstration">
+      <div className="demo-nav m" role="tablist" aria-label="Onglets de démonstration">
         <span
           className="demo-nav__ind"
           style={{ transform: `translateX(${rect.x}px)`, width: rect.w }}
@@ -239,11 +239,15 @@ function MorphingShapes() {
     <button
       type="button"
       className="subject"
-      style={{ background: "none", border: 0, padding: 0, minWidth: 0 }}
+      style={{ display: "grid", gap: "var(--s-2)", justifyItems: "center", background: "none", border: 0, padding: 0, minWidth: 0 }}
       onClick={() => setI((v) => (v + 1) % stages.length)}
       aria-label="Morphing Shapes : toucher pour changer de forme"
     >
-      <span className="morph" aria-hidden="true" style={{ borderRadius: stages[i] }} />
+      <span
+        className="morph m"
+        aria-hidden="true"
+        style={{ borderRadius: stages[i] } as CSSProperties}
+      />
       <span className="subject__sub">Forme {i + 1}/{stages.length} — toucher</span>
     </button>
   );
@@ -258,7 +262,7 @@ function RadialMenu({ bounce }: PatternProps) {
     <div className={`radial${open ? " radial--open" : ""}`}>
       <button
         type="button"
-        className="radial__center"
+        className="radial__center m"
         aria-expanded={open}
         aria-label={open ? "Fermer le menu radial" : "Ouvrir le menu radial"}
         onClick={() => setOpen((v) => !v)}
@@ -280,7 +284,7 @@ function RadialMenu({ bounce }: PatternProps) {
           <button
             key={a}
             type="button"
-            className="radial__item"
+            className="radial__item m"
             style={style}
             tabIndex={open ? 0 : -1}
             onClick={() => setOpen(false)}
@@ -317,7 +321,7 @@ function Kinetic() {
         {base.map((h, i) => (
           <span
             key={i}
-            className="kinetic__bar"
+            className="kinetic__bar m"
             style={
               {
                 height: `${30 + h * 80 * (0.4 + amp)}px`,
@@ -391,7 +395,7 @@ function ExpressiveMotion({ bounce }: PatternProps) {
     <button
       type="button"
       className="subject"
-      style={{ background: "none", border: 0, padding: 0, minWidth: 0 }}
+      style={{ display: "grid", gap: "var(--s-2)", justifyItems: "center", background: "none", border: 0, padding: 0, minWidth: 0 }}
       onClick={() => {
         setFired(false);
         window.requestAnimationFrame(() => setFired(true));
