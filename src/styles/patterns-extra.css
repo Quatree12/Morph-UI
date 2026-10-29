@@ -1,0 +1,55 @@
+/* ==========================================================================
+   MORPH/UI — Animations internes aux patterns + comparateur.
+   ========================================================================== */
+
+@keyframes kinetic-0 {
+  0%, 100% { transform: scaleY(0.55) translateY(0); }
+  50%      { transform: scaleY(1) translateY(-6px); }
+}
+@keyframes kinetic-1 {
+  0%, 100% { transform: scaleY(1) translateY(-4px); }
+  50%      { transform: scaleY(0.5) translateY(4px); }
+}
+@keyframes kinetic-2 {
+  0%, 100% { transform: scaleY(0.7) translateY(2px); }
+  50%      { transform: scaleY(1.1) translateY(-8px); }
+}
+
+.kinetic__bar {
+  will-change: transform;
+  /* La durée de base est posée en inline (elle suit déjà la vitesse choisie) ;
+     on la multiplie par le facteur global pour que les deux s'additionnent. */
+  animation-duration: calc(var(--kinetic-dur, 2s) * var(--speed-mul));
+}
+
+/* Gooey : le filtre SVG est coûteux sur grande surface ; on le borne. */
+@media (max-width: 520px) {
+  .goo { filter: url(#morph-goo) blur(0px); }
+}
+
+/* Lens : repli si backdrop-filter est absent, on garde la zone visible. */
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  .lens__glass { background: rgba(255, 255, 255, 0.14); }
+}
+
+/* Mode mouvement réduit forcé depuis Settings. */
+html.force-reduced-motion *,
+html.force-reduced-motion *::before,
+html.force-reduced-motion *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+}
+
+/* Comparateur : empilé sur mobile, deux colonnes au-delà. */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-4);
+}
+
+@media (min-width: 760px) {
+  .compare-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,295 @@
+/* ==========================================================================
+   MORPH/UI — Layout responsive (mobile-first)
+   Desktop : sidebar fixe à gauche.
+   Mobile  : dock flottant en bas, contenu en pleine largeur.
+   ========================================================================== */
+
+.app {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* ---------------------------------------------------------------- Sidebar */
+.sidebar {
+  display: none;
+}
+
+/* ------------------------------------------------------------- Contenu */
+.main {
+  min-width: 0;
+  padding: var(--s-4) var(--s-4) calc(var(--dock-h) + var(--safe-b) + var(--s-6));
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.section-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-3);
+}
+
+/* ---------------------------------------------------------------- Dock */
+.dock {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-b) + var(--s-3));
+  transform: translateX(-50%);
+  z-index: 60;
+  width: min(100% - 24px, 520px);
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 6px;
+  border-radius: var(--r-pill);
+  background: rgba(25, 23, 32, 0.82);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+
+/* Repli si backdrop-filter n'est pas supporté : surface opaque lisible. */
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  .dock { background: var(--surface); }
+}
+
+.dock__item {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.625rem;
+  letter-spacing: 0.02em;
+  position: relative;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.dock__item svg { width: 20px; height: 20px; }
+
+.dock__item[aria-current="page"] { color: var(--text); }
+
+/* Indicateur actif animé */
+.dock__item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  z-index: -1;
+  animation: dock-pop calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
+}
+
+@keyframes dock-pop {
+  from { transform: scale(0.86); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.dock__label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- Desktop */
+@media (min-width: 900px) {
+  .app {
+    grid-template-columns: var(--nav-w) 1fr;
+  }
+
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    padding: var(--s-5) var(--s-3);
+    border-right: 1px solid var(--border);
+    background: rgba(20, 18, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow-y: auto;
+  }
+
+  .main {
+    padding: var(--s-6) var(--s-7) var(--s-7);
+    gap: var(--s-6);
+    max-width: 1240px;
+  }
+
+  .dock { display: none; }
+}
+
+/* ------------------------------------------------------- Grilles utiles */
+.grid-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-4);
+}
+
+@media (min-width: 640px) {
+  .grid-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1180px) {
+  .grid-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.grid-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+@media (min-width: 700px) {
+  .grid-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* --------------------------------------------- Playground (desktop 3 col) */
+.studio {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+
+@media (min-width: 1080px) {
+  .studio {
+    grid-template-columns: 300px minmax(0, 1fr) 340px;
+  }
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+}
+
+.panel__body {
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* Séparateur de groupe (sections repliables du Playground) */
+.group {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.group__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface-2);
+  border: 0;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.group__caret {
+  transition: transform var(--dur) var(--ease-out);
+  color: var(--text-faint);
+}
+.group__head[aria-expanded="true"] .group__caret { transform: rotate(90deg); }
+
+.group__body {
+  padding: var(--s-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+
+/* ------------------------------------------------------- Barre d'onglets */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tabs__btn {
+  flex: 1 0 auto;
+  min-height: 38px;
+  padding: 0 var(--s-3);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.tabs__btn[aria-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text);
+}
+
+/* ------------------------------------------------------- Tableaux / docs */
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.doc-table th,
+.doc-table td {
+  text-align: left;
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.doc-table th {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
