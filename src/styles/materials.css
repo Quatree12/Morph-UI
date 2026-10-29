@@ -246,3 +246,17 @@
   background-blend-mode: normal;
   filter: saturate(calc(100% + var(--glow) * 30%));
 }
+/* Les matériaux à texture (métal, chrome, irisé) ont besoin d'une surface
+   minimale et d'un fond opaque pour que la texture soit lisible sur les
+   éléments étroits (barres, icônes, pastilles). */
+.m--brushed-metal,
+.m--liquid-chrome,
+.m--iridescent-crystal,
+.m--neon-glow {
+  background-color: #4a4753;
+  min-height: 18px;
+}
+
+.m--liquid-chrome { background-color: #7b7787; }
+.m--iridescent-crystal { background-color: #a78bfa; }
+.m--neon-glow { background-color: color-mix(in srgb, var(--accent) 24%, #0c0a11); }
