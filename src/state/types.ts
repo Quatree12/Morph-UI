@@ -50,7 +50,7 @@ export type ControlKey =
   | "size";
 
 export interface StudioState {
-  pattern: PatternId src/state/types.ts;
+  pattern: PatternId;
   material: MaterialId;
   shape: ShapeId;
   /** Couleur d'accent, en hexadécimal (issue d'une pastille ou du picker). */
@@ -77,7 +77,7 @@ export interface Creation {
   createdAt: number;
 }
 
-/** Données d'un import JSON : tout est optionnel, on ne remplace que fourni. */
+/** Données d'un import JSON : tout est optionnel, on ne remplace que le fourni. */
 export interface DatasetPayload {
   favorites?: PatternId[];
   creations?: Creation[];
