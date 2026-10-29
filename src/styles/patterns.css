@@ -1,5 +1,9 @@
 /* ==========================================================================
    MORPH/UI — Formes + maquette + patterns
+
+   RÈGLE MATÉRIAU : les éléments qui portent la classe .m ne reçoivent AUCUN
+   background, border ni box-shadow depuis ce fichier. Sinon patterns.css est
+   chargé après materials.css et, à spécificité égale, il écrase le matériau.
    ========================================================================== */
 
 /* ------------------------------------------------------------ Formes §9 */
@@ -7,15 +11,9 @@
 .shape--rounded  { border-radius: calc(var(--radius) * 1px); }
 .shape--circle   { border-radius: 50%; }
 .shape--sharp    { border-radius: 0; }
-/* Squircle : superellipse approchée. Le masque évite l'angle trop mou
-   du border-radius et donne la silhouette continue caractéristique. */
 .shape--squircle {
   border-radius: calc(var(--radius) * 1.4px);
-  -webkit-mask-image: radial-gradient(
-    closest-side,
-    #000 96%,
-    rgba(0, 0, 0, 0.86) 100%
-  );
+  -webkit-mask-image: radial-gradient(closest-side, #000 96%, rgba(0, 0, 0, 0.86) 100%);
   mask-image: radial-gradient(closest-side, #000 96%, rgba(0, 0, 0, 0.86) 100%);
 }
 
@@ -29,12 +27,9 @@
   padding: 10px;
   background: linear-gradient(160deg, #2a2634, #15131c 45%, #221e2c);
   border: 1px solid #3a3546;
-  box-shadow:
-    var(--shadow-lg),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: max-width var(--dur) var(--ease-out);
 }
-
 .phone--expanded { width: min(100%, 460px); }
 
 .phone__screen {
@@ -48,7 +43,6 @@
   flex-direction: column;
 }
 
-/* Fond d'ambiance de l'écran : sans lui, backdrop-filter n'aurait rien à flouter. */
 .phone__bg {
   position: absolute;
   inset: 0;
@@ -58,8 +52,6 @@
     radial-gradient(50% 36% at 50% 108%, rgba(255, 158, 196, 0.2), transparent 70%),
     linear-gradient(180deg, #131019, #0b0a10);
 }
-
-/* Grille de repère : donne de la matière au flou, reste très discrète. */
 .phone__bg::after {
   content: "";
   position: absolute;
@@ -120,7 +112,6 @@
 }
 
 /* ------------------------------------------- Objet principal du pattern */
-/* C'est LUI que les matériaux doivent transformer (§8). */
 .subject {
   position: relative;
   display: flex;
@@ -170,8 +161,6 @@
 .knob:nth-child(2) { background: color-mix(in srgb, var(--accent) 72%, transparent); }
 .knob:nth-child(3) { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
-/* Illustrations des patterns */
-
 /* 1. Liquid Glass : superposition de calques décalés */
 .stack { position: relative; width: 190px; height: 110px; z-index: 3; }
 .stack__layer {
@@ -185,7 +174,7 @@
 .stack__layer:nth-child(2) { opacity: 0.78; }
 .stack__layer:nth-child(3) { opacity: 1; }
 
-/* 2. Gooey : conteneur filtré */
+/* 2. Gooey : conteneur filtré — le fond vient du matériau (.m) */
 .goo {
   position: relative;
   width: 190px;
@@ -193,7 +182,6 @@
   z-index: 3;
   filter: url(#morph-goo);
 }
-.goo--on .goo__blob { transform: translate(var(--tx), var(--ty)); }
 .goo__blob {
   position: absolute;
   top: 50%;
@@ -208,6 +196,7 @@
 .goo__blob:nth-child(2) { --tx: 0px;   --ty: 14px; }
 .goo__blob:nth-child(3) { --tx: 48px;  --ty: -18px; }
 .goo__blob:nth-child(4) { --tx: 0px;   --ty: -26px; }
+.goo--on .goo__blob { transform: translate(var(--tx), var(--ty)); }
 .goo--on .goo__blob:nth-child(1) { --tx: -22px; --ty: 0px; }
 .goo--on .goo__blob:nth-child(2) { --tx: 0px;   --ty: 0px; }
 .goo--on .goo__blob:nth-child(3) { --tx: 24px;  --ty: 0px; }
@@ -229,7 +218,7 @@
 .expand__extra--open { grid-template-rows: 1fr; opacity: 1; }
 .expand__extra > div { min-height: 0; display: grid; gap: var(--s-2); }
 
-/* 4. Dock : magnification */
+/* 4. Dock : magnification — le fond vient du matériau (.m) */
 .demo-dock {
   display: flex;
   align-items: flex-end;
@@ -238,18 +227,17 @@
   z-index: 3;
 }
 .demo-dock__item {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: calc(var(--radius) * 1px);
   display: grid;
   place-items: center;
   color: var(--text);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    background var(--dur-fast) var(--ease-out);
+  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
 }
-.demo-dock__item[aria-current="true"] {
-  transform: translateY(-10px) scale(1.32);
-  box-shadow: 0 0 0 2px var(--accent), 0 10px 24px rgba(0, 0, 0, 0.45);
+.demo-dock__item[aria-selected="true"] {
+  transform: translateY(-10px) scale(1.28);
+  box-shadow: 0 0 0 2px var(--accent), 0 12px 26px rgba(0, 0, 0, 0.5);
 }
 
 /* 5. Nav capsules */
@@ -259,8 +247,6 @@
   gap: 4px;
   padding: 4px;
   border-radius: var(--r-pill);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(0, 0, 0, 0.34);
   z-index: 3;
 }
 .demo-nav__ind {
@@ -296,7 +282,7 @@
     transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-spring);
 }
 
-/* 7. Radial menu */
+/* 7. Radial menu — les fonds viennent du matériau (.m) */
 .radial { position: relative; width: 220px; height: 220px; z-index: 3; }
 .radial__item {
   position: absolute;
@@ -306,7 +292,6 @@
   height: 52px;
   margin: -26px 0 0 -26px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.22);
   display: grid;
   place-items: center;
   color: var(--text);
@@ -330,15 +315,14 @@
   height: 64px;
   margin: -32px 0 0 -32px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #14121a;
+  color: var(--text);
   font-weight: 700;
   display: grid;
   place-items: center;
   z-index: 3;
 }
 
-/* 8. Kinetic */
+/* 8. Kinetic — les barres prennent le matériau (.m) */
 .kinetic {
   width: 200px;
   height: 120px;
@@ -375,7 +359,7 @@
   border: 2px solid rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(2px) brightness(1.4);
   -webkit-backdrop-filter: blur(2px) brightness(1.4);
-  box-shadow: 0 0 0 9999px rgba(6, 5, 9, 0.38), inset 0 0 24px rgba(255,255,255,0.24);
+  box-shadow: 0 0 0 9999px rgba(6, 5, 9, 0.38), inset 0 0 24px rgba(255, 255, 255, 0.24);
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -437,20 +421,18 @@
   font-size: 0.6875rem;
 }
 
-/* ------------------------------------------- Aperçus animés du catalogue */
+/* ------------------------------------------- Aperçus du catalogue : motifs
+   Explore n'affiche plus de composants animés — uniquement un motif statique
+   caractéristique. Le visuel vivant vit dans la maquette du Studio. */
 .thumb {
   position: relative;
-  height: 128px;
+  height: 132px;
   border-radius: var(--r-sm);
   overflow: hidden;
   display: grid;
   place-items: center;
-  background:
-    radial-gradient(60% 50% at 30% 20%, color-mix(in srgb, var(--thumb-accent, var(--accent)) 30%, transparent), transparent 70%),
-    linear-gradient(180deg, #17141f, #100e16);
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, #17141f, #100e16);
 }
-.thumb__inner { transform: scale(0.62); }
 .thumb__label {
   position: absolute;
   bottom: var(--s-2);
@@ -458,4 +440,62 @@
   font-family: var(--font-mono);
   font-size: 0.625rem;
   color: var(--text-faint);
+}
+
+/* Motifs statiques : une silhouette par famille de pattern. */
+.motif { position: relative; width: 100%; height: 100%; display: grid; place-items: center; }
+.motif--surfaces::before {
+  content: "";
+  width: 120px; height: 62px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.24), rgba(255,255,255,0.04));
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+  outline: 1px solid rgba(255,255,255,0.16);
+}
+.motif--organique::before {
+  content: "";
+  width: 110px; height: 66px;
+  border-radius: 50%;
+  background: var(--accent);
+  filter: blur(14px);
+  opacity: 0.85;
+}
+.motif--action::before {
+  content: "";
+  width: 132px; height: 40px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.motif--navigation::before {
+  content: "";
+  width: 150px; height: 34px;
+  border-radius: 999px;
+  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 46%, transparent) 0 26px, transparent 26px 34px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.motif--géométrie::before,
+.motif--geometrie::before {
+  content: "";
+  width: 84px; height: 84px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 58%, transparent), transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 42% 58% 55% 45% / 50% 42% 58% 50%;
+}
+.motif--mouvement::before {
+  content: "";
+  width: 150px; height: 60px;
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 54%, transparent), transparent);
+  mask-image: repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 18px);
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 18px);
+}
+.motif--structure::before {
+  content: "";
+  width: 128px; height: 30px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 22px 0 -8px color-mix(in srgb, var(--accent) 42%, transparent),
+    0 44px 0 -16px color-mix(in srgb, var(--accent) 24%, transparent);
 }
