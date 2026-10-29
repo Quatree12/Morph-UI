@@ -500,3 +500,127 @@
   box-shadow: 0 22px 0 -8px color-mix(in srgb, var(--accent) 42%, transparent),
     0 44px 0 -16px color-mix(in srgb, var(--accent) 24%, transparent);
 }
+/* ==========================================================================
+   13-16. Patterns ajoutés : Sheet Drag, Parallax, Swipe Stack, Ripple.
+   Les éléments portant .m ne reçoivent aucun fond ici (règle matériau).
+   ========================================================================== */
+
+/* --- 13. Sheet Drag --- */
+.sheet-demo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  align-content: end;
+}
+
+.sheet {
+  position: relative;
+  overflow: hidden;
+  transition: height calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.sheet__handle {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  cursor: grab;
+  touch-action: none;
+  position: relative;
+  z-index: 3;
+}
+.sheet__handle:active { cursor: grabbing; }
+
+.sheet__grip {
+  width: 44px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* --- 14. Parallax Layers --- */
+.parallax {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.parallax__layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 100px;
+  margin: -50px 0 0 -60px;
+  border-radius: calc(var(--radius) * 1px);
+  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
+  will-change: transform;
+}
+.parallax__layer:nth-child(1) { width: 150px; height: 110px; margin: -55px 0 0 -75px; }
+.parallax__layer:nth-child(2) { width: 130px; height: 105px; margin: -52px 0 0 -65px; }
+.parallax__layer:nth-child(3) { width: 110px; height: 100px; margin: -50px 0 0 -55px; }
+
+/* --- 15. Swipe Stack --- */
+.stack-demo {
+  position: relative;
+  width: 100%;
+  max-width: 240px;
+  height: 170px;
+  display: grid;
+  place-items: center;
+}
+
+.stack-demo__card {
+  position: absolute;
+  width: 100%;
+  min-height: 110px;
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
+    opacity var(--dur) var(--ease-out);
+  touch-action: none;
+  cursor: grab;
+}
+.stack-demo__card:active { cursor: grabbing; }
+
+/* --- 16. Ripple Surface --- */
+.ripple { position: relative; overflow: hidden; }
+
+.ripple__wave {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+  z-index: 2;
+  animation: ripple-out calc(900ms * var(--speed-mul)) var(--ease-out) forwards;
+}
+
+@keyframes ripple-out {
+  from {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(calc(18 * var(--ripple-scale, 1)));
+    opacity: 0;
+  }
+}
+
+/* Motifs statiques de la Library pour les 4 nouveaux patterns. */
+.motif--decision::before {
+  content: "";
+  width: 96px; height: 64px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 44%, transparent), transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: 12px 12px 0 -1px rgba(255,255,255,0.06), 24px 24px 0 -2px rgba(255,255,255,0.03);
+  transform: rotate(-8deg);
+}
