@@ -37,7 +37,7 @@ export function Playground() {
               Reset
             </button>
           </div>
-          <div className="panel__body" style={{ maxHeight: "68vh", overflowY: "auto" }}>
+          <div className="panel__body">
             <PatternPicker />
             <MaterialPicker />
             <ShapePicker />
