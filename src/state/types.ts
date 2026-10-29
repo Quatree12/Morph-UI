@@ -35,10 +35,12 @@ export type MaterialId =
 
 export type ShapeId = "pill" | "rounded" | "circle" | "squircle" | "sharp";
 
+/** Ancrage du panneau : le contrôle Anchor n'agit que sur Sheet Drag. */
+export type AnchorId = "bottom" | "top";
+
 export type Complexity = "simple" | "intermédiaire" | "avancé";
 
-/** Champs de réglages avancés. Sert à désactiver proprement un contrôle
- *  quand un pattern n'en a pas besoin (explication au lieu d'un faux réglage). */
+/** Champs de réglages avancés. */
 export type ControlKey =
   | "blur"
   | "speed"
@@ -53,10 +55,12 @@ export interface StudioState {
   pattern: PatternId;
   material: MaterialId;
   shape: ShapeId;
-  /** Couleur d'accent, en hexadécimal (issue d'une pastille ou du picker). */
+  /** Couleur d'accent, en hexadécimal. */
   color: string;
   /** Nom du preset couleur actif, ou "custom" si l'utilisateur a pipeté. */
   colorPreset: string;
+  /** Ancrage du panneau (Sheet Drag uniquement). */
+  anchor: AnchorId;
 
   /* --- Contrôles avancés --- */
   blur: number;         // 0 → 40  (px)
@@ -64,9 +68,9 @@ export interface StudioState {
   radius: number;       // 0 → 48  (px)
   shadow: number;       // 0 → 1
   glow: number;         // 0 → 1
-  transparency: number; // 0.15 → 1  (1 = opaque)
-  spring: number;       // 0 → 1  (rebond des animations)
-  size: number;         // 0.6 → 1.6 (échelle du composant)
+  transparency: number; // 0.15 → 1
+  spring: number;       // 0 → 1
+  size: number;         // 0.6 → 1.6
 }
 
 /** Une création sauvegardée dans Favorites / Creations. */
@@ -77,7 +81,7 @@ export interface Creation {
   createdAt: number;
 }
 
-/** Données d'un import JSON : tout est optionnel, on ne remplace que le fourni. */
+/** Données d'un import JSON : tout est optionnel. */
 export interface DatasetPayload {
   favorites?: PatternId[];
   creations?: Creation[];
@@ -90,22 +94,18 @@ export interface StudioContextValue {
   patch: (partial: Partial<StudioState>) => void;
   reset: () => void;
 
-  /* Favoris */
   favorites: PatternId[];
   toggleFavorite: (id: PatternId) => void;
   isFavorite: (id: PatternId) => boolean;
 
-  /* Créations */
   creations: Creation[];
   saveCreation: (name: string, state?: StudioState) => void;
   deleteCreation: (id: string) => void;
   duplicateCreation: (id: string) => void;
   loadCreation: (id: string) => void;
 
-  /* Import : remplace tout ou partie du jeu de données */
   replaceAll: (data: DatasetPayload) => void;
 
-  /* Réglages globaux de l'app */
   reducedMotion: boolean;
   setReducedMotion: (v: boolean) => void;
 }
