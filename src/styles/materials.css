@@ -236,3 +236,13 @@
     background-color: color-mix(in srgb, var(--surface-2) 92%, var(--accent) 8%);
   }
 }
+/* Petites surfaces (icônes, barres) : la texture doit rester lisible
+   quand la surface est réduite. On accentue le contraste du matériau. */
+.demo-dock__item.m,
+.radial__item.m,
+.radial__center.m,
+.kinetic__bar.m,
+.goo__blob.m {
+  background-blend-mode: normal;
+  filter: saturate(calc(100% + var(--glow) * 30%));
+}
