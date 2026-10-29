@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { PATTERNS, CATEGORIES, COMPLEXITIES } from "../data/patterns";
 import type { PatternDef } from "../data/patterns";
-import { MATERIAL_MAP } from "../data/materials";
 import { useStudio } from "../state/context";
 import { PATTERN_RENDERERS } from "../previews";
 import type { Complexity, PatternId } from "../state/types";
