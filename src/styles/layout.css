@@ -203,6 +203,20 @@
   gap: var(--s-4);
 }
 
+/* L'en-tête ne doit jamais comprimer ses boutons d'action : sur écran
+   étroit, « Live Preview » + 2 boutons ne tiennent pas sans ça. */
+.panel__head > * {
+  flex-shrink: 0;
+}
+
+.panel__head .eyebrow {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Séparateur de groupe (sections repliables du Playground) */
 .group {
   border: 1px solid var(--border);
@@ -293,7 +307,10 @@
 }
 
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-/* Studio mobile : la maquette reste collée en haut pendant qu'on règle. */
+
+/* ---------------------------------------------------------------------------
+   Studio mobile : la maquette reste collée en haut pendant qu'on règle.
+   --------------------------------------------------------------------------- */
 .studio-preview {
   position: sticky;
   top: 0;
@@ -311,21 +328,21 @@
   display: grid;
   gap: var(--s-4);
 }
-/* Aperçu plein écran : un vrai agrandissement, lisible sur iPhone. */
-.preview-fullscreen__stage {
-  display: grid;
-  place-items: start center;
-  padding: var(--s-4);
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
 
-.preview-fullscreen .phone {
-  width: min(100%, 400px);
-  height: auto;
-  min-height: 640px;
+/* ---------------------------------------------------------------------------
+   Aperçu plein écran : un vrai agrandissement, défilable.
+   --------------------------------------------------------------------------- */
+.preview-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  animation: fs-in calc(var(--dur) * var(--speed-mul)) var(--ease-out);
+  padding-bottom: var(--safe-b);
 }
 
 @keyframes fs-in {
@@ -342,19 +359,28 @@
   border-bottom: 1px solid var(--border);
 }
 
-.preview-fullscreen__stage {
-  display: grid;
-  place-items: center;
-  padding: var(--s-4);
-  min-height: 0;
+.preview-fullscreen__bar .eyebrow {
+  flex-shrink: 1;
+  min-width: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* En plein écran, la maquette exploite toute la hauteur disponible. */
+.preview-fullscreen__stage {
+  display: grid;
+  place-items: start center;
+  padding: var(--s-4);
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* En plein écran, la maquette devient défilable pour que les patterns
+   qui ont besoin de hauteur restent utilisables. */
 .preview-fullscreen .phone {
-  width: auto;
-  height: 100%;
-  max-height: 100%;
-  max-width: 100%;
-  aspect-ratio: 9 / 19.5;
+  width: min(100%, 400px);
+  height: auto;
+  min-height: 640px;
 }
