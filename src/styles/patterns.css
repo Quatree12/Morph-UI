@@ -202,7 +202,6 @@
   height: 56px;
   margin: -28px 0 0 -28px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--accent) 82%, #ffffff 6%);
   transition: transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-spring);
 }
 .goo__blob:nth-child(1) { --tx: -46px; --ty: -16px; }
@@ -308,7 +307,6 @@
   margin: -26px 0 0 -26px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  background: color-mix(in srgb, var(--accent) 48%, rgba(20, 18, 26, 0.7));
   display: grid;
   place-items: center;
   color: var(--text);
@@ -333,7 +331,6 @@
   margin: -32px 0 0 -32px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  background: color-mix(in srgb, var(--accent) 78%, #14121a);
   color: #14121a;
   font-weight: 700;
   display: grid;
@@ -354,11 +351,6 @@
 }
 .kinetic__bar {
   border-radius: var(--r-pill);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--accent) 92%, transparent),
-    color-mix(in srgb, var(--accent) 40%, transparent)
-  );
   transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
 }
 
@@ -367,7 +359,6 @@
   position: relative;
   width: 200px;
   height: 130px;
-  border-radius: calc(var(--radius) * 1px);
   overflow: hidden;
   z-index: 3;
   display: grid;
