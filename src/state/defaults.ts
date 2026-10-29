@@ -7,6 +7,7 @@ export const DEFAULT_STATE: StudioState = {
   shape: "pill",
   color: "#C1A8FF",
   colorPreset: "violet",
+  anchor: "bottom",
 
   blur: 18,
   speed: 1,
