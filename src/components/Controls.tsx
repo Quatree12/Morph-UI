@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { useCallback, useId, useState } from "react";
 import { ADVANCED_CONTROLS } from "../state/defaults";
-import type { ControlKey } from "../state/types";
+import { ANCHORS } from "../state/anchor";
+import type { AnchorId, ControlKey } from "../state/types";
 import { useStudio } from "../state/context";
 
 /* --------------------------------------------------------------- Slider */
@@ -35,10 +36,17 @@ export function Slider({
   return (
     <div style={{ display: "grid", gap: 6, opacity: disabled ? 0.45 : 1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-        <label htmlFor={id} style={{ fontSize: "0.8125rem", color: disabled ? "var(--text-faint)" : "var(--text-dim)" }}>
+        <label
+          htmlFor={id}
+          style={{ fontSize: "0.8125rem", color: disabled ? "var(--text-faint)" : "var(--text-dim)" }}
+        >
           {label}
         </label>
-        <output className="mono" htmlFor={id} style={{ color: disabled ? "var(--text-faint)" : "var(--text)" }}>
+        <output
+          className="mono"
+          htmlFor={id}
+          style={{ color: disabled ? "var(--text-faint)" : "var(--text)" }}
+        >
           {value.toFixed(decimals)}
           {unit}
         </output>
@@ -86,7 +94,11 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
             role="radio"
             aria-checked={o.id === value}
             className="tabs__btn"
-            style={o.id === value ? { background: "color-mix(in srgb, var(--accent) 22%, transparent)", color: "var(--text)" } : undefined}
+            style={
+              o.id === value
+                ? { background: "color-mix(in srgb, var(--accent) 22%, transparent)", color: "var(--text)" }
+                : undefined
+            }
             onClick={() => onChange(o.id)}
           >
             {o.label}
@@ -135,20 +147,29 @@ export function Group({ title, defaultOpen = true, badge, children }: GroupProps
 
 /* ------------------------------------------------- Contrôles avancés §11 */
 export function AdvancedControls() {
-  const { state, set } = useStudio();
+  const { state, set, patch } = useStudio();
 
-  const isDisabled = useCallback(
-    (key: ControlKey) => {
-      // Un réglage est désactivé s'il n'a réellement aucun effet sur la maquette :
-      // on explique pourquoi au lieu d'afficher un faux contrôle (§11).
-      if (key === "blur") return false; // le blur agit sur les matériaux translucides
-      return false;
-    },
-    []
-  );
+  // Le contrôle Anchor n'est réel que sur sheet-drag : désactivé partout
+  // ailleurs, avec l'explication — jamais un faux réglage (§11).
+  const anchorDisabled = state.pattern !== "sheet-drag";
+
+  const isDisabled = useCallback((_key: ControlKey) => false, []);
 
   return (
     <>
+      <Segmented<AnchorId>
+        label={anchorDisabled ? "Anchor (inactif pour ce pattern)" : "Anchor"}
+        value={state.anchor}
+        options={ANCHORS.map((a) => ({ id: a.id, label: a.name }))}
+        onChange={(v) => patch({ anchor: v })}
+      />
+      {anchorDisabled && (
+        <p className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-faint)" }}>
+          L'ancrage ne s'applique qu'au pattern Sheet Drag : ailleurs, le placement est
+          déterminé par la composition du composant.
+        </p>
+      )}
+
       {ADVANCED_CONTROLS.map((c) => (
         <Slider
           key={c.key}
