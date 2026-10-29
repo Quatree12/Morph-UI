@@ -40,13 +40,21 @@ export function Playground() {
         </p>
       </header>
 
+      {/* Maquette collante : elle reste visible pendant qu'on règle. */}
       <div className="studio-preview">
         <div className="panel">
           <div className="panel__head">
             <div className="eyebrow">Live Preview</div>
-            <div style={{ display: "flex", gap: "var(--s-2)" }}>
-              <button type="button" className="btn btn--sm" onClick={() => setFullscreen(true)} aria-haspopup="dialog">
-                Plein écran
+            <div style={{ display: "flex", gap: "var(--s-2)", flexShrink: 0 }}>
+              <button
+                type="button"
+                className="btn btn--sm"
+                onClick={() => setFullscreen(true)}
+                aria-haspopup="dialog"
+                title="Agrandir l'aperçu"
+              >
+                <span aria-hidden="true" style={{ fontSize: "1rem", lineHeight: 1 }}>⤢</span>
+                <span className="visually-hidden">Agrandir l'aperçu</span>
               </button>
               <button type="button" className="btn btn--sm btn--ghost" onClick={reset}>
                 Reset
@@ -121,8 +129,14 @@ export function Playground() {
         </div>
       </div>
 
+      {/* ------------------------------------------------ Plein écran */}
       {fullscreen && (
-        <div className="preview-fullscreen" role="dialog" aria-modal="true" aria-label="Aperçu en plein écran">
+        <div
+          className="preview-fullscreen"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Aperçu en plein écran"
+        >
           <div className="preview-fullscreen__bar">
             <span className="eyebrow">
               {pattern.name} · {MATERIAL_MAP[state.material].name}
