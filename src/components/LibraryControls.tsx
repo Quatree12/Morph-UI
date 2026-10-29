@@ -122,7 +122,7 @@ export function ShapePicker() {
 
 /* ------------------------------------------------- Color (§10) */
 export function ColorPicker() {
-  const { state, set, patch } = useStudio();
+  const { state, patch } = useStudio();
   return (
     <Group title="Color" badge="12">
       <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
