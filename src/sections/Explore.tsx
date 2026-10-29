@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { PATTERNS, CATEGORIES, COMPLEXITIES } from "../data/patterns";
 import type { PatternDef } from "../data/patterns";
 import { useStudio } from "../state/context";
-import { PATTERN_RENDERERS } from "../previews";
 import type { Complexity, PatternId } from "../state/types";
 import type { SectionId } from "../nav";
 
@@ -10,8 +9,24 @@ interface Props {
   onNavigate: (id: SectionId) => void;
 }
 
+/** Motif statique : une silhouette par catégorie. Le visuel animé vit dans
+ *  le Studio — Explore sert à choisir, pas à contempler. */
+function Motif({ category }: { category: string }) {
+  const slug = category
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z]/g, "");
+  return (
+    <div className="thumb" aria-hidden="true">
+      <div className={`motif motif--${slug}`} />
+      <span className="thumb__label">{category}</span>
+    </div>
+  );
+}
+
 export function Explore({ onNavigate }: Props) {
-  const { favorites, toggleFavorite, isFavorite, set, state } = useStudio();
+  const { favorites, toggleFavorite, isFavorite, set } = useStudio();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("all");
   const [cpx, setCpx] = useState<Complexity | "all">("all");
@@ -26,7 +41,7 @@ export function Explore({ onNavigate }: Props) {
 
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    let out: PatternDef[] = PATTERNS.filter((p) => {
+    const out: PatternDef[] = PATTERNS.filter((p) => {
       if (onlyFav && !favorites.includes(p.id)) return false;
       if (cat !== "all" && p.category !== cat) return false;
       if (cpx !== "all" && p.complexity !== cpx) return false;
@@ -37,11 +52,18 @@ export function Explore({ onNavigate }: Props) {
       }
       return true;
     });
-    out = [...out].sort((a, b) =>
+    return [...out].sort((a, b) =>
       sort === "alpha" ? a.name.localeCompare(b.name, "fr") : a.category.localeCompare(b.category, "fr")
     );
-    return out;
   }, [q, cat, cpx, ctx, sort, onlyFav, favorites]);
+
+  const resetFilters = () => {
+    setQ("");
+    setCat("all");
+    setCpx("all");
+    setCtx("all");
+    setOnlyFav(false);
+  };
 
   return (
     <section style={{ display: "grid", gap: "var(--s-5)" }}>
@@ -49,12 +71,11 @@ export function Explore({ onNavigate }: Props) {
         <div className="eyebrow">Explore / Pattern Library</div>
         <h1>Pattern Library</h1>
         <p className="muted" style={{ maxWidth: "62ch" }}>
-          {PATTERNS.length} familles d'interaction, chacune avec une démonstration fonctionnelle.
-          Les aperçus ci-dessous sont animés en direct — pas des captures.
+          {PATTERNS.length} familles d'interaction. Chaque fiche mène au Studio, où le pattern
+          s'anime réellement dans la maquette — ici, on choisit.
         </p>
       </header>
 
-      {/* ------------------------------------------------ Barre de filtres */}
       <div className="panel">
         <div className="panel__body" style={{ gap: "var(--s-3)" }}>
           <div style={{ display: "flex", gap: "var(--s-2)", flexWrap: "wrap" }}>
@@ -73,12 +94,7 @@ export function Explore({ onNavigate }: Props) {
                 background: "var(--surface-2)",
               }}
             />
-            <select
-              value={cat}
-              onChange={(e) => setCat(e.target.value)}
-              aria-label="Filtrer par catégorie"
-              style={selectStyle}
-            >
+            <select value={cat} onChange={(e) => setCat(e.target.value)} aria-label="Filtrer par catégorie" style={selectStyle}>
               <option value="all">Toutes catégories</option>
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
@@ -95,12 +111,7 @@ export function Explore({ onNavigate }: Props) {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
-            <select
-              value={ctx}
-              onChange={(e) => setCtx(e.target.value)}
-              aria-label="Filtrer par contexte d'utilisation"
-              style={selectStyle}
-            >
+            <select value={ctx} onChange={(e) => setCtx(e.target.value)} aria-label="Filtrer par contexte" style={selectStyle}>
               <option value="all">Tout contexte</option>
               {contexts.map((c) => (
                 <option key={c} value={c}>{c}</option>
@@ -132,40 +143,79 @@ export function Explore({ onNavigate }: Props) {
         </div>
       </div>
 
-      {/* ------------------------------------------------------- Résultats */}
       {list.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "var(--s-7)" }}>
           <p className="muted">Aucun pattern ne correspond à ces filtres.</p>
-          <button
-            type="button"
-            className="btn btn--sm"
-            style={{ marginTop: "var(--s-3)" }}
-            onClick={() => {
-              setQ("");
-              setCat("all");
-              setCpx("all");
-              setCtx("all");
-              setOnlyFav(false);
-            }}
-          >
+          <button type="button" className="btn btn--sm" style={{ marginTop: "var(--s-3)" }} onClick={resetFilters}>
             Réinitialiser les filtres
           </button>
         </div>
       ) : (
         <div className="grid-cards">
           {list.map((p) => (
-            <PatternCard
-              key={p.id}
-              pattern={p}
-              fav={isFavorite(p.id)}
-              onFav={() => toggleFavorite(p.id)}
-              onTry={() => {
-                set("pattern", p.id as PatternId);
-                onNavigate("playground");
-              }}
-              onCompare={() => onNavigate("compare")}
-              live={state.pattern === p.id}
-            />
+            <article key={p.id} className="card" style={{ display: "grid", gap: "var(--s-3)", alignContent: "start" }}>
+              <Motif category={p.category} />
+
+              <div>
+                <h3>{p.name}</h3>
+                <div className="eyebrow" style={{ marginTop: 4 }}>
+                  {p.category} · {p.complexity}
+                </div>
+              </div>
+
+              <p className="muted" style={{ fontSize: "0.8125rem" }}>{p.description}</p>
+
+              <details>
+                <summary className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-dim)", cursor: "pointer" }}>
+                  Détails, cas d'usage, accessibilité
+                </summary>
+                <div style={{ display: "grid", gap: "var(--s-3)", marginTop: "var(--s-3)" }}>
+                  <div>
+                    <div className="eyebrow">Cas d'usage</div>
+                    <ul style={ulStyle}>{p.useCases.map((u) => <li key={u}>{u}</li>)}</ul>
+                  </div>
+                  <div>
+                    <div className="eyebrow">Mobile / Desktop</div>
+                    <p style={smallStyle}>{p.mobile}</p>
+                    <p style={smallStyle}>{p.desktop}</p>
+                  </div>
+                  <div>
+                    <div className="eyebrow">Avantages</div>
+                    <ul style={ulStyle}>{p.pros.map((u) => <li key={u}>{u}</li>)}</ul>
+                  </div>
+                  <div>
+                    <div className="eyebrow">Limites</div>
+                    <ul style={ulStyle}>{p.cons.map((u) => <li key={u}>{u}</li>)}</ul>
+                  </div>
+                  <div>
+                    <div className="eyebrow">Accessibilité</div>
+                    <ul style={ulStyle}>{p.a11y.map((u) => <li key={u}>{u}</li>)}</ul>
+                  </div>
+                </div>
+              </details>
+
+              <div style={{ display: "flex", gap: "var(--s-2)", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="btn btn--sm btn--primary"
+                  onClick={() => {
+                    set("pattern", p.id as PatternId);
+                    onNavigate("playground");
+                  }}
+                >
+                  Try in Playground
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--sm btn--ghost"
+                  aria-pressed={isFavorite(p.id)}
+                  onClick={() => toggleFavorite(p.id)}
+                  style={isFavorite(p.id) ? { borderColor: "var(--accent)", color: "var(--accent)" } : undefined}
+                >
+                  {isFavorite(p.id) ? "★ Retirer" : "☆ Favori"}
+                </button>
+              </div>
+            </article>
           ))}
         </div>
       )}
@@ -181,101 +231,6 @@ const selectStyle = {
   background: "var(--surface-2)",
   fontSize: "0.8125rem",
 } as const;
-
-interface CardProps {
-  pattern: PatternDef;
-  fav: boolean;
-  live: boolean;
-  onFav: () => void;
-  onTry: () => void;
-  onCompare: () => void;
-}
-
-function PatternCard({ pattern, fav, live, onFav, onTry, onCompare }: CardProps) {
-  const [playing, setPlaying] = useState(false);
-  const Renderer = PATTERN_RENDERERS[pattern.id as PatternId];
-
-  return (
-    <article className="card" style={{ display: "grid", gap: "var(--s-3)", alignContent: "start" }}>
-      <div
-        className="thumb"
-        onClick={() => setPlaying((v) => !v)}
-        role="button"
-        tabIndex={0}
-        aria-label={playing ? "Arrêter l'aperçu animé" : "Lancer l'aperçu animé"}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setPlaying((v) => !v);
-          }
-        }}
-        style={{ cursor: "pointer" }}
-      >
-        {playing ? <div className="thumb__inner"><Renderer bounce={0.5} /></div> : null}
-        <span className="thumb__label">{playing ? "en lecture — toucher pour figer" : "toucher pour animer"}</span>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "var(--s-2)", alignItems: "start" }}>
-        <div>
-          <h3>{pattern.name}</h3>
-          <div className="eyebrow" style={{ marginTop: 4 }}>
-            {pattern.category} · {pattern.complexity}
-          </div>
-        </div>
-        {live && <span className="chip" style={{ borderColor: "var(--accent)" }}>actif</span>}
-      </div>
-
-      <p className="muted" style={{ fontSize: "0.8125rem" }}>{pattern.description}</p>
-
-      <details>
-        <summary className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-dim)", cursor: "pointer" }}>
-          Détails, cas d'usage, accessibilité
-        </summary>
-        <div style={{ display: "grid", gap: "var(--s-3)", marginTop: "var(--s-3)" }}>
-          <div>
-            <div className="eyebrow">Cas d'usage</div>
-            <ul style={ulStyle}>{pattern.useCases.map((u) => <li key={u}>{u}</li>)}</ul>
-          </div>
-          <div>
-            <div className="eyebrow">Mobile / Desktop</div>
-            <p style={smallStyle}>{pattern.mobile}</p>
-            <p style={smallStyle}>{pattern.desktop}</p>
-          </div>
-          <div>
-            <div className="eyebrow">Avantages</div>
-            <ul style={ulStyle}>{pattern.pros.map((u) => <li key={u}>{u}</li>)}</ul>
-          </div>
-          <div>
-            <div className="eyebrow">Limites</div>
-            <ul style={ulStyle}>{pattern.cons.map((u) => <li key={u}>{u}</li>)}</ul>
-          </div>
-          <div>
-            <div className="eyebrow">Accessibilité</div>
-            <ul style={ulStyle}>{pattern.a11y.map((u) => <li key={u}>{u}</li>)}</ul>
-          </div>
-        </div>
-      </details>
-
-      <div style={{ display: "flex", gap: "var(--s-2)", flexWrap: "wrap" }}>
-        <button type="button" className="btn btn--sm btn--primary" onClick={onTry}>
-          Try in Playground
-        </button>
-        <button type="button" className="btn btn--sm" onClick={onCompare}>
-          Compare
-        </button>
-        <button
-          type="button"
-          className="btn btn--sm btn--ghost"
-          aria-pressed={fav}
-          onClick={onFav}
-          style={fav ? { borderColor: "var(--accent)", color: "var(--accent)" } : undefined}
-        >
-          {fav ? "★ Retirer" : "☆ Favori"}
-        </button>
-      </div>
-    </article>
-  );
-}
 
 const ulStyle = {
   margin: 0,
