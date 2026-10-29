@@ -335,6 +335,7 @@
 }
 .kinetic__bar {
   border-radius: var(--r-pill);
+  min-width: 18px;
   transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
 }
 
