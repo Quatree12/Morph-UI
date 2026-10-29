@@ -312,17 +312,20 @@
   gap: var(--s-4);
 }
 /* Aperçu plein écran : un vrai agrandissement, lisible sur iPhone. */
-.preview-fullscreen {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
+.preview-fullscreen__stage {
   display: grid;
-  grid-template-rows: auto 1fr;
-  background: color-mix(in srgb, var(--bg) 94%, transparent);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  animation: fs-in calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-  padding-bottom: var(--safe-b);
+  place-items: start center;
+  padding: var(--s-4);
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.preview-fullscreen .phone {
+  width: min(100%, 400px);
+  height: auto;
+  min-height: 640px;
 }
 
 @keyframes fs-in {
