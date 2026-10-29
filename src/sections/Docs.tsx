@@ -4,13 +4,14 @@ import { MATERIALS } from "../data/materials";
 import { COLORS } from "../data/colors";
 import { SHAPES } from "../data/shapes";
 import { useStudio } from "../state/context";
+import { Group } from "../components/Controls";
 import type { PatternId } from "../state/types";
 import type { SectionId } from "../nav";
 
 const GLOBAL_GUIDELINES: Array<{ title: string; body: string }> = [
   {
     title: "Zones tactiles",
-    body: "44 × 44 px minimum sur toutes les cibles, 48 px sur la navigation principale. Sur le dock, chaque item réserve 48 px de hauteur et le label textuel évite l'ambiguïté des icônes seules.",
+    body: "44 × 44 px minimum sur toutes les cibles, 48 px sur la navigation principale. Sur le dock, chaque item réserve 56 px et le libellé textuel évite l'ambiguïté des icônes seules.",
   },
   {
     title: "Contraste",
@@ -43,8 +44,8 @@ const GLOBAL_GUIDELINES: Array<{ title: string; body: string }> = [
 ];
 
 export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
-  const { state, set } = useStudio();
-  const [active, setActive] = useState<PatternId>(state.pattern);
+  const { set } = useStudio();
+  const [active, setActive] = useState<PatternId>("liquid-glass");
   const p = PATTERN_MAP[active];
 
   return (
@@ -53,8 +54,7 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         <div className="eyebrow">Documentation / Guidelines</div>
         <h1>Interaction Guidelines</h1>
         <p className="muted" style={{ maxWidth: "62ch" }}>
-          Une fiche complète par pattern, plus les règles transverses appliquées dans cette
-          application.
+          Une fiche complète par pattern, plus les règles transverses et le référentiel du Studio.
         </p>
       </header>
 
@@ -95,12 +95,10 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         </div>
       </div>
 
+      {/* ------------------------------------------------------ Fiche pattern */}
       <article className="panel">
         <div className="panel__head">
-          <div>
-            <div className="eyebrow">{p.category} · complexité {p.complexity}</div>
-            <h2 style={{ marginTop: 4 }}>{p.name}</h2>
-          </div>
+          <h2>{p.name}</h2>
         </div>
         <div className="panel__body">
           <p className="muted">{p.description}</p>
@@ -113,13 +111,13 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
             <ul style={ulStyle}>{p.cons.map((c) => <li key={c}>{c}</li>)}</ul>
           </Section>
 
-          <Section title="Comportement tactile">
-            <p style={pStyle}>{p.mobile}</p>
-          </Section>
-
-          <Section title="Compatibilité">
-            <p style={pStyle}><strong style={{ color: "var(--text)" }}>Mobile ·</strong> {p.mobile}</p>
-            <p style={pStyle}><strong style={{ color: "var(--text)" }}>Desktop ·</strong> {p.desktop}</p>
+          <Section title={p.name}>
+            <p style={pStyle}>
+              <strong style={{ color: "var(--text)" }}>Mobile ·</strong> {p.mobile}
+            </p>
+            <p style={pStyle}>
+              <strong style={{ color: "var(--text)" }}>Desktop ·</strong> {p.desktop}
+            </p>
           </Section>
 
           <Section title="Accessibilité">
@@ -149,28 +147,91 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         </div>
       </article>
 
-      <article className="panel">
-        <div className="panel__head">
-          <div className="eyebrow">Règles transverses</div>
-        </div>
-        <div className="panel__body">
-          {GLOBAL_GUIDELINES.map((g) => (
-            <Section key={g.title} title={g.title}>
-              <p style={pStyle}>{g.body}</p>
-            </Section>
-          ))}
-        </div>
-      </article>
+      {/* ------------------------------------------------------- Accordéons */}
+      <div style={{ display: "grid", gap: "var(--s-3)" }}>
+        <Group title="Matériaux, formes et accents" badge="9 · 5 · 12" defaultOpen={false}>
+          <div style={{ display: "grid", gap: "var(--s-4)" }}>
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>9 matériaux</div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+                  gap: "var(--s-3)",
+                }}
+              >
+                {MATERIALS.map((m) => (
+                  <div key={m.id} style={{ display: "grid", gap: 6 }}>
+                    <span
+                      className={`m m--${m.id}`}
+                      style={{ height: 56, borderRadius: 12, display: "block" }}
+                      aria-hidden="true"
+                    />
+                    <span style={{ fontSize: "0.8125rem" }}>{m.name}</span>
+                    <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+                      {m.tagline}
+                    </span>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>{m.details}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-      <article className="panel">
-        <div className="panel__head">
-          <div className="eyebrow">Référentiel du Studio</div>
-        </div>
-        <div className="panel__body">
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>5 formes</div>
+              <ul style={ulStyle}>
+                {SHAPES.map((s) => (
+                  <li key={s.id}>
+                    <strong style={{ color: "var(--text)" }}>{s.name}</strong> — {s.note}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>12 accents</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                {COLORS.map((c) => (
+                  <span key={c.id} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        background: c.hex,
+                        border: "1px solid var(--border)",
+                      }}
+                      aria-hidden="true"
+                    />
+                    <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+                      {c.name}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Group>
+
+        <Group title="Règles transverses" badge="8" defaultOpen={false}>
+          <div style={{ display: "grid", gap: "var(--s-4)" }}>
+            {GLOBAL_GUIDELINES.map((g) => (
+              <div key={g.title} style={{ display: "grid", gap: 6 }}>
+                <h3 style={{ fontSize: "0.9375rem" }}>{g.title}</h3>
+                <p style={pStyle}>{g.body}</p>
+              </div>
+            ))}
+          </div>
+        </Group>
+
+        <Group title="Référentiel du Studio" badge="11" defaultOpen={false}>
           <div className="table-scroll">
             <table className="doc-table">
               <thead>
-                <tr><th>Réglage</th><th>Variable CSS produite</th></tr>
+                <tr>
+                  <th>Réglage</th>
+                  <th>Variable CSS produite</th>
+                </tr>
               </thead>
               <tbody>
                 <tr><td>Material</td><td className="mono">classe .m--&lt;matériau&gt;</td></tr>
@@ -191,51 +252,8 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
             Chaque ligne correspond à une variable réellement posée sur &lt;html&gt; par le
             StudioProvider, donc consommée par la maquette.
           </p>
-        </div>
-      </article>
-
-      <article className="panel">
-        <div className="panel__head">
-          <div className="eyebrow">Matériaux, formes et accents</div>
-        </div>
-        <div className="panel__body">
-          <div>
-            <div className="eyebrow" style={{ marginBottom: 8 }}>9 matériaux</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "var(--s-3)" }}>
-              {MATERIALS.map((m) => (
-                <div key={m.id} style={{ display: "grid", gap: 6 }}>
-                  <span className={`m m--${m.id}`} style={{ height: 52, borderRadius: 12, display: "block" }} aria-hidden="true" />
-                  <span style={{ fontSize: "0.8125rem" }}>{m.name}</span>
-                  <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>{m.tagline}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="eyebrow" style={{ marginBottom: 8 }}>5 formes</div>
-            <ul style={ulStyle}>
-              {SHAPES.map((s) => (
-                <li key={s.id}>
-                  <strong style={{ color: "var(--text)" }}>{s.name}</strong> — {s.note}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <div className="eyebrow" style={{ marginBottom: 8 }}>12 accents</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {COLORS.map((c) => (
-                <span key={c.id} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ width: 18, height: 18, borderRadius: "50%", background: c.hex, border: "1px solid var(--border)" }} aria-hidden="true" />
-                  <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>{c.name}</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </article>
+        </Group>
+      </div>
     </section>
   );
 }
