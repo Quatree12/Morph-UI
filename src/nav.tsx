@@ -51,12 +51,6 @@ export const NAV_ITEMS: NavItem[] = [
     icon: I("M5 7h14M5 12h9M5 17h5M17.5 15l2.5 2.5M20 15l-2.5 2.5"),
   },
   {
-    id: "compare",
-    label: "Compare / Pattern Comparison",
-    short: "Compare",
-    icon: I("M12 3v18M5 8l-3 6h6zM19 8l-3 6h6z"),
-  },
-  {
     id: "favorites",
     label: "Favorites / Saved Patterns",
     short: "Saved",
