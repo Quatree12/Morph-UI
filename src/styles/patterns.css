@@ -139,6 +139,12 @@
     border-radius calc(var(--dur) * var(--speed-mul)) var(--ease-out);
 }
 
+/* Les enfants de l'objet principal ne captent jamais le geste : sinon le
+   onPointerDown du bouton ne se déclenche pas sur iOS. */
+.subject > span {
+  pointer-events: none;
+}
+
 .subject__label {
   position: relative;
   z-index: 3;
@@ -175,7 +181,13 @@
 .knob:nth-child(3) { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
 /* 1. Liquid Glass : superposition de calques décalés */
-.stack { position: relative; width: 190px; height: 110px; z-index: 3; }
+.stack {
+  position: relative;
+  width: 190px;
+  height: 110px;
+  z-index: 3;
+  pointer-events: none;
+}
 .stack__layer {
   position: absolute;
   inset: 0;
@@ -352,7 +364,7 @@
   transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
 }
 
-/* 9. Lens */
+/* 9. Lens — le texte est borné pour ne jamais déborder du cadre. */
 .lens {
   position: relative;
   width: 200px;
@@ -361,10 +373,20 @@
   z-index: 3;
   display: grid;
   place-items: center;
-  font-size: 0.75rem;
+  padding: var(--s-3);
+  font-size: 0.6875rem;
   color: var(--text-dim);
   letter-spacing: 0.06em;
   touch-action: none;
+  text-align: center;
+  line-height: 1.4;
+}
+.lens > span:first-child {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .lens__glass {
   position: absolute;
@@ -400,6 +422,7 @@
   width: calc(70px * var(--size));
   height: calc(70px * var(--size));
   z-index: 3;
+  pointer-events: none;
   transition: transform calc(var(--dur-slow) * var(--speed-mul))
     cubic-bezier(0.34, calc(1 + var(--bounce)), 0.64, 1);
 }
@@ -438,39 +461,37 @@
 
 /* ------------------------------------------- Aperçus du catalogue : motifs
    Explore n'affiche plus de composants animés au chargement — uniquement un
-   motif statique, déplié à la demande par le bouton « Visualiser ». */
+   motif statique, déplié à la demande par le bouton « Visualiser ».
+
+   Le motif est posé en ABSOLU au centre : il ne partage donc plus le flux
+   avec le label, ce qui le décalait vers la droite et le faisait déborder. */
 .thumb {
   position: relative;
   height: 132px;
   border-radius: var(--r-sm);
   overflow: hidden;
-  display: grid;
-  place-items: center;
   background: linear-gradient(180deg, #17141f, #100e16);
 }
 .thumb__label {
   position: absolute;
   bottom: var(--s-2);
   left: var(--s-3);
+  z-index: 2;
   font-family: var(--font-mono);
   font-size: 0.625rem;
   color: var(--text-faint);
   text-transform: capitalize;
 }
 
-/* ==========================================================================
-   Motifs de la Library : UN dessin par pattern, pas par catégorie.
-   Toutes les silhouettes tiennent dans 100 px de large au maximum, pour ne
-   jamais déborder du conteneur .thumb (overflow: hidden).
-   ========================================================================== */
-
 .motif {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
   display: grid;
   place-items: center;
-  overflow: hidden;
 }
 
 /* 1. Liquid Glass : trois calques décalés et translucides */
@@ -482,12 +503,12 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 .motif--liquid-glass::before {
-  width: 96px; height: 50px;
-  transform: translate(-10px, -8px);
+  width: 84px; height: 44px;
+  transform: translate(-9px, -7px);
   background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
 }
 .motif--liquid-glass::after {
-  width: 96px; height: 50px;
+  width: 84px; height: 44px;
   transform: translate(4px, 4px);
   background: color-mix(in srgb, var(--accent) 30%, transparent);
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
@@ -496,48 +517,48 @@
 /* 2. Gooey : quatre cercles qui se touchent, reliés par un pont de matière */
 .motif--gooey::before {
   content: "";
-  width: 96px; height: 44px;
+  width: 88px; height: 40px;
   background:
-    radial-gradient(circle 21px at 18% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 21px at 42% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 21px at 66% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 18px at 88% 50%, color-mix(in srgb, var(--accent) 70%, transparent) 98%, transparent 100%);
+    radial-gradient(circle 19px at 18% 50%, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 19px at 42% 50%, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 19px at 66% 50%, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 16px at 88% 50%, color-mix(in srgb, var(--accent) 70%, transparent) 98%, transparent 100%);
   filter: blur(0.5px);
 }
 
 /* 3. Expandable Buttons : un bouton + deux lignes qui s'en échappent */
 .motif--expandable-button::before {
   content: "";
-  width: 96px; height: 54px;
+  width: 88px; height: 52px;
   background:
-    linear-gradient(var(--accent), var(--accent)) 50% 0 / 64px 20px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 34%, transparent), color-mix(in srgb, var(--accent) 34%, transparent)) 50% 28px / 80px 10px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 24%, transparent), color-mix(in srgb, var(--accent) 24%, transparent)) 50% 44px / 80px 10px no-repeat;
+    linear-gradient(var(--accent), var(--accent)) 50% 0 / 58px 18px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 34%, transparent), color-mix(in srgb, var(--accent) 34%, transparent)) 50% 27px / 74px 9px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 24%, transparent), color-mix(in srgb, var(--accent) 24%, transparent)) 50% 42px / 74px 9px no-repeat;
   border-radius: 12px;
 }
 
 /* 4. Floating Dock : quatre pastilles, la première soulevée */
 .motif--floating-dock::before {
   content: "";
-  width: 96px; height: 42px;
+  width: 88px; height: 40px;
   background:
-    radial-gradient(circle 15px at 14% 38%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 12px at 43% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 12px at 69% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 12px at 94% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%);
+    radial-gradient(circle 14px at 14% 36%, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 11px at 43% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 11px at 69% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 11px at 94% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%);
 }
 
 /* 5. Experimental Nav : trois capsules, indicateur sous la deuxième */
 .motif--experimental-nav::before {
   content: "";
-  width: 100px; height: 30px;
+  width: 90px; height: 28px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.16);
   background: linear-gradient(
     90deg,
-    transparent 0 25px,
-    color-mix(in srgb, var(--accent) 62%, transparent) 25px 53px,
-    transparent 53px 100%
+    transparent 0 22px,
+    color-mix(in srgb, var(--accent) 62%, transparent) 22px 48px,
+    transparent 48px 100%
   );
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
 }
@@ -551,13 +572,13 @@
   border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
 }
 .motif--morphing-shapes::before {
-  width: 72px; height: 72px;
+  width: 64px; height: 64px;
   border-radius: 50%;
-  transform: translate(-8px, -5px);
+  transform: translate(-7px, -4px);
   opacity: 0.45;
 }
 .motif--morphing-shapes::after {
-  width: 72px; height: 72px;
+  width: 64px; height: 64px;
   border-radius: 22% 78% 62% 38% / 46% 34% 66% 54%;
   transform: translate(6px, 6px);
 }
@@ -565,30 +586,28 @@
 /* 7. Radial Menu : un centre + cinq points en cercle */
 .motif--radial-menu::before {
   content: "";
-  width: 100px; height: 100px;
+  width: 88px; height: 88px;
   background:
-    radial-gradient(circle 14px at 50% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 9px at 50% 10%,  var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 9px at 88% 36%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 9px at 72% 88%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 9px at 28% 88%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 9px at 12% 36%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%);
+    radial-gradient(circle 12px at 50% 50%, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 50% 12%,  var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 86% 37%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 72% 86%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 28% 86%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 14% 37%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%);
 }
 
-/* 8. Kinetic : six barres de hauteurs franchement différentes.
-   Chaque barre est un dégradé positionné et dimensionné individuellement,
-   centré verticalement — c'est ce qui produit des hauteurs distinctes. */
+/* 8. Kinetic : six barres de hauteurs franchement différentes */
 .motif--kinetic::before {
   content: "";
-  width: 96px;
-  height: 72px;
+  width: 88px;
+  height: 64px;
   background:
-    linear-gradient(var(--accent), var(--accent)) 0 50% / 10px 30px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 55%, transparent), color-mix(in srgb, var(--accent) 55%, transparent)) 16px 50% / 10px 56px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) 32px 50% / 10px 42px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 70%, transparent), color-mix(in srgb, var(--accent) 70%, transparent)) 48px 50% / 10px 68px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent) 40%, transparent)) 64px 50% / 10px 24px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) 80px 50% / 10px 50px no-repeat;
+    linear-gradient(var(--accent), var(--accent)) 0 50% / 9px 26px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 55%, transparent), color-mix(in srgb, var(--accent) 55%, transparent)) 15px 50% / 9px 50px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) 30px 50% / 9px 38px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 70%, transparent), color-mix(in srgb, var(--accent) 70%, transparent)) 45px 50% / 9px 60px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent) 40%, transparent)) 60px 50% / 9px 22px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) 75px 50% / 9px 44px no-repeat;
   background-color: transparent;
   border-radius: 6px;
 }
@@ -600,49 +619,49 @@
   position: absolute;
 }
 .motif--lens::before {
-  width: 100px; height: 54px;
+  width: 88px; height: 48px;
   border-radius: 12px;
   background: linear-gradient(160deg, rgba(255,255,255,0.14), transparent);
   border: 1px solid rgba(255,255,255,0.14);
 }
 .motif--lens::after {
-  width: 46px; height: 46px;
+  width: 42px; height: 42px;
   border-radius: 50%;
   border: 2px solid var(--accent);
   background: color-mix(in srgb, var(--accent) 34%, transparent);
   box-shadow: 0 0 0 9999px rgba(6,5,9,0.28);
-  transform: translate(14px, 6px);
+  transform: translate(12px, 5px);
 }
 
 /* 10. Collapsible : deux blocs, le second replié */
 .motif--collapsible::before {
   content: "";
-  width: 100px; height: 66px;
+  width: 88px; height: 60px;
   background:
-    linear-gradient(var(--accent), var(--accent)) 0 0 / 100px 26px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent) 40%, transparent)) 0 36px / 100px 10px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent) 22%, transparent)) 0 53px / 100px 10px no-repeat;
+    linear-gradient(var(--accent), var(--accent)) 0 0 / 88px 24px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent) 40%, transparent)) 0 33px / 88px 9px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent) 22%, transparent)) 0 48px / 88px 9px no-repeat;
   border-radius: 10px;
 }
 
 /* 11. Expressive Motion : un cercle + deux échos de rebond */
 .motif--expressive-motion::before {
   content: "";
-  width: 100px; height: 80px;
+  width: 88px; height: 72px;
   background:
-    radial-gradient(circle 17px at 62% 34%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 11px at 42% 62%, color-mix(in srgb, var(--accent) 42%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 7px at 26% 82%, color-mix(in srgb, var(--accent) 22%, transparent) 98%, transparent 100%);
+    radial-gradient(circle 15px at 62% 34%, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 10px at 42% 62%, color-mix(in srgb, var(--accent) 42%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 6px at 26% 82%, color-mix(in srgb, var(--accent) 22%, transparent) 98%, transparent 100%);
 }
 
 /* 12. Contextual Toolbars : deux lignes + une barre flottante */
 .motif--contextual-toolbar::before {
   content: "";
-  width: 100px; height: 68px;
+  width: 88px; height: 62px;
   background:
-    linear-gradient(color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent) 26%, transparent)) 50% 0 / 84px 12px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent) 26%, transparent)) 50% 18px / 84px 12px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) 50% 46px / 100px 20px no-repeat;
+    linear-gradient(color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent) 26%, transparent)) 50% 0 / 74px 11px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent) 26%, transparent)) 50% 16px / 74px 11px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) 50% 42px / 88px 18px no-repeat;
   border-radius: 11px;
 }
 
@@ -653,27 +672,27 @@
   position: absolute;
 }
 .motif--sheet-drag::before {
-  width: 100px; height: 54px;
+  width: 88px; height: 48px;
   border-radius: 12px;
   background: linear-gradient(160deg, rgba(255,255,255,0.12), transparent);
   border: 1px solid rgba(255,255,255,0.14);
 }
 .motif--sheet-drag::after {
-  width: 78px; height: 28px;
+  width: 68px; height: 25px;
   border-radius: 12px 12px 6px 6px;
   background: var(--accent);
-  transform: translate(0, 19px);
+  transform: translate(0, 17px);
   box-shadow: inset 0 5px 0 -3px rgba(255,255,255,0.55);
 }
 
 /* 14. Parallax Layers : trois plans décalés horizontalement */
 .motif--parallax-layers::before {
   content: "";
-  width: 100px; height: 62px;
+  width: 88px; height: 56px;
   background:
-    linear-gradient(color-mix(in srgb, var(--accent) 76%, transparent), color-mix(in srgb, var(--accent) 76%, transparent)) 0 0 / 62px 38px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 46%, transparent), color-mix(in srgb, var(--accent) 46%, transparent)) 24px 12px / 62px 38px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent) 22%, transparent)) 48px 24px / 52px 38px no-repeat;
+    linear-gradient(color-mix(in srgb, var(--accent) 76%, transparent), color-mix(in srgb, var(--accent) 76%, transparent)) 0 0 / 54px 34px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 46%, transparent), color-mix(in srgb, var(--accent) 46%, transparent)) 21px 11px / 54px 34px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent) 22%, transparent)) 42px 22px / 46px 34px no-repeat;
   border-radius: 10px;
 }
 
@@ -685,35 +704,32 @@
   border-radius: 12px;
 }
 .motif--swipe-stack::before {
-  width: 84px; height: 52px;
+  width: 74px; height: 46px;
   border: 1px solid rgba(255,255,255,0.16);
-  transform: translate(8px, -10px) rotate(6deg);
+  transform: translate(7px, -9px) rotate(6deg);
 }
 .motif--swipe-stack::after {
-  width: 84px; height: 52px;
+  width: 74px; height: 46px;
   background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 62%, transparent), transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 44%, transparent);
-  transform: translate(-7px, 4px) rotate(-7deg);
+  transform: translate(-6px, 4px) rotate(-7deg);
 }
 
 /* 16. Ripple Surface : un centre + trois ondes concentriques */
 .motif--ripple-surface::before {
   content: "";
-  width: 100px; height: 100px;
+  width: 88px; height: 88px;
   background:
-    radial-gradient(circle 7px at 50% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 18px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 58%, transparent) 97%, transparent 100%),
-    radial-gradient(circle 33px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 34%, transparent) 97%, transparent 100%),
-    radial-gradient(circle 48px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 18%, transparent) 97%, transparent 100%);
+    radial-gradient(circle 6px at 50% 50%, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 16px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 58%, transparent) 97%, transparent 100%),
+    radial-gradient(circle 29px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 34%, transparent) 97%, transparent 100%),
+    radial-gradient(circle 42px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 18%, transparent) 97%, transparent 100%);
 }
 
 /* ==========================================================================
    13-16. Patterns ajoutés : Sheet Drag, Parallax, Swipe Stack, Ripple.
-   Aucun de ces conteneurs ne définit background-color ou background-image :
-   la surface appartient au matériau (.m), sinon il serait écrasé.
    ========================================================================== */
 
-/* --- 13. Sheet Drag : ancrage bas ou haut, hauteurs en pixels réels --- */
 .sheet-demo {
   position: relative;
   width: 100%;
@@ -723,7 +739,6 @@
   gap: var(--s-2);
   align-content: start;
 }
-
 .sheet-demo:not(.sheet-demo--top) { align-content: end; }
 .sheet-demo--top { align-content: start; }
 
@@ -735,7 +750,6 @@
   align-self: end;
   transition: height calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
 }
-
 .sheet-demo--top .sheet { align-self: start; }
 
 .sheet__handle {
@@ -754,9 +768,9 @@
   height: 5px;
   border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
 }
 
-/* --- 14. Parallax Layers --- */
 .parallax {
   position: relative;
   width: 100%;
@@ -775,13 +789,11 @@
   border-radius: calc(var(--radius) * 1px);
   border: 1px solid rgba(255, 255, 255, 0.14);
   transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-  will-change: transform;
 }
 .parallax__layer:nth-child(1) { width: 150px; height: 110px; margin: -55px 0 0 -75px; }
 .parallax__layer:nth-child(2) { width: 130px; height: 105px; margin: -52px 0 0 -65px; }
 .parallax__layer:nth-child(3) { width: 110px; height: 100px; margin: -50px 0 0 -55px; }
 
-/* --- 15. Swipe Stack --- */
 .stack-demo {
   position: relative;
   width: 100%;
@@ -805,11 +817,7 @@
 }
 .stack-demo__card:active { cursor: grabbing; }
 
-/* --- 16. Ripple Surface --- */
-.ripple {
-  position: relative;
-  overflow: hidden;
-}
+.ripple { position: relative; overflow: hidden; }
 
 .ripple__wave {
   position: absolute;
@@ -824,12 +832,6 @@
 }
 
 @keyframes ripple-out {
-  from {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  to {
-    transform: scale(calc(18 * var(--ripple-scale, 1)));
-    opacity: 0;
-  }
+  from { transform: scale(1); opacity: 0.85; }
+  to   { transform: scale(calc(18 * var(--ripple-scale, 1))); opacity: 0; }
 }
