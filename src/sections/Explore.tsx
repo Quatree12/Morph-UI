@@ -130,6 +130,7 @@ export function Explore({ onNavigate }: Props) {
               <option value="alpha">Tri alphabétique</option>
               <option value="category">Tri par catégorie</option>
             </select>
+            {/* Le filtre actif utilise la marque, pas la couleur du Studio. */}
             <button
               type="button"
               className="btn btn--sm"
@@ -137,7 +138,10 @@ export function Explore({ onNavigate }: Props) {
               onClick={() => setOnlyFav((v) => !v)}
               style={
                 onlyFav
-                  ? { borderColor: "var(--accent)", background: "color-mix(in srgb, var(--accent) 18%, transparent)" }
+                  ? {
+                      borderColor: "var(--brand)",
+                      background: "color-mix(in srgb, var(--brand) 22%, transparent)",
+                    }
                   : undefined
               }
             >
@@ -180,7 +184,11 @@ export function Explore({ onNavigate }: Props) {
                     aria-expanded={open}
                     aria-controls={`motif-${p.id}`}
                     onClick={() => setPreview(open ? null : p.id)}
-                    style={open ? { borderColor: "var(--accent)", color: "var(--accent)" } : undefined}
+                    style={
+                      open
+                        ? { borderColor: "var(--brand)", color: "var(--brand-light)" }
+                        : undefined
+                    }
                   >
                     {open ? "Fermer" : "Visualiser"}
                   </button>
@@ -188,8 +196,7 @@ export function Explore({ onNavigate }: Props) {
 
                 <p className="muted" style={{ fontSize: "0.8125rem" }}>{p.description}</p>
 
-                {/* Vignette : repliée ou dépliée par la CLASSE, jamais par un
-                    style inline concurrent (sinon la règle 0fr gagne). */}
+                {/* La classe pilote l'ouverture, jamais un style inline concurrent. */}
                 <div
                   id={`motif-${p.id}`}
                   className={`expand__extra${open ? " expand__extra--open" : ""}`}
@@ -238,12 +245,17 @@ export function Explore({ onNavigate }: Props) {
                   >
                     Try in Playground
                   </button>
+                  {/* L'étoile active porte la marque : c'est un état d'interface. */}
                   <button
                     type="button"
                     className="btn btn--sm btn--ghost"
                     aria-pressed={fav}
                     onClick={() => toggleFavorite(p.id)}
-                    style={fav ? { borderColor: "var(--accent)", color: "var(--accent)" } : undefined}
+                    style={
+                      fav
+                        ? { borderColor: "var(--brand)", color: "var(--brand-light)" }
+                        : undefined
+                    }
                   >
                     {fav ? "★ Retirer" : "☆ Favori"}
                   </button>
