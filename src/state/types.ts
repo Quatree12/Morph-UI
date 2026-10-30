@@ -1,7 +1,5 @@
 /* ==========================================================================
    MORPH/UI — Modèle d'état partagé
-   Un seul objet StudioState pilote le Playground, le code exporté et les
-   créations sauvegardées.
    ========================================================================== */
 
 export type PatternId =
@@ -22,6 +20,7 @@ export type PatternId =
   | "swipe-stack"
   | "ripple-surface";
 
+/** 15 matériaux : les 9 d'origine + 6 nouveaux. */
 export type MaterialId =
   | "frosted-glass"
   | "clear-glass"
@@ -31,9 +30,15 @@ export type MaterialId =
   | "iridescent-crystal"
   | "brushed-metal"
   | "translucent-gel"
-  | "solid-surface";
+  | "solid-surface"
+  | "holographic-foil"
+  | "frosted-acrylic"
+  | "carbon-fiber"
+  | "ceramic-glaze"
+  | "sandblasted-stone"
+  | "liquid-mercury";
 
-/** 9 formes : les 5 d'origine + 4 nouvelles (blob, diamond, arch, notched). */
+/** 9 formes : les 5 d'origine + 4 nouvelles. */
 export type ShapeId =
   | "pill"
   | "rounded"
@@ -65,25 +70,20 @@ export interface StudioState {
   pattern: PatternId;
   material: MaterialId;
   shape: ShapeId;
-  /** Couleur d'accent, en hexadécimal. */
   color: string;
-  /** Nom du preset couleur actif, ou "custom" si l'utilisateur a pipeté. */
   colorPreset: string;
-  /** Ancrage du panneau (Sheet Drag uniquement). */
   anchor: AnchorId;
 
-  /* --- Contrôles avancés --- */
-  blur: number;         // 0 → 40  (px)
-  speed: number;        // 0.4 → 2.2 (multiplicateur)
-  radius: number;       // 0 → 48  (px)
-  shadow: number;       // 0 → 1
-  glow: number;         // 0 → 1
-  transparency: number; // 0.15 → 1
-  spring: number;       // 0 → 1
-  size: number;         // 0.6 → 1.6
+  blur: number;
+  speed: number;
+  radius: number;
+  shadow: number;
+  glow: number;
+  transparency: number;
+  spring: number;
+  size: number;
 }
 
-/** Une création sauvegardée dans Favorites / Creations. */
 export interface Creation {
   id: string;
   name: string;
@@ -91,7 +91,6 @@ export interface Creation {
   createdAt: number;
 }
 
-/** Données d'un import JSON : tout est optionnel. */
 export interface DatasetPayload {
   favorites?: PatternId[];
   creations?: Creation[];
