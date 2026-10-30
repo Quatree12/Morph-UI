@@ -5,6 +5,10 @@
    background-color, background-image, border ni box-shadow depuis ce fichier.
    Sinon patterns.css (chargé après materials.css) écrase le matériau à
    spécificité égale, et le sélecteur Material n'a plus d'effet visible.
+
+   RÈGLE D'EMPILEMENT : dans un pattern à plusieurs étages, SEUL LE CONTENEUR
+   porte .m. Si plusieurs éléments empilés portent .m, celui du dessus peint
+   sa surface par-dessus les autres et la texture devient invisible.
    ========================================================================== */
 
 /* ------------------------------------------------------------ Formes §9 */
@@ -562,7 +566,9 @@
   background: rgba(255, 255, 255, 0.4);
 }
 
-/* --- 14. Parallax Layers --- */
+/* --- 14. Parallax Layers ---
+   Seul .parallax porte le matériau ; les couches internes sont
+   des voiles translucides posés par-dessus la texture. */
 .parallax {
   position: relative;
   width: 100%;
@@ -579,6 +585,7 @@
   height: 100px;
   margin: -50px 0 0 -60px;
   border-radius: calc(var(--radius) * 1px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
   will-change: transform;
 }
@@ -586,7 +593,8 @@
 .parallax__layer:nth-child(2) { width: 130px; height: 105px; margin: -52px 0 0 -65px; }
 .parallax__layer:nth-child(3) { width: 110px; height: 100px; margin: -50px 0 0 -55px; }
 
-/* --- 15. Swipe Stack --- */
+/* --- 15. Swipe Stack ---
+   Seule la carte du dessus porte .m ; les autres sont de simples contours. */
 .stack-demo {
   position: relative;
   width: 100%;
