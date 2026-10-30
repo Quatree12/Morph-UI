@@ -93,7 +93,6 @@ export function exportCss(state: StudioState): string {
   transform: scale(calc(var(--size) * 0.97));
 }
 
-/* États actifs — vitesse appliquée : ${state.speed.toFixed(2)}× */
 .morph-component[aria-expanded="true"],
 .morph-component[aria-selected="true"] {
   background-color: ${rgba(state.color, Number((state.transparency * 0.55).toFixed(2)))};
@@ -103,6 +102,97 @@ export function exportCss(state: StudioState): string {
 @media (prefers-reduced-motion: reduce) {
   .morph-component { transition-duration: 1ms; }
 }`;
+}
+
+/* --------------------------------------------------------------- Tailwind */
+export function exportTailwind(state: StudioState): string {
+  const pattern = PATTERN_MAP[state.pattern];
+  const material = MATERIAL_MAP[state.material];
+
+  // Le rayon effectif, en valeur Tailwind arbitraire.
+  const radius =
+    state.shape === "pill" ? "rounded-full" : `rounded-[${effectiveRadius(state)}px]`;
+
+  // Flou : n'a de sens que sur les matériaux translucides.
+  const backdrop = material.blurReactive
+    ? `backdrop-blur-[${state.blur}px] backdrop-saturate-150`
+    : "";
+
+  // Transparence : même logique.
+  const alpha = material.alphaReactive
+    ? `bg-white/[${(state.transparency * 0.28).toFixed(2)}]`
+    : "";
+
+  // Halo : exprimé en ombre arbitraire, dans la couleur d'accent.
+  const glowClass =
+    state.glow > 0.02
+      ? `shadow-[0_0_${Math.round(state.glow * 26)}px_${rgba(state.color, Number(clamp01(state.glow * 0.42).toFixed(2)))}]`
+      : "";
+
+  const shadowClass = `shadow-[0_${Math.round(state.shadow * 22)}px_${Math.round(state.shadow * 44)}px_rgba(0,0,0,${(state.shadow * 0.5).toFixed(2)})]`;
+
+  const scaleClass = state.size === 1 ? "" : `scale-[${state.size.toFixed(2)}]`;
+
+  const durationMs = Math.round(220 / state.speed);
+  const easeClass = state.spring > 0.5 ? "ease-[cubic-bezier(0.34,1.56,0.64,1)]" : "ease-[cubic-bezier(0.22,1,0.36,1)]";
+
+  const classes = [
+    radius,
+    backdrop,
+    alpha,
+    `border border-[${state.color}]/40`,
+    glowClass,
+    shadowClass,
+    scaleClass,
+    `duration-[${durationMs}ms]`,
+    easeClass,
+    "transition",
+  ]
+    .filter(Boolean)
+    .join("\n    ");
+
+  return `// MORPH/UI — export Tailwind CSS
+// Pattern  : ${pattern.name}
+// Material : ${material.name}
+//
+// PRÉREQUIS : Tailwind v3.4+ (syntaxe des valeurs arbitraires).
+// Le composant n'est PAS autonome — il suppose la feuille MORPH/UI pour la
+// texture du matériau et les keyframes du pattern.
+
+export function MorphComponent({ children }: { children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      className="
+    ${classes}
+  "
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ============================================================
+   Correspondance avec le Studio
+   ------------------------------------------------------------
+   Shape       → ${radius}
+   Blur        → ${material.blurReactive ? `${state.blur}px (backdrop-blur)` : "sans effet sur ce matériau"}
+   Transparency→ ${material.alphaReactive ? state.transparency.toFixed(2) : "sans effet sur ce matériau"}
+   Shadow      → ${state.shadow.toFixed(2)}
+   Glow        → ${state.glow.toFixed(2)}
+   Size        → ${state.size.toFixed(2)}
+   Speed       → ${durationMs} ms de transition
+   Spring      → ${state.spring.toFixed(2)}
+
+   LIMITES
+   - Le matériau ${material.name} n'est pas exprimable en classes utilitaires :
+     sa texture vient de materials.css. Ajoutez la classe .m--${state.material}
+     à côté des classes ci-dessus, ou copiez l'onglet CSS.
+   - Les valeurs arbitraires Tailwind (rounded-[/blur-[...]) ne sont pas
+     générées si vous utilisez la purge avec un safelist incomplet : pensez
+     à ajouter ces classes au safelist de tailwind.config.
+   - Les keyframes du pattern ${pattern.name} restent dans patterns.css.
+   ============================================================ */`;
 }
 
 /* ----------------------------------------------------------------- React */
@@ -119,8 +209,7 @@ export function exportReact(state: StudioState): string {
    Material: ${material.name}
 
    Prérequis : importer la feuille de style MORPH/UI pour que la classe de
-   matériau et les keyframes du pattern existent. Pour un composant autonome,
-   copiez d'abord l'onglet CSS. */
+   matériau et les keyframes du pattern existent. */
 
 import { useCallback, useState } from "react";
 import type { CSSProperties } from "react";
@@ -153,8 +242,7 @@ export function MorphComponent({ label = "${pattern.name}" }: Props) {
 
 /* Notes d'intégration
    - aria-pressed / aria-expanded reflètent l'état réel « active ».
-   - Le réglage Animation Speed (${state.speed.toFixed(2)}×) passe par --speed-mul,
-     consommé par les transitions CSS.
+   - Le réglage Animation Speed (${state.speed.toFixed(2)}×) passe par --speed-mul.
    - Le comportement propre au pattern (${pattern.name}) est détaillé dans la
      section Documentation : ce composant en fournit l'OSSATURE. */`;
 }
@@ -164,7 +252,6 @@ export function exportFramer(state: StudioState): string {
   const pattern = PATTERN_MAP[state.pattern];
   const bounce = state.spring;
 
-  // Physique dérivée du réglage Spring/Bounce.
   const damping = Math.round(26 - bounce * 12);
   const stiffness = Math.round(220 + bounce * 200);
 
@@ -172,8 +259,7 @@ export function exportFramer(state: StudioState): string {
    Pattern : ${pattern.name}
    Spring  : bounce ${bounce.toFixed(2)} → stiffness ${stiffness} / damping ${damping}
 
-   Dépendances : framer-motion (>= 11). Le composant n'est PAS autonome :
-   il importe la librairie et suppose la feuille CSS MORPH/UI chargée. */
+   Dépendances : framer-motion (>= 11). Le composant n'est PAS autonome. */
 
 import { motion } from "framer-motion";
 
@@ -204,38 +290,46 @@ export function MorphMotion() {
    - stiffness ${stiffness} / damping ${damping} : la physique suit directement
      le curseur Spring / Bounce.
    - Le réglage Animation Speed (${state.speed.toFixed(2)}×) n'a pas d'équivalent
-     direct en Framer Motion, où la durée découle de la physique. Limitation
-     assumée : utilisez le format CSS pour piloter ce réglage. */`;
+     direct en Framer Motion. Limitation assumée. */`;
 }
 
 /* ------------------------------------------------------------- Limitations */
-export function exportLimitations(state: StudioState): string[] {
+export function exportLimitations(state: StudioState, format: "css" | "tailwind" | "react" | "framer"): string[] {
   const out: string[] = [
     "Le code exporté suppose la feuille de style MORPH/UI chargée (classes de matériau et keyframes de pattern). Ce n'est pas un composant 100 % autonome.",
   ];
 
-  if (
-    state.material === "frosted-glass" ||
-    state.material === "clear-glass" ||
-    state.material === "translucent-gel"
-  ) {
+  const material = MATERIAL_MAP[state.material];
+
+  if (material.blurReactive) {
     out.push(
-      "Ce matériau utilise backdrop-filter : prévoir un repli opaque si le navigateur ne le supporte pas (Safari ancien, Firefox désactivé)."
-    );
-  }
-  if (state.material === "brushed-metal" || state.material === "iridescent-crystal") {
-    out.push(
-      `Le matériau ${MATERIAL_MAP[state.material].name} repose sur plusieurs dégradés CSS et sur color-mix(). Son rendu dépend du support de cette fonction par le navigateur.`
+      `Le matériau ${material.name} utilise backdrop-filter : prévoir un repli opaque si le navigateur ne le supporte pas.`
     );
   }
 
-  out.push(
-    "Les réglages Blur et Transparency n'ont d'effet que sur les matériaux translucides : sur Solid Surface ou Brushed Metal, la variable est publiée mais reste sans effet visible."
-  );
+  if (!material.blurReactive && !material.alphaReactive) {
+    out.push(
+      `Sur ${material.name}, les réglages Blur et Transparency sont publiés mais sans effet visible — c'est une propriété du matériau, pas un bug.`
+    );
+  }
 
-  out.push(
-    "Les exports React et Framer Motion ne reproduisent pas les comportements multi-éléments (métaballes, menu radial, dock). Seule l'ossature du composant principal est fournie ; la section Documentation décrit l'implémentation complète de chaque pattern."
-  );
+  if (format === "tailwind") {
+    out.push(
+      `Tailwind ne peut pas exprimer la texture du matériau ${material.name} : sa classe .m--${state.material} reste nécessaire, ou copiez l'onglet CSS.`
+    );
+    out.push(
+      "Les valeurs arbitraires (rounded-[24px], backdrop-blur-[18px], shadow-[...]) doivent être ajoutées au safelist de tailwind.config si vous utilisez la purge."
+    );
+    out.push(
+      "Tailwind n'a pas d'équivalent pour Animation Speed, Spring et l'opacité composée : seul le rayon, le flou, l'ombre et le halo sont traduits."
+    );
+  }
+
+  if (format === "react" || format === "framer") {
+    out.push(
+      "Les exports React et Framer Motion ne reproduisent pas les comportements multi-éléments (métaballes, menu radial, dock). Seule l'ossature du composant principal est fournie."
+    );
+  }
 
   out.push(
     `Le pattern ${PATTERN_MAP[state.pattern].name} nécessite des keyframes CSS spécifiques : ils proviennent de la feuille MORPH/UI, pas du bloc exporté.`
