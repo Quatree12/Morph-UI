@@ -48,7 +48,7 @@ export function SheetDrag({ bounce }: PatternProps) {
     <div className={`sheet-demo${fromTop ? " sheet-demo--top" : ""}`}>
       <button
         type="button"
-        className="subject m shape--rounded"
+        className={`subject m m--${state.material} shape--${state.shape}`}
         aria-expanded={snap > 0}
         aria-controls="sheet-panel"
         onClick={() => setSnap((s) => (s + 1) % SNAPS.length)}
@@ -60,9 +60,10 @@ export function SheetDrag({ bounce }: PatternProps) {
         </span>
       </button>
 
+      {/* Le panneau : matériau + forme interpolés depuis l'état partagé. */}
       <div
         id="sheet-panel"
-        className="sheet m shape--rounded"
+        className={`sheet m m--${state.material} shape--${state.shape}`}
         style={
           {
             height: `${livePx}px`,
