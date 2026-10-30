@@ -2,9 +2,11 @@
    MORPH/UI — Les 16 comportements de pattern.
    Chaque composant a une composition, une géométrie et une animation propres.
 
-   RÈGLE MATÉRIAU : aucun pattern ne pose de background / box-shadow / border
-   en style inline. Ces propriétés appartiennent à la classe .m--<matériau>,
-   sinon le style inline écrase le matériau et le sélecteur n'a plus d'effet.
+   RÈGLE MATÉRIAU : tout élément qui doit être peint par le sélecteur Material
+   reçoit la classe de matériau INTERPOLÉE depuis l'état partagé :
+     `m m--${state.material} shape--${state.shape}`
+   Écrire `className="... m ..."` en dur ne suffit pas : la classe .m seule
+   n'applique aucun matériau, et l'élément reste gris.
 
    Les 4 patterns récents (sheet-drag, parallax-layers, swipe-stack,
    ripple-surface) vivent dans leurs propres modules, importés ci-dessous.
@@ -14,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { PatternId } from "../state/types";
 import type { PatternProps } from "./types";
+import { useStudio } from "../state/context";
 
 import { SheetDrag } from "./sheet-drag";
 import { ParallaxLayers } from "./parallax-layers";
@@ -45,13 +48,14 @@ export function GooFilter() {
 
 /* ------------------------------------------------------- 1. Liquid Glass */
 function LiquidGlass({ bounce }: PatternProps) {
+  const { state } = useStudio();
   const [pressed, setPressed] = useState(false);
   const [tilt, setTilt] = useState(0);
 
   return (
     <button
       type="button"
-      className="subject m shape--pill"
+      className={`subject m m--${state.material} shape--${state.shape}`}
       style={
         {
           "--spec": 0.85,
@@ -72,9 +76,9 @@ function LiquidGlass({ bounce }: PatternProps) {
       aria-pressed={pressed}
     >
       <span className="stack" aria-hidden="true">
-        <span className="stack__layer m" style={{ "--i": 2 } as CSSProperties} />
-        <span className="stack__layer m" style={{ "--i": 1 } as CSSProperties} />
-        <span className="stack__layer m" style={{ "--i": 0 } as CSSProperties} />
+        <span className={`stack__layer m m--${state.material}`} style={{ "--i": 2 } as CSSProperties} />
+        <span className={`stack__layer m m--${state.material}`} style={{ "--i": 1 } as CSSProperties} />
+        <span className={`stack__layer m m--${state.material}`} style={{ "--i": 0 } as CSSProperties} />
       </span>
       <span className="subject__label">Liquid Glass</span>
       <span className="subject__sub">
@@ -86,6 +90,7 @@ function LiquidGlass({ bounce }: PatternProps) {
 
 /* ------------------------------------------------------------- 2. Gooey */
 function Gooey({ bounce }: PatternProps) {
+  const { state } = useStudio();
   const [merged, setMerged] = useState(false);
 
   useEffect(() => {
@@ -101,16 +106,17 @@ function Gooey({ bounce }: PatternProps) {
       aria-pressed={merged}
       aria-label={`Métaballes ${merged ? "fusionnées" : "séparées"}. Activer pour inverser.`}
     >
-      <span className="goo__blob m" />
-      <span className="goo__blob m" />
-      <span className="goo__blob m" />
-      <span className="goo__blob m" />
+      <span className={`goo__blob m m--${state.material}`} />
+      <span className={`goo__blob m m--${state.material}`} />
+      <span className={`goo__blob m m--${state.material}`} />
+      <span className={`goo__blob m m--${state.material}`} />
     </button>
   );
 }
 
 /* -------------------------------------------------- 3. Expandable Button */
 function ExpandableButton() {
+  const { state } = useStudio();
   const [open, setOpen] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
   const actions = ["Partager", "Épingler", "Exporter"];
@@ -119,7 +125,7 @@ function ExpandableButton() {
     <div style={{ display: "grid", gap: "var(--s-2)", justifyItems: "center", width: "100%" }}>
       <button
         type="button"
-        className="subject m shape--pill"
+        className={`subject m m--${state.material} shape--${state.shape}`}
         aria-expanded={open}
         aria-controls="expand-extra"
         onClick={() => setOpen((v) => !v)}
@@ -152,6 +158,7 @@ function ExpandableButton() {
 
 /* ------------------------------------------------------ 4. Floating Dock */
 function FloatingDock() {
+  const { state } = useStudio();
   const [active, setActive] = useState(0);
   const items = ["Accueil", "Studio", "Docs", "Réglages"];
   const glyphs = ["◇", "◈", "▤", "⚙"];
@@ -165,7 +172,7 @@ function FloatingDock() {
             type="button"
             role="tab"
             aria-selected={i === active}
-            className="demo-dock__item m"
+            className={`demo-dock__item m m--${state.material} shape--${state.shape}`}
             onClick={() => setActive(i)}
             title={label}
           >
@@ -183,6 +190,7 @@ function FloatingDock() {
 
 /* ------------------------------------------------- 5. Experimental Nav */
 function ExperimentalNav() {
+  const { state } = useStudio();
   const [active, setActive] = useState(0);
   const [rect, setRect] = useState({ x: 0, w: 0 });
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -202,7 +210,11 @@ function ExperimentalNav() {
 
   return (
     <div style={{ display: "grid", gap: "var(--s-3)", justifyItems: "center" }}>
-      <div className="demo-nav m" role="tablist" aria-label="Onglets de démonstration">
+      <div
+        className={`demo-nav m m--${state.material} shape--${state.shape}`}
+        role="tablist"
+        aria-label="Onglets de démonstration"
+      >
         <span
           className="demo-nav__ind"
           style={{ transform: `translateX(${rect.x}px)`, width: rect.w }}
@@ -238,6 +250,7 @@ function ExperimentalNav() {
 
 /* ----------------------------------------------------- 6. Morphing Shapes */
 function MorphingShapes() {
+  const { state } = useStudio();
   const stages = ["50%", "18px", "0px", "34%", "999px"];
   const [i, setI] = useState(0);
 
@@ -257,7 +270,11 @@ function MorphingShapes() {
       onClick={() => setI((v) => (v + 1) % stages.length)}
       aria-label="Morphing Shapes : toucher pour changer de forme"
     >
-      <span className="morph m" aria-hidden="true" style={{ borderRadius: stages[i] } as CSSProperties} />
+      <span
+        className={`morph m m--${state.material}`}
+        aria-hidden="true"
+        style={{ borderRadius: stages[i] } as CSSProperties}
+      />
       <span className="subject__sub">Forme {i + 1}/{stages.length} — toucher</span>
     </button>
   );
@@ -265,6 +282,7 @@ function MorphingShapes() {
 
 /* --------------------------------------------------------- 7. Radial Menu */
 function RadialMenu({ bounce }: PatternProps) {
+  const { state } = useStudio();
   const [open, setOpen] = useState(false);
   const actions = ["Copier", "Partager", "Nouveau", "Supprimer", "Favori"];
 
@@ -272,7 +290,7 @@ function RadialMenu({ bounce }: PatternProps) {
     <div className={`radial${open ? " radial--open" : ""}`}>
       <button
         type="button"
-        className="radial__center m"
+        className={`radial__center m m--${state.material} shape--circle`}
         aria-expanded={open}
         aria-label={open ? "Fermer le menu radial" : "Ouvrir le menu radial"}
         onClick={() => setOpen((v) => !v)}
@@ -294,7 +312,9 @@ function RadialMenu({ bounce }: PatternProps) {
           <button
             key={a}
             type="button"
-            className="radial__item m"
+            /* Correction : les items portent le matériau et une forme
+               circulaire, au lieu d'une classe .m sans matière. */
+            className={`radial__item m m--${state.material} shape--circle`}
             style={style}
             tabIndex={open ? 0 : -1}
             onClick={() => setOpen(false)}
@@ -311,6 +331,7 @@ function RadialMenu({ bounce }: PatternProps) {
 
 /* ------------------------------------------------- 8. Kinetic Interactions */
 function Kinetic() {
+  const { state } = useStudio();
   const [amp, setAmp] = useState(0.2);
   const base = [0.3, 0.55, 0.85, 0.6, 0.35, 0.5];
 
@@ -331,7 +352,7 @@ function Kinetic() {
         {base.map((h, i) => (
           <span
             key={i}
-            className="kinetic__bar m"
+            className={`kinetic__bar m m--${state.material}`}
             style={
               {
                 height: `${30 + h * 80 * (0.4 + amp)}px`,
@@ -348,11 +369,12 @@ function Kinetic() {
 
 /* ------------------------------------------------------- 9. Lens / Loupe */
 function Lens() {
+  const { state } = useStudio();
   const [pos, setPos] = useState({ x: 50, y: 50 });
 
   return (
     <div
-      className="lens m shape--rounded"
+      className={`lens m m--${state.material} shape--${state.shape}`}
       onPointerMove={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
         setPos({
@@ -370,13 +392,14 @@ function Lens() {
 
 /* ------------------------------------------------------ 10. Collapsible */
 function Collapsible() {
+  const { state } = useStudio();
   const [open, setOpen] = useState(false);
 
   return (
     <div style={{ display: "grid", gap: "var(--s-2)", width: "100%", maxWidth: 260 }}>
       <button
         type="button"
-        className="subject m shape--rounded"
+        className={`subject m m--${state.material} shape--${state.shape}`}
         aria-expanded={open}
         aria-controls="collapse-panel"
         onClick={() => setOpen((v) => !v)}
@@ -399,6 +422,7 @@ function Collapsible() {
 
 /* ----------------------------------------------- 11. Expressive Motion */
 function ExpressiveMotion({ bounce }: PatternProps) {
+  const { state } = useStudio();
   const [fired, setFired] = useState(false);
 
   return (
@@ -421,7 +445,7 @@ function ExpressiveMotion({ bounce }: PatternProps) {
       aria-label="Déclencher l'animation élastique"
     >
       <span
-        className="spring-ball m"
+        className={`spring-ball m m--${state.material}`}
         aria-hidden="true"
         style={{
           borderRadius: "50%",
@@ -437,6 +461,7 @@ function ExpressiveMotion({ bounce }: PatternProps) {
 
 /* --------------------------------------------- 12. Contextual Toolbar */
 function ContextualToolbar() {
+  const { state } = useStudio();
   const [selecting, setSelecting] = useState(false);
   const [count, setCount] = useState(0);
 
@@ -447,7 +472,7 @@ function ContextualToolbar() {
           <button
             key={i}
             type="button"
-            className="subject m shape--rounded"
+            className={`subject m m--${state.material} shape--${state.shape}`}
             onClick={() => {
               setSelecting(true);
               setCount((c) => c + 1);
