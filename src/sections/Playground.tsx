@@ -62,9 +62,20 @@ export function Playground() {
             </div>
           </div>
           <div className="panel__body">
-            <PhoneFrame hint="Touchez les composants dans la maquette">
+            <PhoneFrame>
               <Renderer bounce={state.spring} />
             </PhoneFrame>
+            <p
+              className="mono"
+              style={{
+                fontSize: "0.6875rem",
+                color: "var(--text-faint)",
+                textAlign: "center",
+                margin: 0,
+              }}
+            >
+              Touchez les composants dans la maquette
+            </p>
           </div>
         </div>
       </div>
@@ -148,7 +159,7 @@ export function Playground() {
             </button>
           </div>
           <div className="preview-fullscreen__stage">
-            <PhoneFrame hint="Touchez les composants dans la maquette">
+            <PhoneFrame>
               <Renderer bounce={state.spring} />
             </PhoneFrame>
           </div>
