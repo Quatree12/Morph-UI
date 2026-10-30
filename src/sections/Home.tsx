@@ -3,8 +3,6 @@ import { MATERIALS, MATERIAL_MAP } from "../data/materials";
 import { SHAPES } from "../data/shapes";
 import { COLORS } from "../data/colors";
 import { useStudio } from "../state/context";
-import { PhoneFrame } from "../previews/PhoneFrame";
-import { PATTERN_RENDERERS } from "../previews";
 import type { SectionId } from "../nav";
 
 interface Props {
@@ -14,7 +12,6 @@ interface Props {
 export function Home({ onNavigate }: Props) {
   const { state, favorites, creations, set } = useStudio();
   const recent = creations.slice(0, 3);
-  const featured = ["liquid-glass", "floating-dock", "radial-menu"] as const;
 
   return (
     <section style={{ display: "grid", gap: "var(--s-6)" }}>
@@ -52,39 +49,10 @@ export function Home({ onNavigate }: Props) {
         <Stat label="Saved" value={String(creations.length)} note="créations personnelles" />
       </div>
 
-      {/* -------------------------------------------- Familles d'interaction */}
-      <div className="section-head">
-        <h2>Sélection à découvrir</h2>
-        <p className="muted">Trois patterns choisis pour leur comportement distinctif.</p>
-      </div>
-
-      <div className="grid-cards">
-        {featured.map((id) => {
-          const p = PATTERN_MAP[id];
-          return (
-            <article key={id} className="card" style={{ display: "grid", gap: "var(--s-3)" }}>
-              <h3>{p.name}</h3>
-              <div className="eyebrow">{p.category} · {p.complexity}</div>
-              <p className="muted" style={{ fontSize: "0.8125rem" }}>{p.description}</p>
-              <button
-                type="button"
-                className="btn btn--sm"
-                onClick={() => {
-                  set("pattern", id);
-                  onNavigate("playground");
-                }}
-              >
-                Try in Playground
-              </button>
-            </article>
-          );
-        })}
-      </div>
-
       {/* --------------------------------------------- Dernières expérimentations */}
       <div className="section-head">
-        <h2>Dernières expérimentations</h2>
-        <p className="muted">Votre configuration courante et vos créations enregistrées.</p>
+        <h2>Votre travail</h2>
+        <p className="muted">La configuration courante et vos créations enregistrées.</p>
       </div>
 
       <div className="grid-cards">
@@ -120,6 +88,16 @@ export function Home({ onNavigate }: Props) {
               <span className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-faint)" }}>
                 {PATTERN_MAP[c.state.pattern].name} · {MATERIAL_MAP[c.state.material].name}
               </span>
+              <button
+                type="button"
+                className="btn btn--sm"
+                onClick={() => {
+                  set("pattern", c.state.pattern);
+                  onNavigate("playground");
+                }}
+              >
+                Charger
+              </button>
             </article>
           ))
         )}
@@ -142,61 +120,6 @@ export function Home({ onNavigate }: Props) {
         <button type="button" className="btn" onClick={() => onNavigate("settings")}>
           Préférences
         </button>
-      </div>
-
-      {/* --------------------------------------------- Familles d'interactions */}
-      <div className="section-head">
-        <h2>Familles d'interaction</h2>
-        <p className="muted">
-          {PATTERNS.length} patterns, tous implémentés avec de vrais composants HTML/CSS/JS.
-        </p>
-      </div>
-      <div className="table-scroll card">
-        <table className="doc-table">
-          <thead>
-            <tr>
-              <th>Famille</th>
-              <th>Catégorie</th>
-              <th>Complexité</th>
-            </tr>
-          </thead>
-          <tbody>
-            {PATTERNS.map((p) => (
-              <tr key={p.id}>
-                <td>{p.name}</td>
-                <td className="muted">{p.category}</td>
-                <td className="muted">{p.complexity}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* ------------------------------------------ Aperçu de la configuration */}
-      <div className="panel">
-        <div className="panel__head">
-          <div className="eyebrow">Aperçu de la configuration courante</div>
-          <span className="chip">{MATERIAL_MAP[state.material].name}</span>
-        </div>
-        <div className="panel__body">
-          <PhoneFrame showBadges={false}>
-            {(() => {
-              const R = PATTERN_RENDERERS[state.pattern];
-              return <R bounce={state.spring} />;
-            })()}
-          </PhoneFrame>
-          <p
-            className="mono"
-            style={{
-              fontSize: "0.6875rem",
-              color: "var(--text-faint)",
-              textAlign: "center",
-              margin: 0,
-            }}
-          >
-            {PATTERN_MAP[state.pattern].name} · {state.shape} · {state.color}
-          </p>
-        </div>
       </div>
     </section>
   );
