@@ -89,7 +89,7 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         </div>
       </div>
 
-      {/* Fiche du pattern, elle-même en accordéon */}
+      {/* Fiche du pattern, en accordéon */}
       <Group title={p.name} badge={p.category} defaultOpen>
         <p className="muted">{p.description}</p>
 
@@ -137,10 +137,12 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
 
       {/* Accordéons transverses */}
       <div style={{ display: "grid", gap: "var(--s-3)" }}>
-        <Group title="Matériaux, formes et accents" badge="9 · 5 · 12" defaultOpen={false}>
+        <Group title="Matériaux, formes et accents" badge={`${MATERIALS.length} · ${SHAPES.length} · ${COLORS.length}`} defaultOpen={false}>
           <div style={{ display: "grid", gap: "var(--s-4)" }}>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 8 }}>9 matériaux</div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>
+                {MATERIALS.length} matériaux
+              </div>
               <div
                 style={{
                   display: "grid",
@@ -159,13 +161,14 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
                     <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
                       {m.tagline}
                     </span>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>{m.details}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <div className="eyebrow" style={{ marginBottom: 8 }}>5 formes</div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>{SHAPES.length} formes</div>
               <ul style={ulStyle}>
                 {SHAPES.map((s) => (
                   <li key={s.id}>
@@ -176,7 +179,7 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
             </div>
 
             <div>
-              <div className="eyebrow" style={{ marginBottom: 8 }}>12 accents</div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>{COLORS.length} accents</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                 {COLORS.map((c) => (
                   <span key={c.id} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -200,7 +203,7 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
           </div>
         </Group>
 
-        <Group title="Règles transverses" badge="8" defaultOpen={false}>
+        <Group title="Règles transverses" badge={String(GLOBAL_GUIDELINES.length)} defaultOpen={false}>
           <div style={{ display: "grid", gap: "var(--s-4)" }}>
             {GLOBAL_GUIDELINES.map((g) => (
               <div key={g.title} style={{ display: "grid", gap: 6 }}>
@@ -290,10 +293,16 @@ const PERFORMANCE: Record<PatternId, string> = {
   collapsible: "L'animation de grid-template-rows est correcte ; animer height directement provoquerait un relayout à chaque frame.",
   "expressive-motion": "Ressorts peu coûteux, mais n'en faites pas jouer deux en parallèle sur la même zone.",
   "contextual-toolbar": "Léger : le coût vient de backdrop-filter si vous gardez le flou sur la barre.",
-  "sheet-drag": "L'écriture d'une hauteur en pourcentage à chaque frame est ce qui coûte. Passez par transform quand la structure le permet, et n'animez jamais la hauteur d'un conteneur contenant une image.",
-  "parallax-layers": "Trois couches en transform : acceptable. Le coût vient des images, pas du décalage. Utilisez will-change avec parcimonie, il crée une couche GPU par élément.",
-  "swipe-stack": "setPointerCapture évite les événements perdus, mais la rotation calculée à chaque frame doit rester une transform. Ne mesurez pas getBoundingClientRect pendant le glissement.",
-  "ripple-surface": "Une animation de scale sur un élément positionné en absolu est peu coûteuse. Le vrai risque est d'empiler une onde par toucher sans les retirer du DOM : on en garde trois au maximum.",
+  "sheet-drag": "L'écriture d'une hauteur en pixels à chaque frame est ce qui coûte. Passez par transform quand la structure le permet.",
+  "parallax-layers": "Trois couches en transform : acceptable. Le coût vient des images, pas du décalage.",
+  "swipe-stack": "setPointerCapture évite les événements perdus, mais la rotation calculée à chaque frame doit rester une transform.",
+  "ripple-surface": "Une animation de scale sur un élément positionné en absolu est peu coûteuse. On garde trois ondes au maximum.",
+  "holographic-foil": "Le dégradé spectral est une background-size de 240 % déplacée par Glow. Le déplacement est composé par le GPU, coût négligeable.",
+  "frosted-acrylic": "Comme le verre dépoli mais avec une bordure de 2 px en plus : le coût vient du backdrop-filter et de la bordure, pas de la texture.",
+  "carbon-fiber": "Deux repeating-linear-gradient croisés : aucune image chargée, coût nul. Le repaint est stable car le fond ne se déplace pas.",
+  "ceramic-glaze": "Dégradés radiaux et ombres internes uniquement : très léger, aucun backdrop-filter, aucune image.",
+  "sandblasted-stone": "Le grain est un bruit SVG en data-URI répété sur la surface. C'est le point coûteux : évitez de l'appliquer sur une surface défilante.",
+  "liquid-mercury": "Trois dégradés superposés dont un radial qui suit Glow. Évitez de l'animer en boucle.",
 };
 
 /* 16 clés — même exigence. */
@@ -310,8 +319,14 @@ const EXAMPLES: Record<PatternId, string> = {
   collapsible: "Une fiche produit où seule la description courte s'affiche, le détail technique restant replié.",
   "expressive-motion": "Un toast de confirmation pour un paiement, avec un ressort marqué et borné.",
   "contextual-toolbar": "Une barre qui n'apparaît qu'à partir du moment où deux messages sont sélectionnés.",
-  "sheet-drag": "Une app de cartographie : on déplie la fiche d'un lieu sur trois hauteurs selon ce qu'on veut lire, sans quitter la carte.",
-  "parallax-layers": "Une page produit où le packshot, le titre et le fond doré glissent à trois vitesses différentes au défilement.",
-  "swipe-stack": "Une file de modération : on rejette à gauche, on valide à droite, la carte suivante remonte au premier plan.",
-  "ripple-surface": "Un pavé de commande domotique qui confirme visuellement le toucher par une onde partant du point exact pressé.",
+  "sheet-drag": "Une app de cartographie : on déplie la fiche d'un lieu sur trois hauteurs selon ce qu'on veut lire.",
+  "parallax-layers": "Une page produit où le packshot, le titre et le fond doré glissent à trois vitesses différentes.",
+  "swipe-stack": "Une file de modération : on rejette à gauche, on valide à droite, la carte suivante remonte.",
+  "ripple-surface": "Un pavé de commande domotique qui confirme le toucher par une onde partant du point exact pressé.",
+  "holographic-foil": "Une carte de fidélité d'une app de mode : la surface arc-en-ciel attire l'œil sans image ni logo.",
+  "frosted-acrylic": "Un panneau de réglages flottant au-dessus d'une photo, qui laisse deviner l'arrière-plan tout en gardant ses contours.",
+  "carbon-fiber": "Le tableau de bord d'une app de sport automobile, où la texture évoque la matière sans la photographier.",
+  "ceramic-glaze": "Un badge de statut « vérifié » posé sur une fiche produit, avec un relief doux qui invite au toucher.",
+  "sandblasted-stone": "Un choix de matière dans un configurateur : la surface mate et sans reflet évoque la pierre brute.",
+  "liquid-mercury": "Un bouton d'action principal dans une app de paiement : le métal liquide donne une impression de valeur sans être criard.",
 };
