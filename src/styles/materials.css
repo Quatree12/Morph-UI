@@ -1,12 +1,13 @@
 /* ==========================================================================
    MORPH/UI — Couche matériaux
-   Chaque classe consomme les variables posées par le StudioProvider :
-   --accent, --blur, --alpha, --glow, --shadow.
+
+   RÈGLE CRITIQUE : changer de Material doit modifier visiblement la surface
+   de L'OBJET PRINCIPAL. Chaque classe consomme les variables posées par le
+   StudioProvider : --accent, --blur, --alpha, --glow, --shadow.
 
    CONTRASTE DES TEXTURES : une texture calibrée pour une pastille de 34 px
-   devient invisible sur un panneau de 380 px. Les rayures et les gradients
-   sont donc volontairement marqués (écarts de 30 à 90 % de luminance), sinon
-   les neuf matériaux se confondent sur les grandes surfaces.
+   devient invisible sur un panneau de 380 px. Les rayures et les dégradés
+   sont donc volontairement marqués (écarts de 30 à 90 % de luminance).
    ========================================================================== */
 
 /* Surface de base commune : toutes les matières s'appliquent par-dessus. */
@@ -38,12 +39,13 @@
   z-index: 2;
 }
 
-/* Les matériaux à texture portent leur propre relief : le voile blanc
-   du reflet les laverait et rendrait les surfaces indistinguables. */
+/* Les matériaux à texture portent leur propre relief : le voile blanc du
+   reflet les laverait et rendrait les surfaces indistinguables. */
 .m--liquid-chrome::after,
 .m--brushed-metal::after,
 .m--iridescent-crystal::after,
-.m--neon-glow::after {
+.m--neon-glow::after,
+.m--carbon-fiber::after {
   opacity: 0.12;
 }
 
@@ -78,7 +80,6 @@
 }
 
 /* ----------------------------------------------------------- 3. Chrome */
-/* Bandes franches : clair / sombre alternés, contrastes de 90 %. */
 .m--liquid-chrome {
   background-color: #514d5c;
   background-image: linear-gradient(
@@ -137,7 +138,6 @@
 }
 
 /* ------------------------------------------------------ 6. Iridescent */
-/* Six teintes saturées : le dégradé reste lisible même sur grande surface. */
 .m--iridescent-crystal {
   background-color: #c4b5fd;
   background-image: linear-gradient(
@@ -164,7 +164,6 @@
 }
 
 /* ------------------------------------------------------------ 7. Metal */
-/* Rayures larges et contrastées (34 % blanc / 30 % noir). */
 .m--brushed-metal {
   background-color: #6a6672;
   background-image:
@@ -229,18 +228,172 @@
 }
 .m--solid-surface::after { opacity: 0.14; }
 
+/* ==========================================================================
+   10-15. NOUVEAUX MATÉRIAUX
+   Chacun apporte une matière réellement différente — pas une variante des
+   neuf existants. Les positions et les contrastes sont calibrés pour des
+   surfaces de 100 px et plus.
+   ========================================================================== */
+
+/* 10. Holographic Foil : dégradé spectral qui glisse avec Glow. */
+.m--holographic-foil {
+  background-color: #b8a4e8;
+  background-image: linear-gradient(
+    115deg,
+    #ff9ec4 0%,
+    #ffe066 16%,
+    #6fe3d2 34%,
+    #7aa2ff 52%,
+    #c1a8ff 70%,
+    #ff9ec4 88%,
+    #ffe066 100%
+  );
+  background-size: 240% 240%;
+  background-position: calc(var(--glow) * 90%) 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #14121a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 0 calc(var(--glow) * 26px) color-mix(in srgb, var(--accent) calc(var(--glow) * 55%), transparent),
+    0 calc(var(--shadow) * 20px) calc(var(--shadow) * 38px) rgba(0, 0, 0, calc(var(--shadow) * 0.42));
+  transition: background-position calc(var(--dur-slow) * var(--speed-mul)) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
+}
+
+/* 11. Frosted Acrylic : dépoli épais, bordure claire marquée. */
+.m--frosted-acrylic {
+  background-color: color-mix(in srgb, var(--surface) calc(var(--alpha) * 78%), transparent);
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    transparent 30%,
+    rgba(0, 0, 0, 0.12) 100%
+  );
+  backdrop-filter: blur(var(--blur)) saturate(120%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(120%);
+  border: 2px solid rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 calc(var(--glow) * 20px) color-mix(in srgb, var(--accent) calc(var(--glow) * 34%), transparent),
+    0 calc(var(--shadow) * 20px) calc(var(--shadow) * 40px) rgba(0, 0, 0, calc(var(--shadow) * 0.46));
+}
+.m--frosted-acrylic::after { opacity: 0.35; }
+
+/* 12. Carbon Fiber : trame croisée à 45°, teinte froide.
+   Deux repeating-linear-gradient croisés : c'est ce qui distingue la trame
+   tissée des stries verticales du métal brossé. */
+.m--carbon-fiber {
+  background-color: #22242a;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.09) 0px,
+      rgba(255, 255, 255, 0.09) 2px,
+      rgba(0, 0, 0, 0.34) 3px,
+      rgba(0, 0, 0, 0.34) 5px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.06) 0px,
+      rgba(255, 255, 255, 0.06) 2px,
+      rgba(0, 0, 0, 0.30) 3px,
+      rgba(0, 0, 0, 0.30) 5px
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 22%, #3a3d45) 0%,
+      #24262c 55%,
+      #1a1c21 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 0 calc(var(--glow) * 18px) color-mix(in srgb, var(--accent) calc(var(--glow) * 30%), transparent),
+    0 calc(var(--shadow) * 18px) calc(var(--shadow) * 34px) rgba(0, 0, 0, calc(var(--shadow) * 0.5));
+}
+
+/* 13. Ceramic Glaze : émail lisse, reflet mou, ombre interne. */
+.m--ceramic-glaze {
+  background-color: color-mix(in srgb, var(--accent) 26%, #f0ecf4);
+  background-image:
+    radial-gradient(90% 60% at 30% 6%, rgba(255, 255, 255, 0.72), transparent 60%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 40%, #ffffff) 0%,
+      color-mix(in srgb, var(--accent) 20%, #ded8e6) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #211d29;
+  box-shadow:
+    inset 0 -10px 18px rgba(0, 0, 0, 0.18),
+    inset 0 3px 6px rgba(255, 255, 255, 0.7),
+    0 0 calc(var(--glow) * 20px) color-mix(in srgb, var(--accent) calc(var(--glow) * 36%), transparent),
+    0 calc(var(--shadow) * 22px) calc(var(--shadow) * 40px) rgba(0, 0, 0, calc(var(--shadow) * 0.4));
+}
+.m--ceramic-glaze::after {
+  background: radial-gradient(70% 40% at 34% 4%, rgba(255, 255, 255, 0.9), transparent 62%);
+  opacity: 0.85;
+}
+
+/* 14. Sandblasted Stone : grain fin, zéro brillance.
+   Le grain est un bruit SVG en data-URI, répété sur la surface. */
+.m--sandblasted-stone {
+  background-color: color-mix(in srgb, var(--surface-2) 88%, var(--accent) 12%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 calc(var(--shadow) * 16px) calc(var(--shadow) * 30px) rgba(0, 0, 0, calc(var(--shadow) * 0.4));
+}
+/* Aucun reflet spéculaire : c'est la définition de ce matériau. */
+.m--sandblasted-stone::after { opacity: 0; }
+
+/* 15. Liquid Mercury : reflets larges et étirés, sans arêtes franches. */
+.m--liquid-mercury {
+  background-color: #9a97a3;
+  background-image:
+    radial-gradient(
+      120% 70% at calc(20% + var(--glow) * 40%) 8%,
+      #ffffff 0%,
+      #cfccd6 22%,
+      transparent 62%
+    ),
+    radial-gradient(
+      110% 80% at 80% 100%,
+      color-mix(in srgb, var(--accent) 30%, #b9b5c4) 0%,
+      #4a4753 60%,
+      transparent 100%
+    ),
+    linear-gradient(170deg, #d4d1da 0%, #7d7a86 48%, #3f3c47 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #16141c;
+  box-shadow:
+    inset 0 3px 10px rgba(255, 255, 255, 0.42),
+    inset 0 -4px 12px rgba(0, 0, 0, 0.34),
+    0 0 calc(var(--glow) * 24px) color-mix(in srgb, var(--accent) calc(var(--glow) * 40%), transparent),
+    0 calc(var(--shadow) * 20px) calc(var(--shadow) * 38px) rgba(0, 0, 0, calc(var(--shadow) * 0.48));
+}
+.m--liquid-mercury::after {
+  background: radial-gradient(80% 34% at 26% 6%, rgba(255, 255, 255, 0.6), transparent 60%);
+  opacity: 0.6;
+}
+
 /* ------------------------------------------------- Repli sans backdrop */
 @supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
   .m--frosted-glass,
   .m--clear-glass,
-  .m--translucent-gel {
+  .m--translucent-gel,
+  .m--frosted-acrylic {
     background-color: color-mix(in srgb, var(--surface-2) 92%, var(--accent) 8%);
   }
 }
 
-/* -------------------------------------------------- Petites surfaces */
-/* Sur une surface réduite (icône, barre), on impose seulement une dimension
-   minimale pour que la texture ait de la place. On ne touche PAS au fond. */
+/* Petites surfaces : les matériaux à texture ont besoin d'une dimension
+   minimale pour rester lisibles. On ne touche PAS au fond. */
 .demo-dock__item.m,
 .kinetic__bar.m,
 .radial__item.m,
