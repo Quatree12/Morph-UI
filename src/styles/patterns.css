@@ -10,21 +10,20 @@
    porte .m. Si plusieurs éléments empilés portent .m, celui du dessus peint
    sa surface par-dessus les autres et la texture devient invisible.
 
+   RÈGLE D'OBJET : le matériau et la forme vont sur L'OBJET PRINCIPAL du
+   pattern, jamais sur le bouton ou la div qui l'enveloppe. Un conteneur qui
+   porte .m produit une surface colorée supplémentaire — c'est ce qui faisait
+   apparaître un grand ovale violet autour du Liquid Glass.
+
    RÈGLE DE CLASSE : tout élément peint par le sélecteur Material reçoit le
    matériau INTERPOLÉ depuis l'état partagé :
      `m m--${state.material} shape--${state.shape}`
-   Écrire `className="... m ..."` en dur laisse l'élément gris.
-
-   RÈGLE DE FORME : shape--* ne s'applique qu'à l'objet principal, jamais à un
-   conteneur englobant — sinon un disque apparaît autour du composant quand
-   Shape = Circle.
 
    RÈGLE DE DIMENSION : les composants vivants (.goo, .radial, .kinetic,
-   .stack, .lens) doivent tenir dans la hauteur de .phone__stage, qui est
-   nettement plus courte que celle d'un écran réel. Un composant qui déborde
-   est rogné par le `overflow: hidden` du stage — et disparaît silencieusement.
-   Il ne faut JAMAIS modifier ces dimensions en même temps que les règles
-   .motif--* (vignettes de la Library) : ce sont deux familles distinctes.
+   .stack, .lens) doivent tenir dans la hauteur de .phone__stage. Un composant
+   qui déborde est rogné par son `overflow: hidden` et disparaît
+   silencieusement. Ne JAMAIS modifier ces dimensions en même temps que les
+   règles .motif--* (vignettes de la Library) : deux familles distinctes.
    ========================================================================== */
 
 /* ------------------------------------------------------------ Formes §9
@@ -187,6 +186,24 @@
   pointer-events: none;
 }
 
+/* Conteneur du Liquid Glass : aucun fond, aucune forme. Le matériau et la
+   géométrie appartiennent à la pile de calques, pas au bouton qui la porte.
+   Sans ça, le .subject produisait un grand ovale coloré qui débordait. */
+.glass-host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  background: none;
+  border: 0;
+  padding: 0;
+  min-width: 0;
+  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
+}
+.glass-host > span { pointer-events: none; }
+
 .subject__label {
   position: relative;
   z-index: 3;
@@ -222,7 +239,8 @@
 .knob:nth-child(2) { background: color-mix(in srgb, var(--accent) 72%, transparent); }
 .knob:nth-child(3) { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
-/* 1. Liquid Glass : superposition de calques décalés */
+/* 1. Liquid Glass : superposition de calques décalés.
+   La pile est l'objet principal : c'est elle qui porte matériau et forme. */
 .stack {
   position: relative;
   width: 150px;
@@ -233,7 +251,6 @@
 .stack__layer {
   position: absolute;
   inset: 0;
-  border-radius: calc(var(--radius) * 1px);
   transition: transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-out);
   transform: translate(calc(var(--i) * 10px), calc(var(--i) * -10px));
 }
@@ -696,8 +713,7 @@
   border-radius: 10px;
 }
 
-/* 11. Expressive Motion : un cercle + deux échos de rebond.
-   Positions en PIXELS pour tenir dans le cadre. */
+/* 11. Expressive Motion : un cercle + deux échos de rebond */
 .motif--expressive-motion::before {
   content: "";
   width: 88px; height: 72px;
