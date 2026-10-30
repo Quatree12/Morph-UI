@@ -37,8 +37,7 @@ function Sidebar({ section, onNavigate }: Omit<Props, "children">) {
           className="mono"
           style={{ fontSize: "1.0625rem", fontWeight: 700, letterSpacing: "-0.02em" }}
         >
-          {/* Le slash du logo porte la MARQUE, pas la couleur du Studio :
-              c'est un élément d'identité, il ne doit pas changer. */}
+          {/* Le slash porte la MARQUE, pas la couleur du Studio. */}
           MORPH<span style={{ color: "var(--brand-light)" }}>/</span>UI
         </div>
         <div className="eyebrow" style={{ marginTop: 4 }}>
@@ -64,13 +63,10 @@ function Sidebar({ section, onNavigate }: Omit<Props, "children">) {
                   padding: "0 var(--s-3)",
                   borderRadius: "var(--r-sm)",
                   border: "1px solid transparent",
-                  /* L'onglet actif utilise la marque, jamais --accent. */
                   background: active
-                    ? "color-mix(in srgb, var(--brand) 22%, transparent)"
+                    ? "color-mix(in srgb, var(--brand) 55%, transparent)"
                     : "transparent",
-                  borderColor: active
-                    ? "color-mix(in srgb, var(--brand) 50%, transparent)"
-                    : "transparent",
+                  borderColor: active ? "var(--brand-light)" : "transparent",
                   color: active ? "var(--text)" : "var(--text-dim)",
                   fontSize: "0.875rem",
                   textAlign: "left",
