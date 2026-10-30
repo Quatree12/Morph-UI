@@ -1,22 +1,28 @@
 /* ==========================================================================
    MORPH/UI — Design tokens
-   Toute la direction artistique vit ici.
+
+   AMBIANCE : Graphite — noir neutre, sans aucune teinte.
+   Le fond ne colore rien : les 12 accents et les 15 matériaux sont les
+   seules sources de couleur de l'application. C'est ce qui rend leurs
+   teintes justes et leurs textures lisibles.
+
+   L'accent violet reste inchangé : il ne fait pas partie de l'ambiance.
    ========================================================================== */
 
 :root {
-  /* --- Surfaces --- */
-  --bg: #0e0d13;
-  --surface: #191720;
-  --surface-2: #1f1c29;
-  --border: #302c3a;
-  --border-soft: rgba(193, 168, 255, 0.14);
+  /* --- Surfaces : gris purs, aucun canal dominant --- */
+  --bg: #121212;
+  --surface: #1c1c1e;
+  --surface-2: #242426;
+  --border: #2e2e30;
+  --border-soft: rgba(255, 255, 255, 0.14);
 
   /* --- Texte --- */
-  --text: #f4f1f8;
-  --text-dim: #a5a0b3;
-  --text-faint: #6f6a7d;
+  --text: #f2f2f4;
+  --text-dim: #a0a0a4;
+  --text-faint: #6c6c70;
 
-  /* --- Accents --- */
+  /* --- Accents (inchangés : hors périmètre de l'ambiance) --- */
   --accent: #c1a8ff;
   --lime: #d6fa72;
   --turquoise: #6fe3d2;
@@ -68,8 +74,7 @@
   --speed-mul: 1;
 }
 
-/* prefers-reduced-motion : on neutralise les durées, jamais la lisibilité.
-   Le Playground reste utilisable, les animations ne clignotent plus. */
+/* prefers-reduced-motion : on neutralise les durées, jamais la lisibilité. */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-fast: 1ms;
