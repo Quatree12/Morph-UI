@@ -15,31 +15,31 @@ export function Home({ onNavigate }: Props) {
 
   return (
     <section style={{ display: "grid", gap: "var(--s-6)" }}>
-      {/* ------------------------------------------------------ Héro */}
       <header style={{ display: "grid", gap: "var(--s-4)", paddingTop: "var(--s-4)" }}>
         <div className="eyebrow">Experimental Design Atlas</div>
         <h1 style={{ maxWidth: "18ch" }}>
-          MORPH<span style={{ color: "var(--accent)" }}>/</span>UI
+          {/* Le slash porte la marque, pas la couleur du Studio. */}
+          MORPH<span style={{ color: "var(--brand-light)" }}>/</span>UI
         </h1>
         <p style={{ maxWidth: "58ch", fontSize: "1.0625rem", color: "var(--text-dim)" }}>
           Un laboratoire visuel et fonctionnel pour les patterns d'interaction contemporains.
           Explorez, modifiez, combinez — puis exportez du code réellement conforme à ce que
           vous voyez.
         </p>
-        <p className="mono" style={{ color: "var(--accent)", fontSize: "0.8125rem" }}>
+        <p className="mono" style={{ color: "var(--brand-light)", fontSize: "0.8125rem" }}>
           Explore interactions. Bend materials. Shape interfaces.
         </p>
         <div style={{ display: "flex", gap: "var(--s-3)", flexWrap: "wrap" }}>
           <button type="button" className="btn btn--primary" onClick={() => onNavigate("explore")}>
             Explore Patterns
           </button>
-          <button type="button" className="btn btn--lime" onClick={() => onNavigate("playground")}>
+          {/* Secondaire : contour seul, plus de jaune lime. */}
+          <button type="button" className="btn btn--outline" onClick={() => onNavigate("playground")}>
             Open Playground
           </button>
         </div>
       </header>
 
-      {/* Statistiques calculées depuis le contenu réel, jamais en dur. */}
       <div className="grid-stats">
         <Stat label="Patterns" value={String(PATTERNS.length)} note="familles d'interaction" />
         <Stat label="Materials" value={String(MATERIALS.length)} note="matières numériques" />
@@ -49,7 +49,6 @@ export function Home({ onNavigate }: Props) {
         <Stat label="Saved" value={String(creations.length)} note="créations personnelles" />
       </div>
 
-      {/* --------------------------------------------- Dernières expérimentations */}
       <div className="section-head">
         <h2>Votre travail</h2>
         <p className="muted">La configuration courante et vos créations enregistrées.</p>
@@ -103,7 +102,6 @@ export function Home({ onNavigate }: Props) {
         )}
       </div>
 
-      {/* ---------------------------------------- Accès rapide */}
       <div className="section-head">
         <h2>Accès rapide</h2>
       </div>
