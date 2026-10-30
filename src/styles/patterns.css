@@ -6,18 +6,15 @@
    Sinon patterns.css (chargé après materials.css) écrase le matériau à
    spécificité égale, et le sélecteur Material n'a plus d'effet visible.
 
-   RÈGLE D'EMPILEMENT : dans un pattern à plusieurs étages, SEUL LE CONTENEUR
-   porte .m. Si plusieurs éléments empilés portent .m, celui du dessus peint
-   sa surface par-dessus les autres et la texture devient invisible.
+   RÈGLE D'EMPILEMENT : SEUL LE CONTENEUR porte .m dans un pattern à étages.
 
-   RÈGLE D'OBJET : le matériau et la forme vont sur L'OBJET PRINCIPAL du
-   pattern, jamais sur le bouton ou la div qui l'enveloppe.
+   RÈGLE D'OBJET : le matériau et la forme vont sur L'OBJET PRINCIPAL, jamais
+   sur le bouton ou la div qui l'enveloppe.
 
    RÈGLE DE DIMENSION : les composants vivants (.goo, .radial, .kinetic,
-   .glass-frame, .lens) doivent tenir dans la hauteur de .phone__stage. Un
-   composant qui déborde est rogné par son `overflow: hidden` et disparaît
-   silencieusement. Ne JAMAIS modifier ces dimensions en même temps que les
-   règles .motif--* (vignettes de la Library) : deux familles distinctes.
+   .glass-frame, .lens) doivent tenir dans la hauteur de .phone__stage. Ne
+   JAMAIS modifier ces dimensions en même temps que les règles .motif--*
+   (vignettes de la Library) : deux familles distinctes.
    ========================================================================== */
 
 /* ------------------------------------------------------------ Formes §9 */
@@ -210,7 +207,7 @@
 /* 1. Liquid Glass : superposition de calques décalés.
    Le cadre .glass-frame contraint la pile : sans lui, les couches en
    position absolue prennent la largeur du panneau et le backdrop-filter
-   du matériau déborde — c'est ce qui produisait le rectangle blanc. */
+   du matériau déborde. */
 .glass-host {
   position: relative;
   display: grid;
@@ -424,7 +421,8 @@
   transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
 }
 
-/* 9. Lens — le texte est borné pour ne jamais déborder du cadre. */
+/* 9. Lens — le motif agrandi est fait de trois barres fines : rien qui
+   puisse traverser le cadre, contrairement à une ligne de texte. */
 .lens {
   position: relative;
   width: 190px;
@@ -434,20 +432,25 @@
   display: grid;
   place-items: center;
   padding: var(--s-3);
-  font-size: 0.6875rem;
-  color: var(--text-dim);
-  letter-spacing: 0.06em;
   touch-action: none;
-  text-align: center;
-  line-height: 1.4;
 }
-.lens > span:first-child {
+.lens__target {
+  display: grid;
+  gap: 7px;
+  width: 62px;
+  justify-items: center;
+  pointer-events: none;
+}
+.lens__target > span {
   display: block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
 }
+.lens__target > span:nth-child(1) { width: 62px; }
+.lens__target > span:nth-child(2) { width: 44px; }
+.lens__target > span:nth-child(3) { width: 54px; }
+
 .lens__glass {
   position: absolute;
   width: calc(78px * var(--size));
