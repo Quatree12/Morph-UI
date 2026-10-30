@@ -20,15 +20,62 @@
    Shape = Circle.
    ========================================================================== */
 
-/* ------------------------------------------------------------ Formes §9 */
+/* ------------------------------------------------------------ Formes §9
+   Les formes qui ne peuvent pas s'exprimer par border-radius utilisent un
+   clip-path ou un masque. Chaque forme est appliquée à l'objet principal. */
 .shape--pill     { border-radius: var(--r-pill); }
 .shape--rounded  { border-radius: calc(var(--radius) * 1px); }
 .shape--circle   { border-radius: 50%; }
 .shape--sharp    { border-radius: 0; }
+
 .shape--squircle {
   border-radius: calc(var(--radius) * 1.4px);
   -webkit-mask-image: radial-gradient(closest-side, #000 96%, rgba(0, 0, 0, 0.86) 100%);
   mask-image: radial-gradient(closest-side, #000 96%, rgba(0, 0, 0, 0.86) 100%);
+}
+
+/* Blob : silhouette organique. Le rayon module l'asymétrie des coins. */
+.shape--blob {
+  border-radius:
+    calc(var(--radius) * 1.2px) calc(60px - var(--radius) * 0.6px)
+    calc(var(--radius) * 1.6px) calc(70px - var(--radius) * 0.8px) /
+    calc(70px - var(--radius) * 0.8px) calc(var(--radius) * 1.4px)
+    calc(60px - var(--radius) * 0.7px) calc(var(--radius) * 1.1px);
+}
+
+/* Diamond : losange franc. Le rayon n'a pas d'effet, la forme est absolue. */
+.shape--diamond {
+  -webkit-clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  border-radius: 0;
+}
+
+/* Arch : arrondi en haut, base droite. Le rayon pilote la courbure du haut. */
+.shape--arch {
+  border-radius: calc(var(--radius) * 2px) calc(var(--radius) * 2px) 0 0;
+}
+
+/* Notched : coin supérieur droit coupé. Le rayon garde les trois autres. */
+.shape--notched {
+  border-radius:
+    calc(var(--radius) * 1px)
+    0
+    calc(var(--radius) * 1px)
+    calc(var(--radius) * 1px);
+  -webkit-clip-path: polygon(
+    0 0,
+    calc(100% - 22px) 0,
+    100% 22px,
+    100% 100%,
+    0 100%
+  );
+  clip-path: polygon(
+    0 0,
+    calc(100% - 22px) 0,
+    100% 22px,
+    100% 100%,
+    0 100%
+  );
 }
 
 /* ---------------------------------------------------- Maquette téléphone */
@@ -460,9 +507,6 @@
 }
 
 /* ------------------------------------------- Aperçus du catalogue : motifs
-   Explore n'affiche plus de composants animés au chargement — uniquement un
-   motif statique, déplié à la demande par le bouton « Visualiser ».
-
    Le motif est posé en ABSOLU au centre : il ne partage donc plus le flux
    avec le label, ce qui le décalait vers la droite et le faisait déborder. */
 .thumb {
