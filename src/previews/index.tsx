@@ -401,7 +401,7 @@ function Lens() {
       onPointerMove={(e) => move(e.clientX, e.clientY, e.currentTarget)}
       onPointerLeave={() => setPos({ x: 50, y: 50 })}
     >
-      <span aria-hidden="true">MORPH/UI · DÉTAIL · 0123 · ALPHA</span>
+      <span aria-hidden="true">DÉTAIL · 0123</span>
       <span className="lens__glass" style={{ left: `${pos.x}%`, top: `${pos.y}%` }} aria-hidden="true" />
     </div>
   );
@@ -476,58 +476,107 @@ function ExpressiveMotion({ bounce }: PatternProps) {
   );
 }
 
-/* --------------------------------------------- 12. Contextual Toolbar */
+/* --------------------------------------------- 12. Contextual Toolbar ---
+   DÉMONSTRATION HONNÊTE : la barre apparaît quand au moins un élément est
+   sélectionné, et CHAQUE bouton agit réellement sur la sélection —
+   dupliquer ajoute une copie, supprimer la retire, annuler désélectionne.
+   Aucun bouton n'est décoratif. */
+const INITIAL_ITEMS = ["Élément A", "Élément B", "Élément C"];
+
 function ContextualToolbar() {
   const { state } = useStudio();
-  const [selecting, setSelecting] = useState(false);
-  const [count, setCount] = useState(0);
+  const [items, setItems] = useState<string[]>(INITIAL_ITEMS);
+  const [selected, setSelected] = useState<number[]>([]);
+  const [flash, setFlash] = useState<string | null>(null);
+
+  const selecting = selected.length > 0;
+
+  const toggle = (i: number) => {
+    setSelected((prev) => (prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i]));
+  };
+
+  /** Dupliquer : ajoute une copie de chaque élément sélectionné. */
+  const duplicate = () => {
+    const copies = selected.map((i) => `${items[i]} (copie)`);
+    setItems((prev) => [...prev, ...copies]);
+    setFlash(`${copies.length} élément${copies.length > 1 ? "s" : ""} dupliqué${copies.length > 1 ? "s" : ""}`);
+    setSelected([]);
+  };
+
+  /** Supprimer : retire réellement les éléments sélectionnés. */
+  const remove = () => {
+    const n = selected.length;
+    setItems((prev) => prev.filter((_, i) => !selected.includes(i)));
+    setFlash(`${n} élément${n > 1 ? "s" : ""} supprimé${n > 1 ? "s" : ""}`);
+    setSelected([]);
+  };
+
+  /** Annuler : vide la sélection et fait disparaître la barre. */
+  const cancel = () => {
+    setSelected([]);
+    setFlash(null);
+  };
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
       <div style={{ display: "grid", gap: "var(--s-2)", width: "100%", maxWidth: 250 }}>
-        {[0, 1, 2].map((i) => (
-          <button
-            key={i}
-            type="button"
-            className={`subject m m--${state.material} shape--${state.shape}`}
-            onClick={() => {
-              setSelecting(true);
-              setCount((c) => c + 1);
-            }}
-            style={{ minWidth: 0, width: "100%", padding: "var(--s-3)" }}
-          >
-            <span className="subject__label" style={{ fontSize: "0.8125rem" }}>
-              Élément {i + 1}
-            </span>
-          </button>
-        ))}
+        {items.map((label, i) => {
+          const on = selected.includes(i);
+          return (
+            <button
+              key={`${label}-${i}`}
+              type="button"
+              className={`subject m m--${state.material} shape--${state.shape}`}
+              aria-pressed={on}
+              onClick={() => toggle(i)}
+              style={{
+                minWidth: 0,
+                width: "100%",
+                padding: isItemPadded(items.length) ? "var(--s-3)" : "10px",
+                boxShadow: on ? "0 0 0 2px var(--accent)" : undefined,
+              }}
+            >
+              <span className="subject__label" style={{ fontSize: "0.8125rem" }}>
+                {on ? "✓ " : ""}{label}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {selecting && (
-        <div className="ctx-bar" role="toolbar" aria-label="Actions contextuelles de sélection">
-          <button type="button" className="ctx-bar__btn" onClick={() => setCount((c) => c + 1)}>
+        <div className="ctx-bar" role="toolbar" aria-label="Actions sur la sélection">
+          <button type="button" className="ctx-bar__btn" onClick={duplicate}>
             Dupliquer
           </button>
-          <button type="button" className="ctx-bar__btn" onClick={() => setCount((c) => c + 1)}>
-            Déplacer
+          <button type="button" className="ctx-bar__btn" onClick={remove}>
+            Supprimer
           </button>
-          <button
-            type="button"
-            className="ctx-bar__btn"
-            onClick={() => {
-              setSelecting(false);
-              setCount(0);
-            }}
-          >
+          <button type="button" className="ctx-bar__btn" onClick={cancel}>
             Annuler
           </button>
           <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }} aria-live="polite">
-            {count}
+            {selected.length}
           </span>
         </div>
       )}
+
+      {flash && (
+        <p
+          className="mono"
+          style={{ position: "absolute", bottom: 4, fontSize: "0.625rem", color: "var(--accent)" }}
+          aria-live="polite"
+        >
+          {flash}
+        </p>
+      )}
     </div>
   );
+}
+
+/** Compacte l'espacement quand la liste s'allonge (après duplication). */
+function isItemPadded(count: number): boolean {
+  return count <= 3;
 }
 
 /* ------------------------------------------------------------ Registre */
