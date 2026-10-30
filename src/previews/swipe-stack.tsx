@@ -19,15 +19,14 @@ export function SwipeStack({ bounce }: PatternProps) {
     setDx(e.clientX - startX.current);
   }, []);
 
-  const commit = useCallback((dir: -1 | 1) => {
+  const commit = useCallback(() => {
     setIndex((i) => (i + 1) % CARDS.length);
     setDx(0);
-    void dir;
   }, []);
 
   const onUp = useCallback(() => {
     // Seuil prudent : 40 px de déplacement.
-    if (Math.abs(dx) > 40) commit(dx > 0 ? 1 : -1);
+    if (Math.abs(dx) > 40) commit();
     else setDx(0);
   }, [dx, commit]);
 
@@ -50,7 +49,6 @@ export function SwipeStack({ bounce }: PatternProps) {
                     : `translateY(${depth * -8}px) scale(${1 - depth * 0.06})`,
                   zIndex: CARDS.length - depth,
                   opacity: depth > 2 ? 0 : 1,
-                  /* Les cartes non actives : contour seul, sans fond opaque. */
                   background: top ? undefined : "transparent",
                   border: top ? undefined : "1px solid var(--border)",
                 } as CSSProperties
@@ -67,10 +65,10 @@ export function SwipeStack({ bounce }: PatternProps) {
       </div>
 
       <div style={{ display: "flex", gap: "var(--s-2)" }}>
-        <button type="button" className="btn btn--sm" onClick={() => commit(-1)}>
+        <button type="button" className="btn btn--sm" onClick={commit}>
           ← Rejeter
         </button>
-        <button type="button" className="btn btn--sm btn--primary" onClick={() => commit(1)}>
+        <button type="button" className="btn btn--sm btn--primary" onClick={commit}>
           Valider →
         </button>
       </div>
