@@ -9,11 +9,11 @@
    n'applique aucun matériau, et l'élément reste gris.
 
    RÈGLE DE FORME : `shape--${state.shape}` ne s'applique qu'à l'OBJET
-   PRINCIPAL du pattern, jamais à un conteneur englobant — sinon un disque
-   apparaît autour du composant quand Shape = Circle.
+   PRINCIPAL du pattern, jamais à un conteneur englobant.
 
-   Les 4 patterns récents (sheet-drag, parallax-layers, swipe-stack,
-   ripple-surface) vivent dans leurs propres modules, importés ci-dessous.
+   RÈGLE DE CONSIGNE : chaque sous-titre décrit EXACTEMENT le geste disponible.
+   Ne jamais annoncer une action que le composant ne fait pas — « déplacer »
+   pour Liquid Glass, par exemple, qui ne fait qu'incliner son reflet.
    ========================================================================== */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -57,7 +57,7 @@ function LiquidGlass({ bounce }: PatternProps) {
   const [tilt, setTilt] = useState(0);
 
   /* Sur iOS, pointermove ne se déclenche pas au premier contact : on amorce
-     le suivi de position dès onPointerDown, sinon le composant paraît inerte. */
+     le suivi dès onPointerDown, sinon le composant paraît inerte. */
   const track = useCallback(
     (clientX: number, el: HTMLElement) => {
       const r = el.getBoundingClientRect();
@@ -96,7 +96,7 @@ function LiquidGlass({ bounce }: PatternProps) {
       </span>
       <span className="subject__label">Liquid Glass</span>
       <span className="subject__sub">
-        {pressed ? "Pression détectée" : "Toucher ou glisser le doigt"}
+        {pressed ? "Reflet incliné" : "Glissez le doigt : le reflet s'incline"}
       </span>
     </button>
   );
@@ -317,7 +317,7 @@ function RadialMenu({ bounce }: PatternProps) {
       </button>
       {actions.map((a, i) => {
         const angle = (-90 + (360 / actions.length) * i) * (Math.PI / 180);
-        const r = 82 * (1 + bounce * 0.1);
+        const r = 78 * (1 + bounce * 0.1);
         const style: CSSProperties = {
           "--x": `${Math.cos(angle) * r}px`,
           "--y": `${Math.sin(angle) * r}px`,
@@ -368,7 +368,7 @@ function Kinetic() {
             className={`kinetic__bar m m--${state.material}`}
             style={
               {
-                height: `${30 + h * 80 * (0.4 + amp)}px`,
+                height: `${24 + h * 62 * (0.4 + amp)}px`,
                 animation: `kinetic-${i % 3} ease-in-out infinite`,
                 "--kinetic-dur": `${(2.4 - amp * 1.4).toFixed(2)}s`,
               } as CSSProperties
@@ -385,7 +385,6 @@ function Lens() {
   const { state } = useStudio();
   const [pos, setPos] = useState({ x: 50, y: 50 });
 
-  /* Le suivi démarre au toucher : pointermove seul ne suffit pas sur iOS. */
   const move = useCallback((clientX: number, clientY: number, el: HTMLElement) => {
     const r = el.getBoundingClientRect();
     setPos({
@@ -401,6 +400,7 @@ function Lens() {
       onPointerMove={(e) => move(e.clientX, e.clientY, e.currentTarget)}
       onPointerLeave={() => setPos({ x: 50, y: 50 })}
     >
+      {/* Le texte est court : il ne doit jamais traverser la loupe en débordant. */}
       <span aria-hidden="true">DÉTAIL · 0123</span>
       <span className="lens__glass" style={{ left: `${pos.x}%`, top: `${pos.y}%` }} aria-hidden="true" />
     </div>
@@ -467,7 +467,7 @@ function ExpressiveMotion({ bounce }: PatternProps) {
         style={{
           borderRadius: "50%",
           transform: fired
-            ? `translateY(${(-18 * (1 + bounce)).toFixed(1)}px) scale(1.12)`
+            ? `translateY(${(-16 * (1 + bounce)).toFixed(1)}px) scale(1.12)`
             : "translateY(0) scale(1)",
         }}
       />
@@ -478,9 +478,9 @@ function ExpressiveMotion({ bounce }: PatternProps) {
 
 /* --------------------------------------------- 12. Contextual Toolbar ---
    DÉMONSTRATION HONNÊTE : la barre apparaît quand au moins un élément est
-   sélectionné, et CHAQUE bouton agit réellement sur la sélection —
-   dupliquer ajoute une copie, supprimer la retire, annuler désélectionne.
-   Aucun bouton n'est décoratif. */
+   sélectionné, et CHAQUE bouton agit réellement. Les trois actions sont
+   Dupliquer, Supprimer et Tout désélectionner — cette dernière vide la
+   sélection, ce qui fait disparaître la barre. Aucune n'est décorative. */
 const INITIAL_ITEMS = ["Élément A", "Élément B", "Élément C"];
 
 function ContextualToolbar() {
@@ -511,15 +511,15 @@ function ContextualToolbar() {
     setSelected([]);
   };
 
-  /** Annuler : vide la sélection et fait disparaître la barre. */
-  const cancel = () => {
+  /** Tout désélectionner : vide la sélection, la barre disparaît. */
+  const clearSelection = () => {
     setSelected([]);
     setFlash(null);
   };
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
-      <div style={{ display: "grid", gap: "var(--s-2)", width: "100%", maxWidth: 250 }}>
+      <div style={{ display: "grid", gap: "var(--s-2)", width: "100%", maxWidth: 240 }}>
         {items.map((label, i) => {
           const on = selected.includes(i);
           return (
@@ -532,7 +532,7 @@ function ContextualToolbar() {
               style={{
                 minWidth: 0,
                 width: "100%",
-                padding: isItemPadded(items.length) ? "var(--s-3)" : "10px",
+                padding: items.length <= 4 ? "var(--s-3)" : "10px",
                 boxShadow: on ? "0 0 0 2px var(--accent)" : undefined,
               }}
             >
@@ -552,8 +552,8 @@ function ContextualToolbar() {
           <button type="button" className="ctx-bar__btn" onClick={remove}>
             Supprimer
           </button>
-          <button type="button" className="ctx-bar__btn" onClick={cancel}>
-            Annuler
+          <button type="button" className="ctx-bar__btn" onClick={clearSelection}>
+            Désélectionner
           </button>
           <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }} aria-live="polite">
             {selected.length}
@@ -564,7 +564,7 @@ function ContextualToolbar() {
       {flash && (
         <p
           className="mono"
-          style={{ position: "absolute", bottom: 4, fontSize: "0.625rem", color: "var(--accent)" }}
+          style={{ position: "absolute", bottom: 0, fontSize: "0.625rem", color: "var(--accent)" }}
           aria-live="polite"
         >
           {flash}
@@ -572,11 +572,6 @@ function ContextualToolbar() {
       )}
     </div>
   );
-}
-
-/** Compacte l'espacement quand la liste s'allonge (après duplication). */
-function isItemPadded(count: number): boolean {
-  return count <= 3;
 }
 
 /* ------------------------------------------------------------ Registre */
