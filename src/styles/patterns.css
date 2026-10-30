@@ -2,8 +2,9 @@
    MORPH/UI — Formes + maquette + patterns
 
    RÈGLE MATÉRIAU : les éléments qui portent la classe .m ne reçoivent AUCUN
-   background, border ni box-shadow depuis ce fichier. Sinon patterns.css est
-   chargé après materials.css et, à spécificité égale, il écrase le matériau.
+   background-color, background-image, border ni box-shadow depuis ce fichier.
+   Sinon patterns.css (chargé après materials.css) écrase le matériau à
+   spécificité égale, et le sélecteur Material n'a plus d'effet visible.
    ========================================================================== */
 
 /* ------------------------------------------------------------ Formes §9 */
@@ -30,7 +31,6 @@
   box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: max-width var(--dur) var(--ease-out);
 }
-.phone--expanded { width: min(100%, 460px); }
 
 .phone__screen {
   position: relative;
@@ -475,8 +475,8 @@
   background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 46%, transparent) 0 26px, transparent 26px 34px);
   border: 1px solid rgba(255,255,255,0.12);
 }
-.motif--géométrie::before,
-.motif--geometrie::before {
+.motif--geometrie::before,
+.motif--géométrie::before {
   content: "";
   width: 84px; height: 84px;
   background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 58%, transparent), transparent);
@@ -500,27 +500,49 @@
   box-shadow: 0 22px 0 -8px color-mix(in srgb, var(--accent) 42%, transparent),
     0 44px 0 -16px color-mix(in srgb, var(--accent) 24%, transparent);
 }
+.motif--decision::before {
+  content: "";
+  width: 96px; height: 64px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 44%, transparent), transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: 12px 12px 0 -1px rgba(255,255,255,0.06), 24px 24px 0 -2px rgba(255,255,255,0.03);
+  transform: rotate(-8deg);
+}
+
 /* ==========================================================================
    13-16. Patterns ajoutés : Sheet Drag, Parallax, Swipe Stack, Ripple.
-   Les éléments portant .m ne reçoivent aucun fond ici (règle matériau).
+   Aucun de ces conteneurs ne définit background-color ou background-image :
+   la surface appartient au matériau (.m), sinon il serait écrasé.
    ========================================================================== */
 
-/* --- 13. Sheet Drag --- */
+/* --- 13. Sheet Drag : ancrage bas ou haut, hauteurs en pixels réels --- */
 .sheet-demo {
   position: relative;
   width: 100%;
   height: 100%;
   display: grid;
-  align-content: end;
+  grid-template-rows: auto 1fr;
+  gap: var(--s-2);
+  align-content: start;
 }
+
+/* Ancrage bas : le panneau colle au bas de la maquette. */
+.sheet-demo:not(.sheet-demo--top) { align-content: end; }
+
+/* Ancrage haut : le panneau colle sous le bouton. */
+.sheet-demo--top { align-content: start; }
 
 .sheet {
   position: relative;
   overflow: hidden;
-  transition: height calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
   display: grid;
   grid-template-rows: auto 1fr;
+  align-self: end;
+  transition: height calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
 }
+
+.sheet-demo--top .sheet { align-self: start; }
 
 .sheet__handle {
   display: grid;
@@ -589,7 +611,10 @@
 .stack-demo__card:active { cursor: grabbing; }
 
 /* --- 16. Ripple Surface --- */
-.ripple { position: relative; overflow: hidden; }
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
 
 .ripple__wave {
   position: absolute;
@@ -612,122 +637,4 @@
     transform: scale(calc(18 * var(--ripple-scale, 1)));
     opacity: 0;
   }
-}
-
-/* Motifs statiques de la Library pour les 4 nouveaux patterns. */
-.motif--decision::before {
-  content: "";
-  width: 96px; height: 64px;
-  border-radius: 14px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 44%, transparent), transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  box-shadow: 12px 12px 0 -1px rgba(255,255,255,0.06), 24px 24px 0 -2px rgba(255,255,255,0.03);
-  transform: rotate(-8deg);
-}
-/* --- 13. Sheet Drag : ancrage bas ou haut, hauteurs en pixels réels --- */
-.sheet-demo {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--s-2);
-  align-content: start;
-}
-
-/* Ancrage bas : le panneau colle au bas de la maquette. */
-.sheet-demo:not(.sheet-demo--top) { align-content: end; }
-
-/* Ancrage haut : le panneau colle sous le bouton. */
-.sheet-demo--top { align-content: start; }
-
-.sheet {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  align-self: end;
-  transition: height calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-  will-change: height;
-}
-
-.sheet-demo--top .sheet { align-self: start; }
-
-.sheet__handle {
-  display: grid;
-  place-items: center;
-  min-height: 48px;
-  cursor: grab;
-  touch-action: none;
-  position: relative;
-  z-index: 3;
-}
-.sheet__handle:active { cursor: grabbing; }
-
-.sheet__grip {
-  width: 44px;
-  height: 5px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.4);
-}
-/* ==========================================================================
-   Correctif matériaux sur les conteneurs à grande surface.
-   Les 4 patterns récents utilisent des conteneurs grid dont le fond doit
-   être porté par le conteneur lui-même, pas par ses enfants.
-   ========================================================================== */
-
-.sheet,
-.stack-demo__card,
-.parallax,
-.parallax__layer,
-.ripple {
-  background-color: var(--surface);
-}
-
-/* On redonne explicitement le fond de chaque matériau à ces conteneurs,
-   pour qu'aucune autre règle ne puisse le neutraliser. */
-.sheet.m--frosted-glass,
-.stack-demo__card.m--frosted-glass { background-color: color-mix(in srgb, var(--surface) calc(var(--alpha) * 62%), transparent); }
-.sheet.m--clear-glass,
-.stack-demo__card.m--clear-glass { background-color: color-mix(in srgb, var(--surface) calc(var(--alpha) * 26%), transparent); }
-.sheet.m--solid-surface,
-.stack-demo__card.m--solid-surface { background-color: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
-.sheet.m--soft-matte,
-.stack-demo__card.m--soft-matte { background-color: color-mix(in srgb, var(--surface-2) 88%, var(--accent) 12%); }
-.sheet.m--neon-glow,
-.stack-demo__card.m--neon-glow { background-color: color-mix(in srgb, var(--accent) calc(var(--alpha) * 22%), #0c0a11); }
-.sheet.m--translucent-gel,
-.stack-demo__card.m--translucent-gel {
-  background-image:
-    radial-gradient(120% 80% at 30% 8%, rgba(255, 255, 255, 0.42), transparent 52%),
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--accent) calc(var(--alpha) * 62%), #241f33),
-      color-mix(in srgb, var(--accent) calc(var(--alpha) * 26%), #1a1622));
-}
-.sheet.m--liquid-chrome,
-.stack-demo__card.m--liquid-chrome {
-  background-image: linear-gradient(118deg,
-    #6d6a78 0%, #e9e7ef 14%, #8f8b9c 27%, #ffffff 41%,
-    #7b7787 53%, #d9d6e2 66%, #58545f 80%,
-    color-mix(in srgb, var(--accent) 40%, #b9b5c4) 100%);
-  color: #16141c;
-}
-.sheet.m--brushed-metal,
-.stack-demo__card.m--brushed-metal {
-  background-color: #4a4753;
-  background-image:
-    repeating-linear-gradient(92deg,
-      rgba(255, 255, 255, 0.11) 0px, rgba(255, 255, 255, 0.11) 1px,
-      rgba(0, 0, 0, 0.13) 2px, rgba(0, 0, 0, 0.13) 3px),
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--accent) 18%, #8e8a99) 0%,
-      #55515f 42%,
-      color-mix(in srgb, var(--accent) 10%, #3d3947) 100%);
-}
-.sheet.m--iridescent-crystal,
-.stack-demo__card.m--iridescent-crystal {
-  background-image: linear-gradient(135deg,
-    #a78bfa 0%, #6fe3d2 22%, #ff9ec4 44%, #ffe066 62%, #7aa2ff 82%, #d6fa72 100%);
-  background-size: 220% 220%;
-  color: #14121a;
 }
