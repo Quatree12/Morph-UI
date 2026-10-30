@@ -65,7 +65,7 @@ export function Slider({
         disabled={disabled}
         aria-describedby={hint ? hintId : undefined}
         onChange={(e) => onChange(Number.parseFloat(e.target.value))}
-        style={{ width: "100%", accentColor: "var(--accent)", height: 28 }}
+        style={{ width: "100%", accentColor: "var(--brand-light)", height: 28 }}
       />
       {hint && !disabled && (
         <p id={hintId} className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0, lineHeight: 1.5 }}>
@@ -103,11 +103,6 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
             role="radio"
             aria-checked={o.id === value}
             className="tabs__btn"
-            style={
-              o.id === value
-                ? { background: "color-mix(in srgb, var(--accent) 22%, transparent)", color: "var(--text)" }
-                : undefined
-            }
             onClick={() => onChange(o.id)}
           >
             {o.label}
@@ -121,12 +116,13 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
 /* ------------------------------------------------------ Groupe repliable */
 interface GroupProps {
   title: string;
+  /** Fermé par défaut partout : c'est la règle du projet. */
   defaultOpen?: boolean;
   children: ReactNode;
   badge?: string;
 }
 
-export function Group({ title, defaultOpen = true, badge, children }: GroupProps) {
+export function Group({ title, defaultOpen = false, badge, children }: GroupProps) {
   const [open, setOpen] = useState(defaultOpen);
   const id = useId();
 
@@ -152,10 +148,7 @@ export function Group({ title, defaultOpen = true, badge, children }: GroupProps
   );
 }
 
-/* ------------------------------------------------- Contrôles avancés §11
-   Chaque réglage porte une explication. Ceux qui n'ont pas d'effet sur le
-   matériau courant sont DÉSACTIVÉS avec la raison — la réactivité est
-   déclarée dans les DONNÉES du matériau, pas devinée dans le composant. */
+/* ------------------------------------------------- Contrôles avancés §11 */
 export function AdvancedControls() {
   const { state, set, patch } = useStudio();
   const material = MATERIAL_MAP[state.material];
@@ -215,7 +208,6 @@ export function AdvancedControls() {
   );
 }
 
-/** Ce que chaque réglage fait, en une phrase. */
 const HINTS: Record<ControlKey, string> = {
   blur: "Flou appliqué à l'arrière-plan vu à travers la surface. À 0, la surface devient nette.",
   speed: "Multiplie la durée de toutes les animations. En dessous de 1, les transitions sont ralenties.",
