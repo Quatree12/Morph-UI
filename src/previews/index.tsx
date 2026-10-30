@@ -8,6 +8,10 @@
    Écrire `className="... m ..."` en dur ne suffit pas : la classe .m seule
    n'applique aucun matériau, et l'élément reste gris.
 
+   RÈGLE DE FORME : `shape--${state.shape}` ne s'applique qu'à l'OBJET
+   PRINCIPAL du pattern, jamais à un conteneur englobant — sinon un disque
+   apparaît autour du composant quand Shape = Circle.
+
    Les 4 patterns récents (sheet-drag, parallax-layers, swipe-stack,
    ripple-surface) vivent dans leurs propres modules, importés ci-dessous.
    ========================================================================== */
@@ -52,6 +56,17 @@ function LiquidGlass({ bounce }: PatternProps) {
   const [pressed, setPressed] = useState(false);
   const [tilt, setTilt] = useState(0);
 
+  /* Sur iOS, pointermove ne se déclenche pas au premier contact : on amorce
+     le suivi de position dès onPointerDown, sinon le composant paraît inerte. */
+  const track = useCallback(
+    (clientX: number, el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      const rel = (clientX - r.left) / r.width - 0.5;
+      setTilt(-rel * 10 * (1 + bounce));
+    },
+    [bounce]
+  );
+
   return (
     <button
       type="button"
@@ -62,17 +77,16 @@ function LiquidGlass({ bounce }: PatternProps) {
           transform: `scale(var(--size)) rotateX(${tilt}deg)`,
         } as CSSProperties
       }
-      onPointerDown={() => setPressed(true)}
+      onPointerDown={(e) => {
+        setPressed(true);
+        track(e.clientX, e.currentTarget);
+      }}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => {
         setPressed(false);
         setTilt(0);
       }}
-      onPointerMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        const rel = (e.clientX - r.left) / r.width - 0.5;
-        setTilt(-rel * 10 * (1 + bounce));
-      }}
+      onPointerMove={(e) => track(e.clientX, e.currentTarget)}
       aria-pressed={pressed}
     >
       <span className="stack" aria-hidden="true">
@@ -82,7 +96,7 @@ function LiquidGlass({ bounce }: PatternProps) {
       </span>
       <span className="subject__label">Liquid Glass</span>
       <span className="subject__sub">
-        {pressed ? "Pression détectée" : "Toucher ou bouger le pointeur"}
+        {pressed ? "Pression détectée" : "Toucher ou glisser le doigt"}
       </span>
     </button>
   );
@@ -141,7 +155,8 @@ function ExpandableButton() {
             <button
               key={a}
               type="button"
-              className="btn btn--sm"
+              className={`btn btn--sm m m--${state.material}`}
+              style={{ minHeight: 40, justifyContent: "center" }}
               onClick={() => {
                 setChosen(a);
                 setOpen(false);
@@ -312,8 +327,6 @@ function RadialMenu({ bounce }: PatternProps) {
           <button
             key={a}
             type="button"
-            /* Correction : les items portent le matériau et une forme
-               circulaire, au lieu d'une classe .m sans matière. */
             className={`radial__item m m--${state.material} shape--circle`}
             style={style}
             tabIndex={open ? 0 : -1}
@@ -372,16 +385,20 @@ function Lens() {
   const { state } = useStudio();
   const [pos, setPos] = useState({ x: 50, y: 50 });
 
+  /* Le suivi démarre au toucher : pointermove seul ne suffit pas sur iOS. */
+  const move = useCallback((clientX: number, clientY: number, el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    setPos({
+      x: ((clientX - r.left) / r.width) * 100,
+      y: ((clientY - r.top) / r.height) * 100,
+    });
+  }, []);
+
   return (
     <div
       className={`lens m m--${state.material} shape--${state.shape}`}
-      onPointerMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        setPos({
-          x: ((e.clientX - r.left) / r.width) * 100,
-          y: ((e.clientY - r.top) / r.height) * 100,
-        });
-      }}
+      onPointerDown={(e) => move(e.clientX, e.clientY, e.currentTarget)}
+      onPointerMove={(e) => move(e.clientX, e.clientY, e.currentTarget)}
       onPointerLeave={() => setPos({ x: 50, y: 50 })}
     >
       <span aria-hidden="true">MORPH/UI · DÉTAIL · 0123 · ALPHA</span>
