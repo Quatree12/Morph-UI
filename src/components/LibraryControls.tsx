@@ -1,7 +1,7 @@
 import { Group, Segmented, Slider } from "./Controls";
 import { useStudio } from "../state/context";
 import { PATTERNS, PATTERN_MAP } from "../data/patterns";
-import { MATERIALS } from "../data/materials";
+import { MATERIALS, MATERIAL_MAP } from "../data/materials";
 import { SHAPES } from "../data/shapes";
 import { COLORS } from "../data/colors";
 import type { MaterialId, PatternId, ShapeId } from "../state/types";
@@ -10,7 +10,7 @@ import type { MaterialId, PatternId, ShapeId } from "../state/types";
 export function PatternPicker() {
   const { state, set } = useStudio();
   return (
-    <Group title="Interaction Pattern" badge="12" defaultOpen>
+    <Group title="Interaction Pattern" badge={String(PATTERNS.length)} defaultOpen>
       <div style={{ display: "grid", gap: 6 }}>
         {PATTERNS.map((p) => {
           const active = p.id === state.pattern;
@@ -48,7 +48,7 @@ export function PatternPicker() {
 export function MaterialPicker() {
   const { state, set } = useStudio();
   return (
-    <Group title="Material" badge="9" defaultOpen>
+    <Group title="Material" badge={String(MATERIALS.length)} defaultOpen>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
         {MATERIALS.map((m) => {
           const active = m.id === state.material;
@@ -69,7 +69,6 @@ export function MaterialPicker() {
                 color: active ? "var(--text)" : "var(--text-dim)",
               }}
             >
-              {/* Pastille d'aperçu : applique RÉELLEMENT la classe du matériau. */}
               <span
                 className={`m m--${m.id}`}
                 aria-hidden="true"
@@ -81,18 +80,17 @@ export function MaterialPicker() {
         })}
       </div>
       <p className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-faint)" }}>
-        {MATERIAL_LOOKUP[state.material].tagline}
+        {MATERIAL_MAP[state.material].tagline}
       </p>
     </Group>
   );
 }
-import { MATERIAL_MAP as MATERIAL_LOOKUP } from "../data/materials";
 
 /* ------------------------------------------------- Shape (§9) */
 export function ShapePicker() {
   const { state, set } = useStudio();
   return (
-    <Group title="Shape" badge="5">
+    <Group title="Shape" badge={String(SHAPES.length)}>
       <Segmented
         label="Formes"
         value={state.shape}
@@ -124,7 +122,7 @@ export function ShapePicker() {
 export function ColorPicker() {
   const { state, patch } = useStudio();
   return (
-    <Group title="Color" badge="12">
+    <Group title="Color" badge={String(COLORS.length)}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
         {COLORS.map((c) => {
           const active = state.colorPreset === c.id;
@@ -195,7 +193,7 @@ export function PatternInfo() {
 
         <div>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Cas d'usage</div>
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: "0.8125rem", color: "var(--text-dim)", display: "grid", gap: 4 }}>
+          <ul style={ul}>
             {p.useCases.map((u) => (
               <li key={u}>{u}</li>
             ))}
@@ -204,17 +202,17 @@ export function PatternInfo() {
 
         <div style={{ display: "grid", gap: 8 }}>
           <div className="eyebrow">Compatibilité</div>
-          <p style={{ fontSize: "0.8125rem", color: "var(--text-dim)" }}>
+          <p style={sm}>
             <strong style={{ color: "var(--text)" }}>Mobile ·</strong> {p.mobile}
           </p>
-          <p style={{ fontSize: "0.8125rem", color: "var(--text-dim)" }}>
+          <p style={sm}>
             <strong style={{ color: "var(--text)" }}>Desktop ·</strong> {p.desktop}
           </p>
         </div>
 
         <div>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Avantages</div>
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: "0.8125rem", color: "var(--text-dim)", display: "grid", gap: 4 }}>
+          <ul style={ul}>
             {p.pros.map((x) => (
               <li key={x}>{x}</li>
             ))}
@@ -223,7 +221,7 @@ export function PatternInfo() {
 
         <div>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Limites</div>
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: "0.8125rem", color: "var(--text-dim)", display: "grid", gap: 4 }}>
+          <ul style={ul}>
             {p.cons.map((x) => (
               <li key={x}>{x}</li>
             ))}
@@ -232,7 +230,7 @@ export function PatternInfo() {
 
         <div>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Accessibilité</div>
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: "0.8125rem", color: "var(--text-dim)", display: "grid", gap: 4 }}>
+          <ul style={ul}>
             {p.a11y.map((x) => (
               <li key={x}>{x}</li>
             ))}
@@ -242,3 +240,14 @@ export function PatternInfo() {
     </div>
   );
 }
+
+const ul = {
+  margin: 0,
+  paddingLeft: 18,
+  fontSize: "0.8125rem",
+  color: "var(--text-dim)",
+  display: "grid",
+  gap: 4,
+} as const;
+
+const sm = { fontSize: "0.8125rem", color: "var(--text-dim)" } as const;
