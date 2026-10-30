@@ -6,12 +6,24 @@
 
 export type ExportFormat = "css" | "tailwind" | "react" | "framer";
 
-const FILES: Record<ExportFormat, { ext: string; mime: string }> = {
-  css: { ext: "css", mime: "text/css" },
-  tailwind: { ext: "jsx", mime: "text/javascript" },
-  react: { ext: "tsx", mime: "text/typescript" },
-  framer: { ext: "tsx", mime: "text/typescript" },
+interface FileSpec {
+  ext: string;
+  mime: string;
+  /** Décrit le fichier dans l'interface : « un fichier .css », etc. */
+  label: string;
+}
+
+const FILES: Record<ExportFormat, FileSpec> = {
+  css: { ext: "css", mime: "text/css", label: "un fichier .css" },
+  tailwind: { ext: "jsx", mime: "text/javascript", label: "un fichier .jsx" },
+  react: { ext: "tsx", mime: "text/typescript", label: "un fichier .tsx" },
+  framer: { ext: "tsx", mime: "text/typescript", label: "un fichier .tsx" },
 };
+
+/** Ce que produit chaque format, pour l'affichage. */
+export function fileLabel(format: ExportFormat): string {
+  return FILES[format].label;
+}
 
 /** Nom de fichier lisible : morphui-<format>-<pattern>.<ext> */
 export function exportFileName(format: ExportFormat, patternId: string): string {
@@ -20,17 +32,27 @@ export function exportFileName(format: ExportFormat, patternId: string): string 
   return `morphui-${format}-${slug}.${f.ext}`;
 }
 
-/** Déclenche le téléchargement du code. */
-export function downloadCode(format: ExportFormat, patternId: string, code: string): void {
+/** Déclenche le téléchargement du code généré. */
+export function downloadCode(
+  format: ExportFormat,
+  patternId: string,
+  code: string
+): string {
   const f = FILES[format];
+  const name = exportFileName(format, patternId);
   const blob = new Blob([code], { type: `${f.mime};charset=utf-8` });
   const url = URL.createObjectURL(blob);
+
   const a = document.createElement("a");
   a.href = url;
-  a.download = exportFileName(format, patternId);
+  a.download = name;
+  a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  // Safari a besoin d'un délai avant de libérer l'URL.
+
+  // Safari a besoin d'un délai avant que l'URL puisse être libérée.
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  return name;
 }
