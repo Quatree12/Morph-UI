@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useCallback, useId, useState } from "react";
 import { ADVANCED_CONTROLS } from "../state/defaults";
 import { ANCHORS } from "../state/anchor";
+import { MATERIAL_MAP } from "../data/materials";
 import type { AnchorId, ControlKey } from "../state/types";
 import { useStudio } from "../state/context";
 
@@ -13,7 +14,6 @@ interface SliderProps {
   max: number;
   step: number;
   unit?: string;
-  /** Une phrase qui dit ce que le réglage fait réellement. */
   hint?: string;
   disabled?: boolean;
   disabledReason?: string;
@@ -154,19 +154,29 @@ export function Group({ title, defaultOpen = true, badge, children }: GroupProps
 
 /* ------------------------------------------------- Contrôles avancés §11
    Chaque réglage porte une explication. Ceux qui n'ont pas d'effet sur le
-   matériau ou le pattern courant sont DÉSACTIVÉS avec la raison — jamais
-   affichés comme un faux contrôle fonctionnel. */
+   matériau courant sont DÉSACTIVÉS avec la raison — la réactivité est
+   déclarée dans les DONNÉES du matériau, pas devinée dans le composant. */
 export function AdvancedControls() {
   const { state, set, patch } = useStudio();
-
-  // Les matériaux qui réagissent au flou et à la transparence.
-  const translucentMaterials = ["frosted-glass", "clear-glass", "translucent-gel", "neon-glow"];
-  const isTranslucent = translucentMaterials.includes(state.material);
-
-  // Le matériau qui réagit vraiment au halo.
-  const glowReactive = state.material !== "soft-matte" && state.material !== "solid-surface";
+  const material = MATERIAL_MAP[state.material];
 
   const anchorDisabled = state.pattern !== "sheet-drag";
+
+  const disabledReasonFor = useCallback(
+    (key: ControlKey): string | undefined => {
+      if (key === "blur" && !material.blurReactive) {
+        return `${material.name} ne produit pas de flou d'arrière-plan : Blur n'a pas d'effet ici.`;
+      }
+      if (key === "transparency" && !material.alphaReactive) {
+        return `${material.name} est opaque par nature : Transparency n'a pas d'effet ici.`;
+      }
+      if (key === "glow" && !material.glowReactive) {
+        return `${material.name} ne produit pas de halo : Glow n'a pas d'effet ici.`;
+      }
+      return undefined;
+    },
+    [material]
+  );
 
   return (
     <>
@@ -184,22 +194,7 @@ export function AdvancedControls() {
       )}
 
       {ADVANCED_CONTROLS.map((c) => {
-        const disabled =
-          ((c.key === "blur" || c.key === "transparency") && !isTranslucent) ||
-          (c.key === "glow" && !glowReactive) ||
-          (c.key === "radius" && (state.shape === "pill" || state.shape === "sharp"));
-
-        let reason: string | undefined;
-        if (c.key === "blur" || c.key === "transparency") {
-          reason = "Ce réglage n'agit que sur les matériaux translucides (Frosted Glass, Clear Glass, Translucent Gel, Neon Glow).";
-        } else if (c.key === "glow") {
-          reason = "Ce matériau ne produit pas de halo : Glow n'a pas d'effet ici.";
-        } else if (c.key === "radius") {
-          reason = state.shape === "pill"
-            ? "Pill force un rayon maximal."
-            : "Sharp force un rayon nul.";
-        }
-
+        const reason = disabledReasonFor(c.key);
         return (
           <Slider
             key={c.key}
@@ -210,7 +205,7 @@ export function AdvancedControls() {
             step={c.step}
             unit={c.unit}
             hint={HINTS[c.key]}
-            disabled={disabled}
+            disabled={reason !== undefined}
             disabledReason={reason}
             onChange={(v) => set(c.key, v)}
           />
