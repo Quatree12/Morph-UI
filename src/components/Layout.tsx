@@ -37,7 +37,8 @@ function Sidebar({ section, onNavigate }: Omit<Props, "children">) {
           className="mono"
           style={{ fontSize: "1.0625rem", fontWeight: 700, letterSpacing: "-0.02em" }}
         >
-          MORPH<span style={{ color: "var(--accent)" }}>/</span>UI
+          {/* Le slash porte la marque : il ne suit pas le Studio. */}
+          MORPH<span style={{ color: "var(--brand-light)" }}>/</span>UI
         </div>
         <div className="eyebrow" style={{ marginTop: 4 }}>
           Experimental Design Atlas
@@ -62,8 +63,12 @@ function Sidebar({ section, onNavigate }: Omit<Props, "children">) {
                   padding: "0 var(--s-3)",
                   borderRadius: "var(--r-sm)",
                   border: "1px solid transparent",
-                  background: active ? "color-mix(in srgb, var(--accent) 16%, transparent)" : "transparent",
-                  borderColor: active ? "color-mix(in srgb, var(--accent) 34%, transparent)" : "transparent",
+                  background: active
+                    ? "color-mix(in srgb, var(--brand) 22%, transparent)"
+                    : "transparent",
+                  borderColor: active
+                    ? "color-mix(in srgb, var(--brand) 48%, transparent)"
+                    : "transparent",
                   color: active ? "var(--text)" : "var(--text-dim)",
                   fontSize: "0.875rem",
                   textAlign: "left",
