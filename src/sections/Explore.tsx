@@ -9,18 +9,13 @@ interface Props {
   onNavigate: (id: SectionId) => void;
 }
 
-/** Motif statique : une silhouette par catégorie. Le visuel animé vit dans
- *  le Studio — Explore sert à choisir, pas à contempler. */
-function Motif({ category }: { category: string }) {
-  const slug = category
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z]/g, "");
+/** Motif statique : une silhouette PAR PATTERN (et non par catégorie), pour
+ *  que deux patterns voisins ne partagent jamais le même dessin. */
+function Motif({ id }: { id: PatternId }) {
   return (
     <div className="thumb" aria-hidden="true">
-      <div className={`motif motif--${slug}`} />
-      <span className="thumb__label">{category}</span>
+      <div className={`motif motif--${id}`} />
+      <span className="thumb__label">{id.replace(/-/g, " ")}</span>
     </div>
   );
 }
@@ -33,9 +28,14 @@ export function Explore({ onNavigate }: Props) {
   const [ctx, setCtx] = useState<string>("all");
   const [sort, setSort] = useState<"alpha" | "category">("alpha");
   const [onlyFav, setOnlyFav] = useState(false);
+  /** Un seul motif déplié à la fois : la page reste courte. */
+  const [preview, setPreview] = useState<PatternId | null>(null);
 
   const contexts = useMemo(
-    () => Array.from(new Set(PATTERNS.flatMap((p) => p.contexts))).sort((a, b) => a.localeCompare(b, "fr")),
+    () =>
+      Array.from(new Set(PATTERNS.flatMap((p) => p.contexts))).sort((a, b) =>
+        a.localeCompare(b, "fr")
+      ),
     []
   );
 
@@ -53,7 +53,9 @@ export function Explore({ onNavigate }: Props) {
       return true;
     });
     return [...out].sort((a, b) =>
-      sort === "alpha" ? a.name.localeCompare(b.name, "fr") : a.category.localeCompare(b.category, "fr")
+      sort === "alpha"
+        ? a.name.localeCompare(b.name, "fr")
+        : a.category.localeCompare(b.category, "fr")
     );
   }, [q, cat, cpx, ctx, sort, onlyFav, favorites]);
 
@@ -63,6 +65,7 @@ export function Explore({ onNavigate }: Props) {
     setCpx("all");
     setCtx("all");
     setOnlyFav(false);
+    setPreview(null);
   };
 
   return (
@@ -71,11 +74,12 @@ export function Explore({ onNavigate }: Props) {
         <div className="eyebrow">Explore / Pattern Library</div>
         <h1>Pattern Library</h1>
         <p className="muted" style={{ maxWidth: "62ch" }}>
-          {PATTERNS.length} familles d'interaction. Chaque fiche mène au Studio, où le pattern
-          s'anime réellement dans la maquette — ici, on choisit.
+          {PATTERNS.length} familles d'interaction. Touchez « Visualiser » pour voir la
+          silhouette d'un pattern — le rendu vivant l'attend dans le Studio.
         </p>
       </header>
 
+      {/* ---------------------------------------------------- Filtres */}
       <div className="panel">
         <div className="panel__body" style={{ gap: "var(--s-3)" }}>
           <div style={{ display: "flex", gap: "var(--s-2)", flexWrap: "wrap" }}>
@@ -131,7 +135,11 @@ export function Explore({ onNavigate }: Props) {
               className="btn btn--sm"
               aria-pressed={onlyFav}
               onClick={() => setOnlyFav((v) => !v)}
-              style={onlyFav ? { borderColor: "var(--accent)", background: "color-mix(in srgb, var(--accent) 18%, transparent)" } : undefined}
+              style={
+                onlyFav
+                  ? { borderColor: "var(--accent)", background: "color-mix(in srgb, var(--accent) 18%, transparent)" }
+                  : undefined
+              }
             >
               ★ Favorites ({favorites.length})
             </button>
@@ -143,6 +151,7 @@ export function Explore({ onNavigate }: Props) {
         </div>
       </div>
 
+      {/* --------------------------------------------------- Liste compacte */}
       {list.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "var(--s-7)" }}>
           <p className="muted">Aucun pattern ne correspond à ces filtres.</p>
@@ -151,72 +160,93 @@ export function Explore({ onNavigate }: Props) {
           </button>
         </div>
       ) : (
-        <div className="grid-cards">
-          {list.map((p) => (
-            <article key={p.id} className="card" style={{ display: "grid", gap: "var(--s-3)", alignContent: "start" }}>
-              <Motif category={p.category} />
-
-              <div>
-                <h3>{p.name}</h3>
-                <div className="eyebrow" style={{ marginTop: 4 }}>
-                  {p.category} · {p.complexity}
+        <div style={{ display: "grid", gap: "var(--s-2)" }}>
+          {list.map((p) => {
+            const open = preview === p.id;
+            const fav = isFavorite(p.id);
+            return (
+              <article key={p.id} className="card" style={{ padding: "var(--s-3)", display: "grid", gap: "var(--s-2)" }}>
+                {/* Ligne de titre : nom + bouton Visualiser */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--s-2)" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3 style={{ fontSize: "1rem" }}>{p.name}</h3>
+                    <div className="eyebrow" style={{ marginTop: 2 }}>
+                      {p.category} · {p.complexity}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn--sm"
+                    aria-expanded={open}
+                    aria-controls={`motif-${p.id}`}
+                    onClick={() => setPreview(open ? null : p.id)}
+                    style={open ? { borderColor: "var(--accent)", color: "var(--accent)" } : undefined}
+                  >
+                    {open ? "Fermer" : "Visualiser"}
+                  </button>
                 </div>
-              </div>
 
-              <p className="muted" style={{ fontSize: "0.8125rem" }}>{p.description}</p>
+                <p className="muted" style={{ fontSize: "0.8125rem" }}>{p.description}</p>
 
-              <details>
-                <summary className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-dim)", cursor: "pointer" }}>
-                  Détails, cas d'usage, accessibilité
-                </summary>
-                <div style={{ display: "grid", gap: "var(--s-3)", marginTop: "var(--s-3)" }}>
-                  <div>
-                    <div className="eyebrow">Cas d'usage</div>
-                    <ul style={ulStyle}>{p.useCases.map((u) => <li key={u}>{u}</li>)}</ul>
-                  </div>
-                  <div>
-                    <div className="eyebrow">Mobile / Desktop</div>
-                    <p style={smallStyle}>{p.mobile}</p>
-                    <p style={smallStyle}>{p.desktop}</p>
-                  </div>
-                  <div>
-                    <div className="eyebrow">Avantages</div>
-                    <ul style={ulStyle}>{p.pros.map((u) => <li key={u}>{u}</li>)}</ul>
-                  </div>
-                  <div>
-                    <div className="eyebrow">Limites</div>
-                    <ul style={ulStyle}>{p.cons.map((u) => <li key={u}>{u}</li>)}</ul>
-                  </div>
-                  <div>
-                    <div className="eyebrow">Accessibilité</div>
-                    <ul style={ulStyle}>{p.a11y.map((u) => <li key={u}>{u}</li>)}</ul>
+                {/* Vignette, dépliée à la demande */}
+                <div id={`motif-${p.id}`} className="expand__extra" style={open ? undefined : { gridTemplateRows: "0fr", opacity: 0 }}>
+                  <div style={{ display: "grid", gap: "var(--s-3)" }}>
+                    <Motif id={p.id} />
+                    <details>
+                      <summary className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-dim)", cursor: "pointer" }}>
+                        Cas d'usage, accessibilité, limites
+                      </summary>
+                      <div style={{ display: "grid", gap: "var(--s-3)", marginTop: "var(--s-3)" }}>
+                        <div>
+                          <div className="eyebrow">Cas d'usage</div>
+                          <ul style={ulStyle}>{p.useCases.map((u) => <li key={u}>{u}</li>)}</ul>
+                        </div>
+                        <div>
+                          <div className="eyebrow">Mobile / Desktop</div>
+                          <p style={smallStyle}>{p.mobile}</p>
+                          <p style={smallStyle}>{p.desktop}</p>
+                        </div>
+                        <div>
+                          <div className="eyebrow">Avantages</div>
+                          <ul style={ulStyle}>{p.pros.map((u) => <li key={u}>{u}</li>)}</ul>
+                        </div>
+                        <div>
+                          <div className="eyebrow">Limites</div>
+                          <ul style={ulStyle}>{p.cons.map((u) => <li key={u}>{u}</li>)}</ul>
+                        </div>
+                        <div>
+                          <div className="eyebrow">Accessibilité</div>
+                          <ul style={ulStyle}>{p.a11y.map((u) => <li key={u}>{u}</li>)}</ul>
+                        </div>
+                      </div>
+                    </details>
                   </div>
                 </div>
-              </details>
 
-              <div style={{ display: "flex", gap: "var(--s-2)", flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  className="btn btn--sm btn--primary"
-                  onClick={() => {
-                    set("pattern", p.id as PatternId);
-                    onNavigate("playground");
-                  }}
-                >
-                  Try in Playground
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--sm btn--ghost"
-                  aria-pressed={isFavorite(p.id)}
-                  onClick={() => toggleFavorite(p.id)}
-                  style={isFavorite(p.id) ? { borderColor: "var(--accent)", color: "var(--accent)" } : undefined}
-                >
-                  {isFavorite(p.id) ? "★ Retirer" : "☆ Favori"}
-                </button>
-              </div>
-            </article>
-          ))}
+                <div style={{ display: "flex", gap: "var(--s-2)", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    className="btn btn--sm btn--primary"
+                    onClick={() => {
+                      set("pattern", p.id);
+                      onNavigate("playground");
+                    }}
+                  >
+                    Try in Playground
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--sm btn--ghost"
+                    aria-pressed={fav}
+                    onClick={() => toggleFavorite(p.id)}
+                    style={fav ? { borderColor: "var(--accent)", color: "var(--accent)" } : undefined}
+                  >
+                    {fav ? "★ Retirer" : "☆ Favori"}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </section>
