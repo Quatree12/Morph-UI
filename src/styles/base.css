@@ -2,9 +2,9 @@
    MORPH/UI — Base
 
    AMBIANCE GRAPHITE : le body est un aplat neutre, sans halo teinté.
-   La profondeur vient des surfaces, des bordures et des ombres.
-   Les halos subsistent uniquement DANS la maquette (.phone__bg), en blanc,
-   pour donner de la matière aux matériaux translucides.
+
+   RÈGLE DE MARQUE : les éléments d'interface utilisent --brand, jamais
+   --accent. L'accent est réservé à la maquette et au sélecteur de couleur.
    ========================================================================== */
 
 *,
@@ -43,7 +43,8 @@ h3 { font-size: 1.0625rem; }
 
 p { margin: 0; }
 
-a { color: var(--accent); text-decoration: none; }
+/* Les liens suivent la marque : c'est de l'interface, pas de la maquette. */
+a { color: var(--brand-light); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 button,
@@ -55,13 +56,13 @@ button { cursor: pointer; }
 
 /* Focus visible : clavier uniquement, contraste franc. */
 :focus-visible {
-  outline: 2px solid var(--lime);
+  outline: 2px solid var(--brand-light);
   outline-offset: 2px;
   border-radius: var(--r-xs);
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 32%, transparent);
+  background: color-mix(in srgb, var(--brand) 45%, transparent);
   color: var(--text);
 }
 
@@ -125,19 +126,31 @@ button { cursor: pointer; }
 .btn:hover { border-color: var(--border-soft); background: #323236; }
 .btn:active { transform: scale(0.97); }
 
+/* Bouton de marque : bleu canard, texte blanc. Ne suit PAS le Studio. */
 .btn--primary {
-  background: linear-gradient(180deg, #d3bfff, var(--accent));
+  background: linear-gradient(180deg, var(--brand-light), var(--brand));
   border-color: transparent;
-  color: #16131f;
+  color: var(--brand-ink);
   font-weight: 600;
 }
-.btn--primary:hover { background: linear-gradient(180deg, #ded0ff, #b79aff); }
+.btn--primary:hover {
+  background: linear-gradient(180deg, #37aec2, var(--brand-light));
+}
 
+/* Variante lime retirée : la marque n'a qu'une couleur. On la garde pour
+   les actions secondaires mises en avant. */
 .btn--lime {
   background: linear-gradient(180deg, #e2ff9c, var(--lime));
   border-color: transparent;
   color: #14180a;
   font-weight: 600;
+}
+
+/* État actif neutre, pour les filtres et les bascules. */
+.btn--on {
+  border-color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 22%, transparent);
+  color: var(--text);
 }
 
 .btn--ghost { background: transparent; }
