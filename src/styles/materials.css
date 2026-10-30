@@ -1,9 +1,12 @@
 /* ==========================================================================
    MORPH/UI — Couche matériaux
-   RÈGLE CRITIQUE (§8) : changer de Material doit modifier visiblement la
-   surface de L'OBJET PRINCIPAL. Chaque classe ci-dessous est donc écrite pour
-   une surface de taille réelle, et consomme les variables posées par le
-   StudioProvider : --accent, --blur, --alpha, --glow, --shadow.
+   Chaque classe consomme les variables posées par le StudioProvider :
+   --accent, --blur, --alpha, --glow, --shadow.
+
+   CONTRASTE DES TEXTURES : une texture calibrée pour une pastille de 34 px
+   devient invisible sur un panneau de 380 px. Les rayures et les gradients
+   sont donc volontairement marqués (écarts de 30 à 90 % de luminance), sinon
+   les neuf matériaux se confondent sur les grandes surfaces.
    ========================================================================== */
 
 /* Surface de base commune : toutes les matières s'appliquent par-dessus. */
@@ -36,12 +39,12 @@
 }
 
 /* Les matériaux à texture portent leur propre relief : le voile blanc
-   du reflet les laverait et rendrait les neuf surfaces indistinguables. */
+   du reflet les laverait et rendrait les surfaces indistinguables. */
 .m--liquid-chrome::after,
 .m--brushed-metal::after,
 .m--iridescent-crystal::after,
 .m--neon-glow::after {
-  opacity: 0.15;
+  opacity: 0.12;
 }
 
 /* ---------------------------------------------------------- 1. Frosted */
@@ -49,7 +52,7 @@
   background-color: color-mix(in srgb, var(--surface) calc(var(--alpha) * 62%), transparent);
   backdrop-filter: blur(var(--blur)) saturate(150%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   box-shadow:
     0 0 calc(var(--glow) * 26px) color-mix(in srgb, var(--accent) calc(var(--glow) * 42%), transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.24),
@@ -61,7 +64,7 @@
   background-color: color-mix(in srgb, var(--surface) calc(var(--alpha) * 26%), transparent);
   backdrop-filter: blur(calc(var(--blur) * 0.3)) saturate(180%) brightness(1.06);
   -webkit-backdrop-filter: blur(calc(var(--blur) * 0.3)) saturate(180%) brightness(1.06);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.34);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 0 calc(var(--glow) * 18px) color-mix(in srgb, var(--accent) calc(var(--glow) * 30%), transparent),
@@ -75,26 +78,28 @@
 }
 
 /* ----------------------------------------------------------- 3. Chrome */
+/* Bandes franches : clair / sombre alternés, contrastes de 90 %. */
 .m--liquid-chrome {
-  background-color: #7b7787;
+  background-color: #514d5c;
   background-image: linear-gradient(
     118deg,
-    #6d6a78 0%,
-    #e9e7ef 14%,
-    #8f8b9c 27%,
-    #ffffff 41%,
-    #7b7787 53%,
-    #d9d6e2 66%,
-    #58545f 80%,
-    color-mix(in srgb, var(--accent) 40%, #b9b5c4) 100%
+    #3a3742 0%,
+    #ffffff 12%,
+    #6d6a78 24%,
+    #ffffff 38%,
+    #55515f 50%,
+    #f2f0f7 64%,
+    #2e2b36 78%,
+    #ffffff 92%,
+    #4a4753 100%
   );
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border: 1px solid rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   color: #16141c;
   filter: saturate(calc(100% + var(--glow) * 40%));
   box-shadow:
-    inset 0 -2px 6px rgba(0, 0, 0, 0.32),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.42),
     inset 0 2px 4px rgba(255, 255, 255, 0.5),
     0 0 calc(var(--glow) * 22px) color-mix(in srgb, var(--accent) calc(var(--glow) * 45%), transparent),
     0 calc(var(--shadow) * 18px) calc(var(--shadow) * 36px) rgba(0, 0, 0, calc(var(--shadow) * 0.45));
@@ -102,7 +107,7 @@
 
 /* ------------------------------------------------------------ 4. Matte */
 .m--soft-matte {
-  background-color: color-mix(in srgb, var(--surface-2) 88%, var(--accent) 12%);
+  background-color: color-mix(in srgb, var(--surface-2) 82%, var(--accent) 18%);
   background-image: linear-gradient(
     180deg,
     color-mix(in srgb, var(--accent) calc(var(--glow) * 10%), transparent),
@@ -110,44 +115,45 @@
   );
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border));
   box-shadow:
     inset 1px 1px 0 rgba(255, 255, 255, 0.05),
     0 calc(var(--shadow) * 20px) calc(var(--shadow) * 34px) rgba(0, 0, 0, calc(var(--shadow) * 0.42));
 }
-.m--soft-matte::after { opacity: 0.12; }
+.m--soft-matte::after { opacity: 0.08; }
 
 /* ------------------------------------------------------------- 5. Neon */
 .m--neon-glow {
-  background-color: color-mix(in srgb, var(--accent) calc(var(--alpha) * 22%), #0c0a11);
+  background-color: color-mix(in srgb, var(--accent) calc(var(--alpha) * 42%), #0c0a11);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border: 1px solid color-mix(in srgb, var(--accent) 82%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 92%, transparent);
   color: var(--text);
   box-shadow:
-    0 0 calc(var(--glow) * 12px) color-mix(in srgb, var(--accent) calc(var(--glow) * 90%), transparent),
-    0 0 calc(var(--glow) * 40px) color-mix(in srgb, var(--accent) calc(var(--glow) * 55%), transparent),
-    inset 0 0 calc(var(--glow) * 22px) color-mix(in srgb, var(--accent) calc(var(--glow) * 45%), transparent),
+    0 0 calc(var(--glow) * 14px) color-mix(in srgb, var(--accent) calc(var(--glow) * 95%), transparent),
+    0 0 calc(var(--glow) * 48px) color-mix(in srgb, var(--accent) calc(var(--glow) * 65%), transparent),
+    inset 0 0 calc(var(--glow) * 26px) color-mix(in srgb, var(--accent) calc(var(--glow) * 55%), transparent),
     0 calc(var(--shadow) * 16px) calc(var(--shadow) * 30px) rgba(0, 0, 0, calc(var(--shadow) * 0.4));
 }
 
 /* ------------------------------------------------------ 6. Iridescent */
+/* Six teintes saturées : le dégradé reste lisible même sur grande surface. */
 .m--iridescent-crystal {
-  background-color: #a78bfa;
+  background-color: #c4b5fd;
   background-image: linear-gradient(
     135deg,
-    #a78bfa 0%,
-    #6fe3d2 22%,
-    #ff9ec4 44%,
-    #ffe066 62%,
-    #7aa2ff 82%,
-    #d6fa72 100%
+    #7c3aed 0%,
+    #22d3ee 20%,
+    #f472b6 42%,
+    #fbbf24 62%,
+    #3b82f6 82%,
+    #84cc16 100%
   );
-  background-size: 220% 220%;
+  background-size: 200% 200%;
   background-position: calc(var(--glow) * 80%) 50%;
-  backdrop-filter: blur(calc(var(--blur) * 0.16));
-  -webkit-backdrop-filter: blur(calc(var(--blur) * 0.16));
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(calc(var(--blur) * 0.12));
+  -webkit-backdrop-filter: blur(calc(var(--blur) * 0.12));
+  border: 1px solid rgba(255, 255, 255, 0.6);
   color: #14121a;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
@@ -158,68 +164,70 @@
 }
 
 /* ------------------------------------------------------------ 7. Metal */
+/* Rayures larges et contrastées (34 % blanc / 30 % noir). */
 .m--brushed-metal {
-  background-color: #4a4753;
+  background-color: #6a6672;
   background-image:
     repeating-linear-gradient(
       92deg,
-      rgba(255, 255, 255, 0.11) 0px,
-      rgba(255, 255, 255, 0.11) 1px,
-      rgba(0, 0, 0, 0.13) 2px,
-      rgba(0, 0, 0, 0.13) 3px
+      rgba(255, 255, 255, 0.34) 0px,
+      rgba(255, 255, 255, 0.34) 2px,
+      rgba(0, 0, 0, 0.30) 3px,
+      rgba(0, 0, 0, 0.30) 5px
     ),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--accent) 18%, #8e8a99) 0%,
-      #55515f 42%,
-      color-mix(in srgb, var(--accent) 10%, #3d3947) 100%
+      color-mix(in srgb, var(--accent) 40%, #d4d0dc) 0%,
+      #7d7987 45%,
+      color-mix(in srgb, var(--accent) 22%, #4a4753) 100%
     );
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: #14121a;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
     0 calc(var(--shadow) * 18px) calc(var(--shadow) * 32px) rgba(0, 0, 0, calc(var(--shadow) * 0.48));
 }
 
 /* --------------------------------------------------------------- 8. Gel */
 .m--translucent-gel {
   background-image:
-    radial-gradient(120% 80% at 30% 8%, rgba(255, 255, 255, 0.42), transparent 52%),
+    radial-gradient(120% 80% at 30% 8%, rgba(255, 255, 255, 0.5), transparent 52%),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--accent) calc(var(--alpha) * 62%), #241f33),
-      color-mix(in srgb, var(--accent) calc(var(--alpha) * 26%), #1a1622)
+      color-mix(in srgb, var(--accent) calc(var(--alpha) * 72%), #241f33),
+      color-mix(in srgb, var(--accent) calc(var(--alpha) * 34%), #1a1622)
     );
   backdrop-filter: blur(calc(var(--blur) * 0.4)) saturate(140%);
   -webkit-backdrop-filter: blur(calc(var(--blur) * 0.4)) saturate(140%);
-  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, transparent);
   box-shadow:
-    inset 0 4px 8px rgba(255, 255, 255, 0.28),
-    inset 0 -8px 14px color-mix(in srgb, var(--accent) 34%, transparent),
+    inset 0 4px 8px rgba(255, 255, 255, 0.32),
+    inset 0 -8px 14px color-mix(in srgb, var(--accent) 40%, transparent),
     0 calc(var(--shadow) * 22px) calc(var(--shadow) * 40px) rgba(0, 0, 0, calc(var(--shadow) * 0.4));
 }
 .m--translucent-gel::after {
-  background: radial-gradient(60% 34% at 34% 12%, rgba(255, 255, 255, 0.62), transparent 62%);
+  background: radial-gradient(60% 34% at 34% 12%, rgba(255, 255, 255, 0.68), transparent 62%);
   opacity: 0.9;
 }
 
 /* ------------------------------------------------------------ 9. Solid */
 .m--solid-surface {
-  background-color: color-mix(in srgb, var(--accent) 14%, var(--surface-2));
+  background-color: color-mix(in srgb, var(--accent) 42%, var(--surface-2));
   background-image: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--accent) 22%, transparent),
-    color-mix(in srgb, var(--accent) 6%, transparent)
+    color-mix(in srgb, var(--accent) 50%, transparent),
+    color-mix(in srgb, var(--accent) 22%, transparent)
   );
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border));
   box-shadow:
     0 calc(var(--shadow) * 18px) calc(var(--shadow) * 36px) rgba(0, 0, 0, calc(var(--shadow) * 0.46));
 }
-.m--solid-surface::after { opacity: 0.18; }
+.m--solid-surface::after { opacity: 0.14; }
 
 /* ------------------------------------------------- Repli sans backdrop */
 @supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
@@ -231,20 +239,13 @@
 }
 
 /* -------------------------------------------------- Petites surfaces */
-/* Sur une surface réduite (icône, barre), la texture a besoin d'un fond
-   opaque pour rester lisible. On ne touche PAS au background-image. */
-.demo-dock__item.m--brushed-metal,
-.demo-dock__item.m--liquid-chrome,
-.demo-dock__item.m--iridescent-crystal,
-.demo-dock__item.m--neon-glow,
-.kinetic__bar.m--brushed-metal,
-.kinetic__bar.m--liquid-chrome,
-.kinetic__bar.m--iridescent-crystal,
-.kinetic__bar.m--neon-glow,
-.radial__item.m--brushed-metal,
-.radial__item.m--liquid-chrome,
-.radial__item.m--iridescent-crystal,
-.radial__item.m--neon-glow {
+/* Sur une surface réduite (icône, barre), on impose seulement une dimension
+   minimale pour que la texture ait de la place. On ne touche PAS au fond. */
+.demo-dock__item.m,
+.kinetic__bar.m,
+.radial__item.m,
+.radial__center.m,
+.goo__blob.m {
   min-height: 18px;
   min-width: 18px;
 }
