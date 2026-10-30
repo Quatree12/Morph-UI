@@ -44,7 +44,7 @@ export function Settings() {
         </p>
       </header>
 
-      {/* ============================ DIAGNOSTIC MATÉRIAUX ============================ */}
+      {/* ====================== DIAGNOSTIC MATÉRIAUX ====================== */}
       <div className="panel">
         <div className="panel__head">
           <div className="eyebrow">Diagnostic · les 9 matériaux</div>
@@ -53,8 +53,7 @@ export function Settings() {
         <div className="panel__body">
           <p className="muted" style={{ fontSize: "0.875rem" }}>
             Neuf blocs de grande surface, chacun avec sa classe de matériau. Touchez un bloc
-            pour l'appliquer au Studio. Si deux blocs se ressemblent, leurs matériaux sont
-            identiques — c'est le test décisif.
+            pour l'appliquer au Studio.
           </p>
 
           <div style={{ display: "grid", gap: "var(--s-4)" }}>
@@ -79,9 +78,7 @@ export function Settings() {
                       height: 86,
                       width: "100%",
                       display: "block",
-                      border: active
-                        ? "2px solid var(--lime)"
-                        : undefined,
+                      border: active ? "2px solid var(--lime)" : undefined,
                       cursor: "pointer",
                     }}
                     title={`Appliquer ${m.name}`}
@@ -96,9 +93,58 @@ export function Settings() {
             })}
           </div>
 
+          {/* ================= REPRODUCTION : conteneur de pattern ================= */}
+          <div style={{ display: "grid", gap: "var(--s-3)", marginTop: "var(--s-4)" }}>
+            <div className="eyebrow">Reproduction · conteneur de pattern</div>
+            <p className="muted" style={{ fontSize: "0.8125rem" }}>
+              Ce bloc utilise exactement les mêmes classes que le pattern Parallax dans le
+              Studio. Comparez-le aux neuf blocs ci-dessus : s'il est texturé, le CSS est bon
+              et le problème est dans le fichier du pattern. S'il est gris, une règle neutralise
+              le matériau sur les conteneurs de pattern.
+            </p>
+
+            <div style={{ display: "grid", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: "0.8125rem" }}>Parallax — conteneur</span>
+                <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+                  .parallax m shape--rounded
+                </span>
+              </div>
+              <div className="parallax m shape--rounded" style={{ height: 86, position: "relative" }}>
+                <span className="parallax__layer" />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: "0.8125rem" }}>Sheet — conteneur</span>
+                <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+                  .sheet m shape--rounded
+                </span>
+              </div>
+              <div className="sheet m shape--rounded" style={{ height: 86 }}>
+                <div className="sheet__handle">
+                  <span className="sheet__grip" />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: "0.8125rem" }}>Témoin — <code>subject</code></span>
+                <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+                  .subject m
+                </span>
+              </div>
+              <div className="subject m shape--rounded" style={{ minHeight: 86, alignSelf: "stretch" }}>
+                <span className="subject__label">Témoin</span>
+              </div>
+            </div>
+          </div>
+
           <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
-            Variables en cours — accent {state.color} · blur {state.blur}px · alpha{" "}
-            {state.transparency} · glow {state.glow}
+            Variables — accent {state.color} · blur {state.blur}px · alpha {state.transparency} · glow{" "}
+            {state.glow} · matériau {state.material}
           </p>
         </div>
       </div>
