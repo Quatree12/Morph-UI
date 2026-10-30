@@ -11,7 +11,7 @@ export function PatternPicker() {
   const { state, set } = useStudio();
   return (
     <Group title="Interaction Pattern" badge={String(PATTERNS.length)} defaultOpen>
-      <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0 }}>
+      <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0, lineHeight: 1.5 }}>
         Choisit le comportement de la maquette : chaque pattern a sa propre composition,
         sa géométrie et son animation.
       </p>
@@ -53,7 +53,7 @@ export function MaterialPicker() {
   const { state, set } = useStudio();
   return (
     <Group title="Material" badge={String(MATERIALS.length)} defaultOpen>
-      <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0 }}>
+      <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0, lineHeight: 1.5 }}>
         Peint la surface de l'objet principal : transparence, reflets, texture et profondeur.
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
@@ -98,17 +98,52 @@ export function MaterialPicker() {
 /* ------------------------------------------------- Shape (§9) */
 export function ShapePicker() {
   const { state, set } = useStudio();
+  const active = SHAPES.find((s) => s.id === state.shape);
   return (
     <Group title="Shape" badge={String(SHAPES.length)}>
-      <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0 }}>
+      <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0, lineHeight: 1.5 }}>
         Géométrie de l'objet principal : angles, courbes et masque.
       </p>
-      <Segmented
-        label="Formes"
-        value={state.shape}
-        options={SHAPES.map((s) => ({ id: s.id as ShapeId, label: s.name }))}
-        onChange={(v) => set("shape", v)}
-      />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+        {SHAPES.map((s) => {
+          const on = s.id === state.shape;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => set("shape", s.id as ShapeId)}
+              aria-pressed={on}
+              title={s.note}
+              style={{
+                display: "grid",
+                gap: 4,
+                justifyItems: "center",
+                padding: 6,
+                borderRadius: "var(--r-sm)",
+                border: `1px solid ${on ? "color-mix(in srgb, var(--accent) 60%, transparent)" : "var(--border)"}`,
+                background: on ? "color-mix(in srgb, var(--accent) 12%, transparent)" : "transparent",
+                color: on ? "var(--text)" : "var(--text-dim)",
+              }}
+            >
+              <span
+                className={on ? `shape--${s.id} m m--${state.material}` : `shape--${s.id}`}
+                aria-hidden="true"
+                style={{
+                  width: 34,
+                  height: 34,
+                  display: "block",
+                  background: on ? undefined : "color-mix(in srgb, var(--accent) 26%, transparent)",
+                  border: on ? undefined : "1px solid var(--border)",
+                }}
+              />
+              <span style={{ fontSize: "0.625rem" }}>{s.name}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mono" style={{ fontSize: "0.6875rem", color: "var(--text-faint)", margin: 0 }}>
+        {active?.note}
+      </p>
       <Slider
         label="Border Radius"
         value={state.radius}
@@ -116,12 +151,12 @@ export function ShapePicker() {
         max={48}
         step={1}
         unit="px"
-        hint="Rayon des angles en pixels. Sans effet sur Pill et Sharp, qui l'imposent."
-        disabled={state.shape === "pill" || state.shape === "sharp"}
+        hint="Rayon des angles en pixels. Sur Blob il module l'asymétrie, sur Arch la courbure."
+        disabled={!active?.radiusDriven}
         disabledReason={
-          state.shape === "pill"
-            ? "Pill force un rayon maximal : le réglage est sans effet."
-            : "Sharp force un rayon nul : le réglage est sans effet."
+          active?.radiusDriven
+            ? undefined
+            : `${active?.name} impose sa géométrie : le réglage Border Radius est sans effet.`
         }
         onChange={(v) => set("radius", v)}
       />
@@ -134,7 +169,7 @@ export function ColorPicker() {
   const { state, patch } = useStudio();
   return (
     <Group title="Color" badge={String(COLORS.length)}>
-      <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0 }}>
+      <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0, lineHeight: 1.5 }}>
         Couleur d'accent : bordures, halos, indicateurs actifs et états interactifs.
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
