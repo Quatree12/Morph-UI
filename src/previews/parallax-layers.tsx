@@ -3,7 +3,7 @@ import type { PatternProps } from "./types";
 
 /** Trois plans qui glissent à des vitesses différentes.
  *  Seul l'élément .parallax porte le matériau : les couches intérieures
- *  sont transparentes, sinon elles recouvriraient la texture du conteneur. */
+ *  dessinent le décalage sans recouvrir la texture du conteneur. */
 export function ParallaxLayers({ bounce }: PatternProps) {
   const [offset, setOffset] = useState(0);
 
