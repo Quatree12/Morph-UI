@@ -7,8 +7,7 @@
      `m m--${state.material} shape--${state.shape}`
 
    RÈGLE D'OBJET : le matériau et la forme vont sur l'OBJET PRINCIPAL du
-   pattern, jamais sur le bouton qui l'enveloppe. Un conteneur qui porte .m
-   produit une surface colorée supplémentaire.
+   pattern, jamais sur le bouton qui l'enveloppe.
 
    RÈGLE DE CONSIGNE : chaque sous-titre décrit EXACTEMENT le geste disponible.
    ========================================================================== */
@@ -76,9 +75,6 @@ function LiquidGlass({ bounce }: PatternProps) {
       }}
       onPointerMove={(e) => track(e.clientX, e.currentTarget)}
     >
-      {/* Le cadre contraint la pile : sans lui, les couches en position
-          absolue prennent la largeur du panneau et le backdrop-filter du
-          matériau déborde — c'est ce qui produisait le rectangle blanc. */}
       <div className="glass-frame">
         {[2, 1, 0].map((i) => (
           <span
@@ -397,7 +393,13 @@ function Lens() {
       onPointerMove={(e) => move(e.clientX, e.clientY, e.currentTarget)}
       onPointerLeave={() => setPos({ x: 50, y: 50 })}
     >
-      <span aria-hidden="true">DÉTAIL · 0123</span>
+      {/* Un motif discret remplace le texte : la lentille agrandit une
+          surface, sans qu'aucune inscription ne traverse le cadre. */}
+      <span className="lens__target" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </span>
       <span className="lens__glass" style={{ left: `${pos.x}%`, top: `${pos.y}%` }} aria-hidden="true" />
     </div>
   );
