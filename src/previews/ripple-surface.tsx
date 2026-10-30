@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import type { CSSProperties } from "react";
 import type { PatternProps } from "./types";
+import { useStudio } from "../state/context";
 
 interface Ripple {
   id: number;
@@ -10,6 +11,7 @@ interface Ripple {
 
 /** Une onde concentrique part du point touché et se propage. */
 export function RippleSurface({ bounce }: PatternProps) {
+  const { state } = useStudio();
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const [count, setCount] = useState(0);
 
@@ -18,7 +20,11 @@ export function RippleSurface({ bounce }: PatternProps) {
     const id = Date.now() + Math.random();
     setRipples((prev) => [
       ...prev.slice(-2),
-      { id, x: ((clientX - rect.left) / rect.width) * 100, y: ((clientY - rect.top) / rect.height) * 100 },
+      {
+        id,
+        x: ((clientX - rect.left) / rect.width) * 100,
+        y: ((clientY - rect.top) / rect.height) * 100,
+      },
     ]);
     setCount((c) => c + 1);
     window.setTimeout(() => {
@@ -29,7 +35,7 @@ export function RippleSurface({ bounce }: PatternProps) {
   return (
     <button
       type="button"
-      className="subject m shape--rounded ripple"
+      className={`subject m m--${state.material} shape--${state.shape} ripple`}
       style={{ padding: "var(--s-5)", minWidth: 200, minHeight: 130 } as CSSProperties}
       onClick={(e) => addRipple(e.clientX, e.clientY, e.currentTarget)}
       aria-label="Ripple Surface : toucher pour déclencher une onde"
@@ -38,7 +44,9 @@ export function RippleSurface({ bounce }: PatternProps) {
         Ripple Surface
       </span>
       <span className="subject__sub" style={{ position: "relative", zIndex: 3 }}>
-        {count > 0 ? `${count} onde${count > 1 ? "s" : ""} déclenchée${count > 1 ? "s" : ""}` : "Toucher la surface"}
+        {count > 0
+          ? `${count} onde${count > 1 ? "s" : ""} déclenchée${count > 1 ? "s" : ""}`
+          : "Toucher la surface"}
       </span>
 
       {ripples.map((r) => (
