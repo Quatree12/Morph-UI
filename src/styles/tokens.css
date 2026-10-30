@@ -5,7 +5,8 @@
 
    DEUX COULEURS, DEUX RÔLES :
    - --brand : couleur d'identité de l'outil (logo, boutons de marque,
-     étoiles actives, indicateur du dock). FIXE, choisie une fois pour toutes.
+     étoiles actives, indicateur du dock, onglets actifs des exports).
+     FIXE, choisie une fois pour toutes.
    - --accent : couleur choisie par l'utilisateur dans le Studio. Elle ne
      peint QUE la maquette et la pastille sélectionnée du sélecteur.
 
@@ -26,11 +27,11 @@
   --text-dim: #a4a4a8;
   --text-faint: #707074;
 
-  /* --- Marque : couleur fixe de l'outil, indépendante du Studio --- */
-  --brand: #1f7a8c;
+  /* --- Marque : bleu canard foncé, indépendant du Studio --- */
+  --brand: #17606f;
   --brand-light: #2e9eb0;
-  --brand-deep: #155a6b;
-  --brand-ink: #ffffff; /* texte posé sur la marque */
+  --brand-deep: #0f4351;
+  --brand-ink: #ffffff;
 
   /* --- Accents : les 12 choix de l'utilisateur, utilisés par la maquette --- */
   --accent: #c1a8ff;
@@ -84,7 +85,6 @@
   --speed-mul: 1;
 }
 
-/* prefers-reduced-motion : on neutralise les durées, jamais la lisibilité. */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-fast: 1ms;
