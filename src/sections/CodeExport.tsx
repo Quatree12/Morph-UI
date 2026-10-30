@@ -1,16 +1,39 @@
 import { useState } from "react";
 import { useStudio } from "../state/context";
-import { exportCss, exportFramer, exportReact, exportLimitations } from "../lib/exporters";
+import {
+  exportCss,
+  exportFramer,
+  exportReact,
+  exportTailwind,
+  exportLimitations,
+} from "../lib/exporters";
 import { CopyButton } from "../components/ClipboardButton";
 import { PATTERN_MAP } from "../data/patterns";
 import { MATERIAL_MAP } from "../data/materials";
 
-type Format = "css" | "react" | "framer";
+type Format = "css" | "tailwind" | "react" | "framer";
 
 const FORMATS: Array<{ id: Format; label: string; hint: string }> = [
-  { id: "css", label: "CSS", hint: "Styles, matériau, ombres, transitions et états actifs." },
-  { id: "react", label: "React", hint: "Structure du composant, état et attributs d'accessibilité." },
-  { id: "framer", label: "Framer Motion", hint: "Structure React + animations et transitions physiques." },
+  {
+    id: "css",
+    label: "CSS",
+    hint: "Styles, matériau, ombres, transitions et états actifs.",
+  },
+  {
+    id: "tailwind",
+    label: "Tailwind",
+    hint: "Classes utilitaires en valeurs arbitraires, avec la correspondance des réglages.",
+  },
+  {
+    id: "react",
+    label: "React",
+    hint: "Structure du composant, état et attributs d'accessibilité.",
+  },
+  {
+    id: "framer",
+    label: "Framer Motion",
+    hint: "Structure React + animations et transitions physiques.",
+  },
 ];
 
 export function CodeExport() {
@@ -18,8 +41,15 @@ export function CodeExport() {
   const [format, setFormat] = useState<Format>("css");
 
   const code =
-    format === "css" ? exportCss(state) : format === "react" ? exportReact(state) : exportFramer(state);
-  const limitations = exportLimitations(state);
+    format === "css"
+      ? exportCss(state)
+      : format === "tailwind"
+        ? exportTailwind(state)
+        : format === "react"
+          ? exportReact(state)
+          : exportFramer(state);
+
+  const limitations = exportLimitations(state, format);
   const active = FORMATS.find((f) => f.id === format)!;
 
   return (
@@ -84,7 +114,16 @@ export function CodeExport() {
           <div className="eyebrow">Limitations assumées de cet export</div>
         </div>
         <div className="panel__body">
-          <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 8, color: "var(--text-dim)", fontSize: "0.8125rem" }}>
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: 18,
+              display: "grid",
+              gap: 8,
+              color: "var(--text-dim)",
+              fontSize: "0.8125rem",
+            }}
+          >
             {limitations.map((l) => (
               <li key={l}>{l}</li>
             ))}
