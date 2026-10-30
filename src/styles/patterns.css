@@ -1,514 +1,9 @@
-/* ==========================================================================
-   MORPH/UI — Formes + maquette + patterns
-
-   RÈGLE MATÉRIAU : les éléments qui portent la classe .m ne reçoivent AUCUN
-   background-color, background-image, border ni box-shadow depuis ce fichier.
-   Sinon patterns.css (chargé après materials.css) écrase le matériau à
-   spécificité égale, et le sélecteur Material n'a plus d'effet visible.
-
-   RÈGLE D'EMPILEMENT : dans un pattern à plusieurs étages, SEUL LE CONTENEUR
-   porte .m. Si plusieurs éléments empilés portent .m, celui du dessus peint
-   sa surface par-dessus les autres et la texture devient invisible.
-
-   RÈGLE DE CLASSE : tout élément peint par le sélecteur Material reçoit le
-   matériau INTERPOLÉ depuis l'état partagé :
-     `m m--${state.material} shape--${state.shape}`
-   Écrire `className="... m ..."` en dur laisse l'élément gris.
-
-   RÈGLE DE FORME : shape--* ne s'applique qu'à l'objet principal, jamais à un
-   conteneur englobant — sinon un disque apparaît autour du composant quand
-   Shape = Circle.
-   ========================================================================== */
-
-/* ------------------------------------------------------------ Formes §9
-   Les formes qui ne peuvent pas s'exprimer par border-radius utilisent un
-   clip-path ou un masque. Chaque forme est appliquée à l'objet principal. */
-.shape--pill     { border-radius: var(--r-pill); }
-.shape--rounded  { border-radius: calc(var(--radius) * 1px); }
-.shape--circle   { border-radius: 50%; }
-.shape--sharp    { border-radius: 0; }
-
-.shape--squircle {
-  border-radius: calc(var(--radius) * 1.4px);
-  -webkit-mask-image: radial-gradient(closest-side, #000 96%, rgba(0, 0, 0, 0.86) 100%);
-  mask-image: radial-gradient(closest-side, #000 96%, rgba(0, 0, 0, 0.86) 100%);
-}
-
-/* Blob : silhouette organique. Le rayon module l'asymétrie des coins. */
-.shape--blob {
-  border-radius:
-    calc(var(--radius) * 1.2px) calc(60px - var(--radius) * 0.6px)
-    calc(var(--radius) * 1.6px) calc(70px - var(--radius) * 0.8px) /
-    calc(70px - var(--radius) * 0.8px) calc(var(--radius) * 1.4px)
-    calc(60px - var(--radius) * 0.7px) calc(var(--radius) * 1.1px);
-}
-
-/* Diamond : losange franc. Le rayon n'a pas d'effet, la forme est absolue. */
-.shape--diamond {
-  -webkit-clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  border-radius: 0;
-}
-
-/* Arch : arrondi en haut, base droite. Le rayon pilote la courbure du haut. */
-.shape--arch {
-  border-radius: calc(var(--radius) * 2px) calc(var(--radius) * 2px) 0 0;
-}
-
-/* Notched : coin supérieur droit coupé. Le rayon garde les trois autres. */
-.shape--notched {
-  border-radius:
-    calc(var(--radius) * 1px)
-    0
-    calc(var(--radius) * 1px)
-    calc(var(--radius) * 1px);
-  -webkit-clip-path: polygon(
-    0 0,
-    calc(100% - 22px) 0,
-    100% 22px,
-    100% 100%,
-    0 100%
-  );
-  clip-path: polygon(
-    0 0,
-    calc(100% - 22px) 0,
-    100% 22px,
-    100% 100%,
-    0 100%
-  );
-}
-
-/* ---------------------------------------------------- Maquette téléphone */
-.phone {
-  position: relative;
-  width: min(100%, 380px);
-  margin-inline: auto;
-  aspect-ratio: 9 / 19.5;
-  border-radius: 44px;
-  padding: 10px;
-  background: linear-gradient(160deg, #2a2634, #15131c 45%, #221e2c);
-  border: 1px solid #3a3546;
-  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: max-width var(--dur) var(--ease-out);
-}
-
-.phone__screen {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  border-radius: 36px;
-  overflow: hidden;
-  background: #0b0a10;
-  display: flex;
-  flex-direction: column;
-}
-
-.phone__bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(70% 45% at 20% 12%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 70%),
-    radial-gradient(60% 40% at 88% 78%, rgba(111, 227, 210, 0.24), transparent 72%),
-    radial-gradient(50% 36% at 50% 108%, rgba(255, 158, 196, 0.2), transparent 70%),
-    linear-gradient(180deg, #131019, #0b0a10);
-}
-.phone__bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 34px 34px;
-}
-
-.phone__notch {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 86px;
-  height: 22px;
-  border-radius: var(--r-pill);
-  background: #07060a;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  z-index: 5;
-}
-
-.phone__status {
-  position: relative;
-  z-index: 4;
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 18px 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--text-dim);
-  pointer-events: none;
-}
-
-.phone__stage {
-  position: relative;
-  z-index: 3;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-3);
-  padding: var(--s-4);
-  overflow: hidden;
-}
-
-.phone__badges {
-  position: relative;
-  z-index: 6;
-  display: flex;
-  gap: var(--s-1);
-  padding: 0 var(--s-3) var(--s-3);
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-/* ------------------------------------------- Objet principal du pattern */
-.subject {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-2);
-  padding: var(--s-4) var(--s-5);
-  min-width: 150px;
-  transform: scale(var(--size));
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    border-radius calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-
-/* Les enfants de l'objet principal ne captent jamais le geste : sinon le
-   onPointerDown du bouton ne se déclenche pas sur iOS. */
-.subject > span {
-  pointer-events: none;
-}
-
-.subject__label {
-  position: relative;
-  z-index: 3;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.subject__sub {
-  position: relative;
-  z-index: 3;
-  font-size: 0.6875rem;
-  color: var(--text-dim);
-}
-
-/* -------------------------------------------------- Patterns partagés */
-.knob-row {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  position: relative;
-  z-index: 3;
-}
-
-.knob {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: color-mix(in srgb, var(--accent) 40%, transparent);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-}
-.knob:nth-child(2) { background: color-mix(in srgb, var(--accent) 72%, transparent); }
-.knob:nth-child(3) { background: color-mix(in srgb, var(--accent) 22%, transparent); }
-
-/* 1. Liquid Glass : superposition de calques décalés */
-.stack {
-  position: relative;
-  width: 190px;
-  height: 110px;
-  z-index: 3;
-  pointer-events: none;
-}
-.stack__layer {
-  position: absolute;
-  inset: 0;
-  border-radius: calc(var(--radius) * 1px);
-  transition: transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-out);
-  transform: translate(calc(var(--i) * 12px), calc(var(--i) * -12px));
-}
-.stack__layer:nth-child(1) { opacity: 0.5; }
-.stack__layer:nth-child(2) { opacity: 0.78; }
-.stack__layer:nth-child(3) { opacity: 1; }
-
-/* 2. Gooey : conteneur filtré — le fond vient du matériau (.m) */
-.goo {
-  position: relative;
-  width: 190px;
-  height: 120px;
-  z-index: 3;
-  filter: url(#morph-goo);
-}
-.goo__blob {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 56px;
-  height: 56px;
-  margin: -28px 0 0 -28px;
-  border-radius: 50%;
-  transition: transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-spring);
-}
-.goo__blob:nth-child(1) { --tx: -46px; --ty: -16px; }
-.goo__blob:nth-child(2) { --tx: 0px;   --ty: 14px; }
-.goo__blob:nth-child(3) { --tx: 48px;  --ty: -18px; }
-.goo__blob:nth-child(4) { --tx: 0px;   --ty: -26px; }
-.goo--on .goo__blob { transform: translate(var(--tx), var(--ty)); }
-.goo--on .goo__blob:nth-child(1) { --tx: -22px; --ty: 0px; }
-.goo--on .goo__blob:nth-child(2) { --tx: 0px;   --ty: 0px; }
-.goo--on .goo__blob:nth-child(3) { --tx: 24px;  --ty: 0px; }
-.goo--on .goo__blob:nth-child(4) { --tx: 0px;   --ty: -6px; }
-
-/* 3. Expandable : hauteur mesurée */
-.expand__extra {
-  display: grid;
-  gap: var(--s-2);
-  overflow: hidden;
-  transition: grid-template-rows calc(var(--dur) * var(--speed-mul)) var(--ease-out),
-    opacity calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-  grid-template-rows: 0fr;
-  opacity: 0;
-  width: 100%;
-  position: relative;
-  z-index: 3;
-}
-.expand__extra--open { grid-template-rows: 1fr; opacity: 1; }
-.expand__extra > div { min-height: 0; display: grid; gap: var(--s-2); }
-
-/* 4. Dock : magnification — le fond vient du matériau (.m) */
-.demo-dock {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--s-2);
-  position: relative;
-  z-index: 3;
-}
-.demo-dock__item {
-  width: 56px;
-  height: 56px;
-  border-radius: calc(var(--radius) * 1px);
-  display: grid;
-  place-items: center;
-  color: var(--text);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-}
-.demo-dock__item[aria-selected="true"] {
-  transform: translateY(-10px) scale(1.28);
-  box-shadow: 0 0 0 2px var(--accent), 0 12px 26px rgba(0, 0, 0, 0.5);
-}
-
-/* 5. Nav capsules */
-.demo-nav {
-  position: relative;
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: var(--r-pill);
-  z-index: 3;
-}
-.demo-nav__ind {
-  position: absolute;
-  top: 4px;
-  height: calc(100% - 8px);
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--accent) 58%, transparent);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    width calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-  pointer-events: none;
-}
-.demo-nav__btn {
-  position: relative;
-  z-index: 2;
-  min-height: 40px;
-  padding: 0 var(--s-3);
-  border: 0;
-  background: transparent;
-  border-radius: var(--r-pill);
-  color: var(--text-dim);
-  font-size: 0.8125rem;
-  white-space: nowrap;
-}
-.demo-nav__btn[aria-selected="true"] { color: #14121a; font-weight: 600; }
-
-/* 6. Morphing shapes */
-.morph {
-  width: calc(140px * var(--size));
-  height: calc(140px * var(--size));
-  z-index: 3;
-  transition: border-radius calc(var(--dur-slow) * var(--speed-mul)) var(--ease-spring),
-    transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-spring);
-}
-
-/* 7. Radial menu — les fonds viennent du matériau (.m) */
-.radial { position: relative; width: 220px; height: 220px; z-index: 3; }
-.radial__item {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 52px;
-  height: 52px;
-  margin: -26px 0 0 -26px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: var(--text);
-  font-size: 0.625rem;
-  opacity: 0;
-  transform: translate(0, 0) scale(0.4);
-  pointer-events: none;
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    opacity calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-.radial--open .radial__item {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translate(var(--x), var(--y)) scale(1);
-}
-.radial__center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 64px;
-  height: 64px;
-  margin: -32px 0 0 -32px;
-  border-radius: 50%;
-  color: var(--text);
-  font-weight: 700;
-  display: grid;
-  place-items: center;
-  z-index: 3;
-}
-
-/* 8. Kinetic — les barres prennent le matériau (.m) */
-.kinetic {
-  width: 200px;
-  height: 120px;
-  position: relative;
-  z-index: 3;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  align-items: center;
-  gap: 6px;
-}
-.kinetic__bar {
-  border-radius: var(--r-pill);
-  min-width: 18px;
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-
-/* 9. Lens — le texte est borné pour ne jamais déborder du cadre. */
-.lens {
-  position: relative;
-  width: 200px;
-  height: 130px;
-  overflow: hidden;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  padding: var(--s-3);
-  font-size: 0.6875rem;
-  color: var(--text-dim);
-  letter-spacing: 0.06em;
-  touch-action: none;
-  text-align: center;
-  line-height: 1.4;
-}
-.lens > span:first-child {
-  display: block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.lens__glass {
-  position: absolute;
-  width: calc(84px * var(--size));
-  height: calc(84px * var(--size));
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(2px) brightness(1.4);
-  -webkit-backdrop-filter: blur(2px) brightness(1.4);
-  box-shadow: 0 0 0 9999px rgba(6, 5, 9, 0.38), inset 0 0 24px rgba(255, 255, 255, 0.24);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  transition: left calc(var(--dur-fast) * var(--speed-mul)) var(--ease-out),
-    top calc(var(--dur-fast) * var(--speed-mul)) var(--ease-out);
-  pointer-events: none;
-}
-
-/* 10. Collapsible */
-.collapse__panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-  width: 100%;
-  position: relative;
-  z-index: 3;
-}
-.collapse__panel--open { grid-template-rows: 1fr; }
-.collapse__panel > div { min-height: 0; overflow: hidden; }
-
-/* 11. Expressive motion */
-.spring-ball {
-  width: calc(70px * var(--size));
-  height: calc(70px * var(--size));
-  z-index: 3;
-  pointer-events: none;
-  transition: transform calc(var(--dur-slow) * var(--speed-mul))
-    cubic-bezier(0.34, calc(1 + var(--bounce)), 0.64, 1);
-}
-
-/* 12. Contextual toolbar */
-.ctx-bar {
-  position: absolute;
-  left: var(--s-3);
-  right: var(--s-3);
-  bottom: var(--s-3);
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-pill);
-  background: rgba(25, 23, 32, 0.9);
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  animation: ctx-in calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-@keyframes ctx-in {
-  from { transform: translateY(14px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
-.ctx-bar__btn {
-  flex: 1;
-  min-height: 40px;
-  border-radius: var(--r-pill);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--text);
-  font-size: 0.6875rem;
-}
-
 /* ------------------------------------------- Aperçus du catalogue : motifs
    Le motif est posé en ABSOLU au centre : il ne partage donc plus le flux
-   avec le label, ce qui le décalait vers la droite et le faisait déborder. */
+   avec le label, ce qui le décalait vers la droite et le faisait déborder.
+   Toutes les positions internes sont en PIXELS, jamais en pourcentage :
+   un point placé à « 94 % » d'un cadre de 88 px + son rayon de 11 px
+   sortait de son propre cadre. */
 .thumb {
   position: relative;
   height: 132px;
@@ -563,10 +58,10 @@
   content: "";
   width: 88px; height: 40px;
   background:
-    radial-gradient(circle 19px at 18% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 19px at 42% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 19px at 66% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 16px at 88% 50%, color-mix(in srgb, var(--accent) 70%, transparent) 98%, transparent 100%);
+    radial-gradient(circle 19px at 19px 20px, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 19px at 37px 20px, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 19px at 55px 20px, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 16px at 71px 20px, color-mix(in srgb, var(--accent) 70%, transparent) 98%, transparent 100%);
   filter: blur(0.5px);
 }
 
@@ -581,15 +76,16 @@
   border-radius: 12px;
 }
 
-/* 4. Floating Dock : quatre pastilles, la première soulevée */
+/* 4. Floating Dock : quatre pastilles, la première soulevée.
+   Positions en PIXELS : la dernière pastille reste dans le cadre. */
 .motif--floating-dock::before {
   content: "";
   width: 88px; height: 40px;
   background:
-    radial-gradient(circle 14px at 14% 36%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 11px at 43% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 11px at 69% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 11px at 94% 62%, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%);
+    radial-gradient(circle 14px at 14px 14px, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 11px at 38px 25px, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 11px at 60px 25px, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 11px at 80px 25px, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%);
 }
 
 /* 5. Experimental Nav : trois capsules, indicateur sous la deuxième */
@@ -627,17 +123,18 @@
   transform: translate(6px, 6px);
 }
 
-/* 7. Radial Menu : un centre + cinq points en cercle */
+/* 7. Radial Menu : un centre + cinq points en cercle.
+   Positions en PIXELS : le point central est à 44,44 pour un cadre de 88. */
 .motif--radial-menu::before {
   content: "";
   width: 88px; height: 88px;
   background:
-    radial-gradient(circle 12px at 50% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 50% 12%,  var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 86% 37%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 72% 86%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 28% 86%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 14% 37%, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%);
+    radial-gradient(circle 12px at 44px 44px, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 44px 12px, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 75px 34px, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 64px 74px, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 24px 74px, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 8px at 13px 34px, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%);
 }
 
 /* 8. Kinetic : six barres de hauteurs franchement différentes */
@@ -688,14 +185,15 @@
   border-radius: 10px;
 }
 
-/* 11. Expressive Motion : un cercle + deux échos de rebond */
+/* 11. Expressive Motion : un cercle + deux échos de rebond.
+   Positions en PIXELS pour tenir dans le cadre. */
 .motif--expressive-motion::before {
   content: "";
   width: 88px; height: 72px;
   background:
-    radial-gradient(circle 15px at 62% 34%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 10px at 42% 62%, color-mix(in srgb, var(--accent) 42%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 6px at 26% 82%, color-mix(in srgb, var(--accent) 22%, transparent) 98%, transparent 100%);
+    radial-gradient(circle 15px at 55px 25px, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 10px at 37px 45px, color-mix(in srgb, var(--accent) 42%, transparent) 98%, transparent 100%),
+    radial-gradient(circle 6px at 23px 59px, color-mix(in srgb, var(--accent) 22%, transparent) 98%, transparent 100%);
 }
 
 /* 12. Contextual Toolbars : deux lignes + une barre flottante */
@@ -764,118 +262,8 @@
   content: "";
   width: 88px; height: 88px;
   background:
-    radial-gradient(circle 6px at 50% 50%, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 16px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 58%, transparent) 97%, transparent 100%),
-    radial-gradient(circle 29px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 34%, transparent) 97%, transparent 100%),
-    radial-gradient(circle 42px at 50% 50%, transparent 96%, color-mix(in srgb, var(--accent) 18%, transparent) 97%, transparent 100%);
-}
-
-/* ==========================================================================
-   13-16. Patterns ajoutés : Sheet Drag, Parallax, Swipe Stack, Ripple.
-   ========================================================================== */
-
-.sheet-demo {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--s-2);
-  align-content: start;
-}
-.sheet-demo:not(.sheet-demo--top) { align-content: end; }
-.sheet-demo--top { align-content: start; }
-
-.sheet {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  align-self: end;
-  transition: height calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-}
-.sheet-demo--top .sheet { align-self: start; }
-
-.sheet__handle {
-  display: grid;
-  place-items: center;
-  min-height: 48px;
-  cursor: grab;
-  touch-action: none;
-  position: relative;
-  z-index: 3;
-}
-.sheet__handle:active { cursor: grabbing; }
-
-.sheet__grip {
-  width: 44px;
-  height: 5px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.4);
-  pointer-events: none;
-}
-
-.parallax {
-  position: relative;
-  width: 100%;
-  height: 150px;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.parallax__layer {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 120px;
-  height: 100px;
-  margin: -50px 0 0 -60px;
-  border-radius: calc(var(--radius) * 1px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-.parallax__layer:nth-child(1) { width: 150px; height: 110px; margin: -55px 0 0 -75px; }
-.parallax__layer:nth-child(2) { width: 130px; height: 105px; margin: -52px 0 0 -65px; }
-.parallax__layer:nth-child(3) { width: 110px; height: 100px; margin: -50px 0 0 -55px; }
-
-.stack-demo {
-  position: relative;
-  width: 100%;
-  max-width: 240px;
-  height: 170px;
-  display: grid;
-  place-items: center;
-}
-
-.stack-demo__card {
-  position: absolute;
-  width: 100%;
-  min-height: 110px;
-  display: grid;
-  place-items: center;
-  padding: var(--s-4);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    opacity var(--dur) var(--ease-out);
-  touch-action: none;
-  cursor: grab;
-}
-.stack-demo__card:active { cursor: grabbing; }
-
-.ripple { position: relative; overflow: hidden; }
-
-.ripple__wave {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  margin: -5px 0 0 -5px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  pointer-events: none;
-  z-index: 2;
-  animation: ripple-out calc(900ms * var(--speed-mul)) var(--ease-out) forwards;
-}
-
-@keyframes ripple-out {
-  from { transform: scale(1); opacity: 0.85; }
-  to   { transform: scale(calc(18 * var(--ripple-scale, 1))); opacity: 0; }
+    radial-gradient(circle 6px at 44px 44px, var(--accent) 98%, transparent 100%),
+    radial-gradient(circle 16px at 44px 44px, transparent 96%, color-mix(in srgb, var(--accent) 58%, transparent) 97%, transparent 100%),
+    radial-gradient(circle 29px at 44px 44px, transparent 96%, color-mix(in srgb, var(--accent) 34%, transparent) 97%, transparent 100%),
+    radial-gradient(circle 42px at 44px 44px, transparent 96%, color-mix(in srgb, var(--accent) 18%, transparent) 97%, transparent 100%);
 }
