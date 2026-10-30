@@ -1,8 +1,9 @@
 import { useState } from "react";
-import type { CSSProperties } from "react";
 import type { PatternProps } from "./types";
 
-/** Trois plans qui glissent à des vitesses différentes. */
+/** Trois plans qui glissent à des vitesses différentes.
+ *  Seul l'élément .parallax porte le matériau : les couches intérieures
+ *  sont transparentes, sinon elles recouvriraient la texture du conteneur. */
 export function ParallaxLayers({ bounce }: PatternProps) {
   const [offset, setOffset] = useState(0);
 
@@ -32,19 +33,21 @@ export function ParallaxLayers({ bounce }: PatternProps) {
         />
       </label>
 
+      {/* Une seule surface matérielle : le conteneur. */}
       <div className="parallax m shape--rounded" aria-hidden="true">
         {speeds.map((speed, i) => (
           <span
             key={i}
-            className="parallax__layer m"
-            style={
-              {
-                transform: `translateX(${offset * speed * (1 + bounce * 0.3)}px)`,
-                opacity: 0.4 + i * 0.3,
-                zIndex: i + 1,
-                "--layer-i": i,
-              } as CSSProperties
-            }
+            className="parallax__layer"
+            style={{
+              transform: `translateX(${offset * speed * (1 + bounce * 0.3)}px)`,
+              background:
+                i === 0
+                  ? "linear-gradient(160deg, rgba(255,255,255,0.06), transparent)"
+                  : i === 1
+                    ? "linear-gradient(160deg, rgba(255,255,255,0.10), transparent)"
+                    : "linear-gradient(160deg, rgba(255,255,255,0.16), transparent)",
+            }}
           />
         ))}
       </div>
