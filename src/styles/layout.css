@@ -1,7 +1,8 @@
 /* ==========================================================================
    MORPH/UI — Layout responsive (mobile-first)
-   Desktop : sidebar fixe à gauche.
-   Mobile  : dock flottant en bas, contenu en pleine largeur.
+
+   Tous les éléments d'INTERFACE (dock, onglets, panneaux) utilisent --brand.
+   --accent n'apparaît ici nulle part : il est réservé à la maquette.
    ========================================================================== */
 
 .app {
@@ -10,12 +11,8 @@
   grid-template-columns: 1fr;
 }
 
-/* ---------------------------------------------------------------- Sidebar */
-.sidebar {
-  display: none;
-}
+.sidebar { display: none; }
 
-/* ------------------------------------------------------------- Contenu */
 .main {
   min-width: 0;
   padding: var(--s-4) var(--s-4) calc(var(--dock-h) + var(--safe-b) + var(--s-6));
@@ -50,14 +47,13 @@
   gap: 2px;
   padding: 6px;
   border-radius: var(--r-pill);
-  background: rgba(25, 23, 32, 0.82);
+  background: rgba(30, 30, 33, 0.88);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(18px) saturate(150%);
   -webkit-backdrop-filter: blur(18px) saturate(150%);
 }
 
-/* Repli si backdrop-filter n'est pas supporté : surface opaque lisible. */
 @supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
   .dock { background: var(--surface); }
 }
@@ -83,16 +79,16 @@
 
 .dock__item svg { width: 20px; height: 20px; }
 
-.dock__item[aria-current="page"] { color: var(--text); }
+.dock__item[aria-current="page"] { color: var(--brand-light); }
 
-/* Indicateur actif animé */
+/* Pastille active : bleu canard foncé, jamais la couleur du Studio. */
 .dock__item[aria-current="page"]::before {
   content: "";
   position: absolute;
   inset: 2px;
   border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  background: color-mix(in srgb, var(--brand) 85%, transparent);
+  border: 1px solid var(--brand-light);
   z-index: -1;
   animation: dock-pop calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
 }
@@ -112,9 +108,7 @@
 
 /* ------------------------------------------------------------- Desktop */
 @media (min-width: 900px) {
-  .app {
-    grid-template-columns: var(--nav-w) 1fr;
-  }
+  .app { grid-template-columns: var(--nav-w) 1fr; }
 
   .sidebar {
     display: flex;
@@ -125,7 +119,7 @@
     height: 100dvh;
     padding: var(--s-5) var(--s-3);
     border-right: 1px solid var(--border);
-    background: rgba(20, 18, 26, 0.6);
+    background: rgba(20, 20, 22, 0.6);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     overflow-y: auto;
@@ -162,7 +156,7 @@
 }
 
 @media (min-width: 700px) {
-  .grid-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .grid-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 /* --------------------------------------------- Playground (desktop 3 col) */
@@ -174,9 +168,7 @@
 }
 
 @media (min-width: 1080px) {
-  .studio {
-    grid-template-columns: 300px minmax(0, 1fr) 340px;
-  }
+  .studio { grid-template-columns: 300px minmax(0, 1fr) 340px; }
 }
 
 .panel {
@@ -203,11 +195,8 @@
   gap: var(--s-4);
 }
 
-/* L'en-tête ne doit jamais comprimer ses boutons d'action : sur écran
-   étroit, « Live Preview » + 2 boutons ne tiennent pas sans ça. */
-.panel__head > * {
-  flex-shrink: 0;
-}
+/* L'en-tête ne comprime jamais ses boutons d'action. */
+.panel__head > * { flex-shrink: 0; }
 
 .panel__head .eyebrow {
   flex-shrink: 1;
@@ -217,7 +206,7 @@
   white-space: nowrap;
 }
 
-/* Séparateur de groupe (sections repliables du Playground) */
+/* ------------------------------------------------------- Groupe repliable */
 .group {
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
@@ -279,9 +268,12 @@
   white-space: nowrap;
   transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
+
+/* Onglet actif : bleu canard, pas la couleur du Studio. */
 .tabs__btn[aria-selected="true"] {
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-  color: var(--text);
+  background: color-mix(in srgb, var(--brand) 78%, transparent);
+  color: var(--brand-ink);
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------- Tableaux / docs */
@@ -320,7 +312,6 @@
 }
 
 @media (min-width: 1080px) {
-  /* Sur desktop, plus besoin d'être collant : les 3 colonnes sont côte à côte. */
   .studio-preview { position: static; padding-block: 0; }
 }
 
@@ -330,7 +321,7 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Aperçu plein écran : un vrai agrandissement, défilable.
+   Aperçu plein écran.
    --------------------------------------------------------------------------- */
 .preview-fullscreen {
   position: fixed;
@@ -377,8 +368,6 @@
   overscroll-behavior: contain;
 }
 
-/* En plein écran, la maquette devient défilable pour que les patterns
-   qui ont besoin de hauteur restent utilisables. */
 .preview-fullscreen .phone {
   width: min(100%, 400px);
   height: auto;
