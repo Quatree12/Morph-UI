@@ -188,8 +188,12 @@ export function Explore({ onNavigate }: Props) {
 
                 <p className="muted" style={{ fontSize: "0.8125rem" }}>{p.description}</p>
 
-                {/* Vignette, dépliée à la demande */}
-                <div id={`motif-${p.id}`} className="expand__extra" style={open ? undefined : { gridTemplateRows: "0fr", opacity: 0 }}>
+                {/* Vignette : repliée ou dépliée par la CLASSE, jamais par un
+                    style inline concurrent (sinon la règle 0fr gagne). */}
+                <div
+                  id={`motif-${p.id}`}
+                  className={`expand__extra${open ? " expand__extra--open" : ""}`}
+                >
                   <div style={{ display: "grid", gap: "var(--s-3)" }}>
                     <Motif id={p.id} />
                     <details>
