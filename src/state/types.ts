@@ -33,7 +33,17 @@ export type MaterialId =
   | "translucent-gel"
   | "solid-surface";
 
-export type ShapeId = "pill" | "rounded" | "circle" | "squircle" | "sharp";
+/** 9 formes : les 5 d'origine + 4 nouvelles (blob, diamond, arch, notched). */
+export type ShapeId =
+  | "pill"
+  | "rounded"
+  | "circle"
+  | "squircle"
+  | "sharp"
+  | "blob"
+  | "diamond"
+  | "arch"
+  | "notched";
 
 /** Ancrage du panneau : le contrôle Anchor n'agit que sur Sheet Drag. */
 export type AnchorId = "bottom" | "top";
