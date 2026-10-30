@@ -5,11 +5,12 @@ import { MATERIAL_MAP } from "../data/materials";
 
 interface Props {
   children: ReactNode;
-  /** L'aperçu agrandi (Playground mobile : bouton "Agrandir"). */
   expanded?: boolean;
   showBadges?: boolean;
 }
 
+/** Le cadre de la maquette. Il ne porte NI matériau NI forme : ce sont les
+ *  patterns qui les appliquent à leur objet principal, chacun à sa manière. */
 export function PhoneFrame({ children, expanded = false, showBadges = true }: Props) {
   const { state } = useStudio();
   const pattern = PATTERN_MAP[state.pattern];
