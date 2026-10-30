@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function Favorites({ onNavigate }: Props) {
-  const { favorites, toggleFavorite, creations, deleteCreation, duplicateCreation, loadCreation } = useStudio();
+  const { favorites, toggleFavorite, creations, deleteCreation, duplicateCreation, loadCreation, set } = useStudio();
   const favPatterns = PATTERNS.filter((p) => favorites.includes(p.id));
 
   return (
@@ -56,6 +56,9 @@ export function Favorites({ onNavigate }: Props) {
                   type="button"
                   className="btn btn--sm btn--primary"
                   onClick={() => {
+                    /* Correction : on sélectionne réellement le pattern AVANT
+                       de naviguer, sinon le Studio reste sur le précédent. */
+                    set("pattern", p.id);
                     onNavigate("playground");
                   }}
                 >
