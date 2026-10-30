@@ -11,7 +11,7 @@ import type { SectionId } from "../nav";
 const GLOBAL_GUIDELINES: Array<{ title: string; body: string }> = [
   {
     title: "Zones tactiles",
-    body: "44 × 44 px minimum sur toutes les cibles, 48 px sur la navigation principale. Sur le dock, chaque item réserve 56 px et le libellé textuel évite l'ambiguïté des icônes seules.",
+    body: "44 × 44 px minimum sur toutes les cibles, 48 px sur la navigation principale. Sur le dock, chaque item réserve 48 px et le libellé textuel évite l'ambiguïté des icônes seules.",
   },
   {
     title: "Contraste",
@@ -89,8 +89,8 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         </div>
       </div>
 
-      {/* Fiche du pattern, en accordéon */}
-      <Group title={p.name} badge={p.category} defaultOpen>
+      {/* Fiche du pattern : accordéon fermé par défaut, comme tout le reste. */}
+      <Group title={p.name} badge={p.category}>
         <p className="muted">{p.description}</p>
 
         <Section title="Quand l'utiliser">
@@ -135,12 +135,11 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         </Section>
       </Group>
 
-      {/* Accordéons transverses */}
+      {/* Accordéons transverses, tous fermés par défaut */}
       <div style={{ display: "grid", gap: "var(--s-3)" }}>
         <Group
           title="Matériaux, formes et accents"
           badge={`${MATERIALS.length} · ${SHAPES.length} · ${COLORS.length}`}
-          defaultOpen={false}
         >
           <div style={{ display: "grid", gap: "var(--s-4)" }}>
             <div>
@@ -207,7 +206,7 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
           </div>
         </Group>
 
-        <Group title="Règles transverses" badge={String(GLOBAL_GUIDELINES.length)} defaultOpen={false}>
+        <Group title="Règles transverses" badge={String(GLOBAL_GUIDELINES.length)}>
           <div style={{ display: "grid", gap: "var(--s-4)" }}>
             {GLOBAL_GUIDELINES.map((g) => (
               <div key={g.title} style={{ display: "grid", gap: 6 }}>
@@ -218,7 +217,7 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
           </div>
         </Group>
 
-        <Group title="Référentiel du Studio" badge="11" defaultOpen={false}>
+        <Group title="Référentiel du Studio" badge="11">
           <div className="table-scroll">
             <table className="doc-table">
               <thead>
@@ -283,7 +282,6 @@ const pStyle = {
   fontSize: "0.875rem",
 } as const;
 
-/* 16 clés — le Record exige exactement une entrée par membre de PatternId. */
 const PERFORMANCE: Record<PatternId, string> = {
   "liquid-glass": "backdrop-filter est accéléré par le GPU mais impose une passe de composition. Limitez la surface floutée et évitez les surfaces qui défilent en continu.",
   gooey: "Le filtre SVG (flou + seuil alpha) est le point coûteux. Gardez une surface d'effet réduite et ne l'animez pas pendant un scroll.",
@@ -303,7 +301,6 @@ const PERFORMANCE: Record<PatternId, string> = {
   "ripple-surface": "Une animation de scale sur un élément positionné en absolu est peu coûteuse. On garde trois ondes au maximum.",
 };
 
-/* 16 clés — même exigence. */
 const EXAMPLES: Record<PatternId, string> = {
   "liquid-glass": "Une barre de lecture flottant au-dessus d'une pochette d'album : la jaquette reste devinée à travers la surface, le titre reste lisible.",
   gooey: "Un indicateur de chargement à trois billes qui se rejoignent puis se séparent pendant une synchronisation.",
