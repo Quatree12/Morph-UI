@@ -7,38 +7,43 @@ import {
   exportTailwind,
   exportLimitations,
 } from "../lib/exporters";
+import { downloadCode } from "../lib/download";
+import type { ExportFormat } from "../lib/download";
 import { CopyButton } from "../components/ClipboardButton";
 import { PATTERN_MAP } from "../data/patterns";
 import { MATERIAL_MAP } from "../data/materials";
 
-type Format = "css" | "tailwind" | "react" | "framer";
-
-const FORMATS: Array<{ id: Format; label: string; hint: string }> = [
+const FORMATS: Array<{ id: ExportFormat; label: string; hint: string; file: string }> = [
   {
     id: "css",
     label: "CSS",
     hint: "Styles, matériau, ombres, transitions et états actifs.",
+    file: "un fichier .css",
   },
   {
     id: "tailwind",
     label: "Tailwind",
     hint: "Classes utilitaires en valeurs arbitraires, avec la correspondance des réglages.",
+    file: "un fichier .jsx",
   },
   {
     id: "react",
     label: "React",
     hint: "Structure du composant, état et attributs d'accessibilité.",
+    file: "un fichier .tsx",
   },
   {
     id: "framer",
     label: "Framer Motion",
     hint: "Structure React + animations et transitions physiques.",
+    file: "un fichier .tsx",
   },
 ];
 
 export function CodeExport() {
   const { state } = useStudio();
-  const [format, setFormat] = useState<Format>("css");
+  const [format, setFormat] = useState<ExportFormat>("css");
+  const [saved, setSaved] = useState<string | null>(null);
 
   const code =
     format === "css"
@@ -51,6 +56,7 @@ export function CodeExport() {
 
   const limitations = exportLimitations(state, format);
   const active = FORMATS.find((f) => f.id === format)!;
+  const pattern = PATTERN_MAP[state.pattern];
 
   return (
     <section style={{ display: "grid", gap: "var(--s-5)" }}>
@@ -59,7 +65,7 @@ export function CodeExport() {
         <h1>Developer Handoff</h1>
         <p className="muted" style={{ maxWidth: "62ch" }}>
           Le code ci-dessous est généré depuis la configuration courante :{" "}
-          <strong>{PATTERN_MAP[state.pattern].name}</strong>, matériau{" "}
+          <strong>{pattern.name}</strong>, matériau{" "}
           <strong>{MATERIAL_MAP[state.material].name}</strong>, accent{" "}
           <strong>{state.color}</strong>.
         </p>
@@ -75,17 +81,43 @@ export function CodeExport() {
                 role="tab"
                 aria-selected={f.id === format}
                 className="tabs__btn"
-                onClick={() => setFormat(f.id)}
+                onClick={() => {
+                  setFormat(f.id);
+                  setSaved(null);
+                }}
               >
                 {f.label}
               </button>
             ))}
           </div>
-          <CopyButton getText={() => code} label="Copier le code" />
         </div>
 
         <div className="panel__body">
           <p className="muted" style={{ fontSize: "0.8125rem" }}>{active.hint}</p>
+
+          <div style={{ display: "flex", gap: "var(--s-3)", flexWrap: "wrap", alignItems: "center" }}>
+            <CopyButton getText={() => code} label="Copier le code" />
+            <button
+              type="button"
+              className="btn btn--sm btn--outline"
+              onClick={() => {
+                downloadCode(format, state.pattern, code);
+                setSaved(active.file);
+              }}
+            >
+              Télécharger {active.file}
+            </button>
+            {saved && (
+              <span
+                role="status"
+                aria-live="polite"
+                className="mono"
+                style={{ fontSize: "0.6875rem", color: "var(--brand-light)" }}
+              >
+                Fichier généré.
+              </span>
+            )}
+          </div>
 
           <pre
             style={{
@@ -93,7 +125,7 @@ export function CodeExport() {
               padding: "var(--s-3)",
               borderRadius: "var(--r-sm)",
               border: "1px solid var(--border)",
-              background: "#0b0a10",
+              background: "#0b0b0c",
               overflowX: "auto",
               maxWidth: "100%",
               fontFamily: "var(--font-mono)",
@@ -109,27 +141,22 @@ export function CodeExport() {
         </div>
       </div>
 
-      <div className="panel">
-        <div className="panel__head">
-          <div className="eyebrow">Limitations assumées de cet export</div>
-        </div>
-        <div className="panel__body">
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: 18,
-              display: "grid",
-              gap: 8,
-              color: "var(--text-dim)",
-              fontSize: "0.8125rem",
-            }}
-          >
-            {limitations.map((l) => (
-              <li key={l}>{l}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <Group title="Limitations assumées de cet export" badge={String(limitations.length)}>
+        <ul
+          style={{
+            margin: 0,
+            paddingLeft: 18,
+            display: "grid",
+            gap: 8,
+            color: "var(--text-dim)",
+            fontSize: "0.8125rem",
+          }}
+        >
+          {limitations.map((l) => (
+            <li key={l}>{l}</li>
+          ))}
+        </ul>
+      </Group>
     </section>
   );
 }
