@@ -2,9 +2,10 @@ import { useRef, useState } from "react";
 import { useStudio } from "../state/context";
 import { clearAll, storageAvailable } from "../state/storage";
 import { buildDataset, downloadDataset, parseDataset } from "../lib/dataset";
+import { MATERIALS } from "../data/materials";
 
 export function Settings() {
-  const { state, reset, reducedMotion, setReducedMotion, favorites, creations, replaceAll } = useStudio();
+  const { state, reset, reducedMotion, setReducedMotion, favorites, creations, replaceAll, set } = useStudio();
   const [hasStorage] = useState(() => storageAvailable());
   const [confirming, setConfirming] = useState(false);
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
@@ -39,11 +40,70 @@ export function Settings() {
         <div className="eyebrow">Settings / Preferences</div>
         <h1>Préférences</h1>
         <p className="muted" style={{ maxWidth: "62ch" }}>
-          Sauvegarde de votre travail et confort visuel.
+          Sauvegarde de votre travail, confort visuel et diagnostic des matériaux.
         </p>
       </header>
 
-      {/* ---------------------------------------------------- Import / export */}
+      {/* ============================ DIAGNOSTIC MATÉRIAUX ============================ */}
+      <div className="panel">
+        <div className="panel__head">
+          <div className="eyebrow">Diagnostic · les 9 matériaux</div>
+          <span className="chip">actif : {state.material}</span>
+        </div>
+        <div className="panel__body">
+          <p className="muted" style={{ fontSize: "0.875rem" }}>
+            Neuf blocs de grande surface, chacun avec sa classe de matériau. Touchez un bloc
+            pour l'appliquer au Studio. Si deux blocs se ressemblent, leurs matériaux sont
+            identiques — c'est le test décisif.
+          </p>
+
+          <div style={{ display: "grid", gap: "var(--s-4)" }}>
+            {MATERIALS.map((m) => {
+              const active = m.id === state.material;
+              return (
+                <div key={m.id} style={{ display: "grid", gap: 6 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <span style={{ fontSize: "0.8125rem", fontWeight: active ? 600 : 400 }}>
+                      {m.name}
+                    </span>
+                    <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+                      .m--{m.id}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={`m m--${m.id} shape--rounded`}
+                    onClick={() => set("material", m.id)}
+                    aria-pressed={active}
+                    style={{
+                      height: 86,
+                      width: "100%",
+                      display: "block",
+                      border: active
+                        ? "2px solid var(--lime)"
+                        : undefined,
+                      cursor: "pointer",
+                    }}
+                    title={`Appliquer ${m.name}`}
+                  >
+                    <span className="visually-hidden">Appliquer le matériau {m.name}</span>
+                  </button>
+                  <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+                    {m.tagline}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
+            Variables en cours — accent {state.color} · blur {state.blur}px · alpha{" "}
+            {state.transparency} · glow {state.glow}
+          </p>
+        </div>
+      </div>
+
+      {/* ============================ SAUVEGARDE ============================ */}
       <div className="panel">
         <div className="panel__head">
           <div className="eyebrow">Sauvegarde · import / export</div>
@@ -58,7 +118,6 @@ export function Settings() {
             <button type="button" className="btn btn--primary" onClick={onExport}>
               Exporter en .json
             </button>
-
             <button type="button" className="btn" onClick={() => fileRef.current?.click()}>
               Importer un .json
             </button>
@@ -96,7 +155,7 @@ export function Settings() {
         </div>
       </div>
 
-      {/* --------------------------------------------------- Confort visuel */}
+      {/* ============================ CONFORT VISUEL ============================ */}
       <div className="panel">
         <div className="panel__head">
           <div className="eyebrow">Confort visuel</div>
@@ -124,7 +183,7 @@ export function Settings() {
         </div>
       </div>
 
-      {/* ------------------------------------------------------ Données locales */}
+      {/* ============================ DONNÉES LOCALES ============================ */}
       <div className="panel">
         <div className="panel__head">
           <div className="eyebrow">Données locales</div>
