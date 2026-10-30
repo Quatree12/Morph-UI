@@ -2,12 +2,15 @@
    MORPH/UI — Design tokens
 
    AMBIANCE : Graphite — noir neutre, sans aucune teinte.
-   Le fond ne colore rien : les 12 accents et les 15 matériaux sont les
-   seules sources de couleur de l'application.
 
-   CONTRASTE DES SURFACES : l'écart entre --bg et --surface est poussé à
-   18 niveaux de luminance (contre 10 auparavant), pour que les panneaux se
-   détachent nettement du fond sans avoir à éclaircir l'ensemble.
+   DEUX COULEURS, DEUX RÔLES :
+   - --brand : couleur d'identité de l'outil (logo, boutons de marque,
+     étoiles actives, indicateur du dock). FIXE, choisie une fois pour toutes.
+   - --accent : couleur choisie par l'utilisateur dans le Studio. Elle ne
+     peint QUE la maquette et la pastille sélectionnée du sélecteur.
+
+   C'est le principe d'un studio : ce qu'on règle s'applique à l'objet
+   qu'on façonne, jamais à l'interface qui le contient.
    ========================================================================== */
 
 :root {
@@ -23,7 +26,13 @@
   --text-dim: #a4a4a8;
   --text-faint: #707074;
 
-  /* --- Accents (inchangés : ce sont les 12 choix de l'utilisateur) --- */
+  /* --- Marque : couleur fixe de l'outil, indépendante du Studio --- */
+  --brand: #1f7a8c;
+  --brand-light: #2e9eb0;
+  --brand-deep: #155a6b;
+  --brand-ink: #ffffff; /* texte posé sur la marque */
+
+  /* --- Accents : les 12 choix de l'utilisateur, utilisés par la maquette --- */
   --accent: #c1a8ff;
   --lime: #d6fa72;
   --turquoise: #6fe3d2;
