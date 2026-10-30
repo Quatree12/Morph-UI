@@ -3,8 +3,8 @@
 
    AMBIANCE GRAPHITE : le body est un aplat neutre, sans halo teinté.
    La profondeur vient des surfaces, des bordures et des ombres.
-   Les halos colorés subsistent uniquement DANS la maquette (.phone__bg),
-   où ils servent à donner de la matière aux matériaux translucides.
+   Les halos subsistent uniquement DANS la maquette (.phone__bg), en blanc,
+   pour donner de la matière aux matériaux translucides.
    ========================================================================== */
 
 *,
@@ -122,7 +122,7 @@ button { cursor: pointer; }
     background var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out);
 }
-.btn:hover { border-color: var(--border-soft); background: #2c2c2e; }
+.btn:hover { border-color: var(--border-soft); background: #323236; }
 .btn:active { transform: scale(0.97); }
 
 .btn--primary {
