@@ -1,908 +1,587 @@
 /* ==========================================================================
-   MORPH/UI — Formes + maquette + patterns
+   MORPH/UI — Les 16 comportements de pattern.
+   Chaque composant a une composition, une géométrie et une animation propres.
 
-   RÈGLE MATÉRIAU : les éléments qui portent la classe .m ne reçoivent AUCUN
-   background-color, background-image, border ni box-shadow depuis ce fichier.
-   Sinon patterns.css (chargé après materials.css) écrase le matériau à
-   spécificité égale, et le sélecteur Material n'a plus d'effet visible.
-
-   RÈGLE D'EMPILEMENT : dans un pattern à plusieurs étages, SEUL LE CONTENEUR
-   porte .m. Si plusieurs éléments empilés portent .m, celui du dessus peint
-   sa surface par-dessus les autres et la texture devient invisible.
-
-   RÈGLE D'OBJET : le matériau et la forme vont sur L'OBJET PRINCIPAL du
-   pattern, jamais sur le bouton ou la div qui l'enveloppe. Un conteneur qui
-   porte .m produit une surface colorée supplémentaire — c'est ce qui faisait
-   apparaître un grand ovale violet autour du Liquid Glass.
-
-   RÈGLE DE CLASSE : tout élément peint par le sélecteur Material reçoit le
-   matériau INTERPOLÉ depuis l'état partagé :
+   RÈGLE MATÉRIAU : tout élément qui doit être peint par le sélecteur Material
+   reçoit la classe de matériau INTERPOLÉE depuis l'état partagé :
      `m m--${state.material} shape--${state.shape}`
 
-   RÈGLE DE DIMENSION : les composants vivants (.goo, .radial, .kinetic,
-   .stack, .lens) doivent tenir dans la hauteur de .phone__stage. Un composant
-   qui déborde est rogné par son `overflow: hidden` et disparaît
-   silencieusement. Ne JAMAIS modifier ces dimensions en même temps que les
-   règles .motif--* (vignettes de la Library) : deux familles distinctes.
+   RÈGLE D'OBJET : le matériau et la forme vont sur l'OBJET PRINCIPAL du
+   pattern, jamais sur le bouton qui l'enveloppe. Un conteneur qui porte .m
+   produit une surface colorée supplémentaire.
+
+   RÈGLE DE CONSIGNE : chaque sous-titre décrit EXACTEMENT le geste disponible.
    ========================================================================== */
 
-/* ------------------------------------------------------------ Formes §9
-   Les formes qui ne peuvent pas s'exprimer par border-radius utilisent un
-   clip-path ou un masque. Chaque forme est appliquée à l'objet principal. */
-.shape--pill     { border-radius: var(--r-pill); }
-.shape--rounded  { border-radius: calc(var(--radius) * 1px); }
-.shape--circle   { border-radius: 50%; }
-.shape--sharp    { border-radius: 0; }
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import type { PatternId } from "../state/types";
+import type { PatternProps } from "./types";
+import { useStudio } from "../state/context";
 
-.shape--squircle {
-  border-radius: calc(var(--radius) * 1.4px);
-  -webkit-mask-image: radial-gradient(closest-side, #000 96%, rgba(0, 0, 0, 0.86) 100%);
-  mask-image: radial-gradient(closest-side, #000 96%, rgba(0, 0, 0, 0.86) 100%);
-}
+import { SheetDrag } from "./sheet-drag";
+import { ParallaxLayers } from "./parallax-layers";
+import { SwipeStack } from "./swipe-stack";
+import { RippleSurface } from "./ripple-surface";
 
-/* Blob : silhouette organique. Le rayon module l'asymétrie des coins. */
-.shape--blob {
-  border-radius:
-    calc(var(--radius) * 1.2px) calc(60px - var(--radius) * 0.6px)
-    calc(var(--radius) * 1.6px) calc(70px - var(--radius) * 0.8px) /
-    calc(70px - var(--radius) * 0.8px) calc(var(--radius) * 1.4px)
-    calc(60px - var(--radius) * 0.7px) calc(var(--radius) * 1.1px);
-}
+export type { PatternProps };
 
-/* Diamond : losange franc. Le rayon n'a pas d'effet, la forme est absolue. */
-.shape--diamond {
-  -webkit-clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  border-radius: 0;
-}
-
-/* Arch : arrondi en haut, base droite. Le rayon pilote la courbure du haut. */
-.shape--arch {
-  border-radius: calc(var(--radius) * 2px) calc(var(--radius) * 2px) 0 0;
-}
-
-/* Notched : coin supérieur droit coupé. Le rayon garde les trois autres. */
-.shape--notched {
-  border-radius:
-    calc(var(--radius) * 1px)
-    0
-    calc(var(--radius) * 1px)
-    calc(var(--radius) * 1px);
-  -webkit-clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
-  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
-}
-
-/* ---------------------------------------------------- Maquette téléphone */
-.phone {
-  position: relative;
-  width: min(100%, 380px);
-  margin-inline: auto;
-  aspect-ratio: 9 / 19.5;
-  border-radius: 44px;
-  padding: 10px;
-  background: linear-gradient(160deg, #2a2634, #15131c 45%, #221e2c);
-  border: 1px solid #3a3546;
-  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: max-width var(--dur) var(--ease-out);
-}
-
-.phone__screen {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  border-radius: 36px;
-  overflow: hidden;
-  background: #0b0a10;
-  display: flex;
-  flex-direction: column;
-}
-
-.phone__bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(70% 45% at 20% 12%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 70%),
-    radial-gradient(60% 40% at 88% 78%, rgba(111, 227, 210, 0.24), transparent 72%),
-    radial-gradient(50% 36% at 50% 108%, rgba(255, 158, 196, 0.2), transparent 70%),
-    linear-gradient(180deg, #131019, #0b0a10);
-}
-.phone__bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 34px 34px;
-}
-
-.phone__notch {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 86px;
-  height: 22px;
-  border-radius: var(--r-pill);
-  background: #07060a;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  z-index: 5;
-}
-
-.phone__status {
-  position: relative;
-  z-index: 4;
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 18px 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--text-dim);
-  pointer-events: none;
-}
-
-.phone__stage {
-  position: relative;
-  z-index: 3;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-3);
-  padding: var(--s-4);
-  overflow: hidden;
-}
-
-.phone__badges {
-  position: relative;
-  z-index: 6;
-  display: flex;
-  gap: var(--s-1);
-  padding: 0 var(--s-3) var(--s-3);
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-/* ------------------------------------------- Objet principal du pattern */
-.subject {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-2);
-  padding: var(--s-4) var(--s-5);
-  min-width: 150px;
-  transform: scale(var(--size));
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    border-radius calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-
-/* Les enfants de l'objet principal ne captent jamais le geste : sinon le
-   onPointerDown du bouton ne se déclenche pas sur iOS. */
-.subject > span {
-  pointer-events: none;
-}
-
-/* Conteneur du Liquid Glass : aucun fond, aucune forme. Le matériau et la
-   géométrie appartiennent à la pile de calques, pas au bouton qui la porte.
-   Sans ça, le .subject produisait un grand ovale coloré qui débordait. */
-.glass-host {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-2);
-  background: none;
-  border: 0;
-  padding: 0;
-  min-width: 0;
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-}
-.glass-host > span { pointer-events: none; }
-
-.subject__label {
-  position: relative;
-  z-index: 3;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.subject__sub {
-  position: relative;
-  z-index: 3;
-  font-size: 0.6875rem;
-  color: var(--text-dim);
-}
-
-/* -------------------------------------------------- Patterns partagés */
-.knob-row {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  position: relative;
-  z-index: 3;
-}
-
-.knob {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: color-mix(in srgb, var(--accent) 40%, transparent);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-}
-.knob:nth-child(2) { background: color-mix(in srgb, var(--accent) 72%, transparent); }
-.knob:nth-child(3) { background: color-mix(in srgb, var(--accent) 22%, transparent); }
-
-/* 1. Liquid Glass : superposition de calques décalés.
-   La pile est l'objet principal : c'est elle qui porte matériau et forme. */
-.stack {
-  position: relative;
-  width: 150px;
-  height: 86px;
-  z-index: 3;
-  pointer-events: none;
-}
-.stack__layer {
-  position: absolute;
-  inset: 0;
-  transition: transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-out);
-  transform: translate(calc(var(--i) * 10px), calc(var(--i) * -10px));
-}
-.stack__layer:nth-child(1) { opacity: 0.5; }
-.stack__layer:nth-child(2) { opacity: 0.78; }
-.stack__layer:nth-child(3) { opacity: 1; }
-
-/* 2. Gooey : conteneur filtré — le fond vient du matériau (.m).
-   Dimensions réduites pour tenir dans .phone__stage : un conteneur plus
-   grand est rogné par le overflow: hidden du stage, et le filtre SVG ne
-   laisse plus voir qu'une bande. */
-.goo {
-  position: relative;
-  width: 150px;
-  height: 84px;
-  z-index: 3;
-  filter: url(#morph-goo);
-}
-.goo__blob {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 40px;
-  height: 40px;
-  margin: -20px 0 0 -20px;
-  border-radius: 50%;
-  transition: transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-spring);
-}
-.goo__blob:nth-child(1) { --tx: -36px; --ty: -11px; }
-.goo__blob:nth-child(2) { --tx: 0px;   --ty: 11px; }
-.goo__blob:nth-child(3) { --tx: 38px;  --ty: -13px; }
-.goo__blob:nth-child(4) { --tx: 0px;   --ty: -18px; }
-.goo--on .goo__blob { transform: translate(var(--tx), var(--ty)); }
-.goo--on .goo__blob:nth-child(1) { --tx: -17px; --ty: 0px; }
-.goo--on .goo__blob:nth-child(2) { --tx: 0px;   --ty: 0px; }
-.goo--on .goo__blob:nth-child(3) { --tx: 19px;  --ty: 0px; }
-.goo--on .goo__blob:nth-child(4) { --tx: 0px;   --ty: -5px; }
-
-/* 3. Expandable : hauteur mesurée */
-.expand__extra {
-  display: grid;
-  gap: var(--s-2);
-  overflow: hidden;
-  transition: grid-template-rows calc(var(--dur) * var(--speed-mul)) var(--ease-out),
-    opacity calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-  grid-template-rows: 0fr;
-  opacity: 0;
-  width: 100%;
-  position: relative;
-  z-index: 3;
-}
-.expand__extra--open { grid-template-rows: 1fr; opacity: 1; }
-.expand__extra > div { min-height: 0; display: grid; gap: var(--s-2); }
-
-/* 4. Dock : magnification — le fond vient du matériau (.m) */
-.demo-dock {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--s-2);
-  position: relative;
-  z-index: 3;
-}
-.demo-dock__item {
-  width: 48px;
-  height: 48px;
-  border-radius: calc(var(--radius) * 1px);
-  display: grid;
-  place-items: center;
-  color: var(--text);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-}
-.demo-dock__item[aria-selected="true"] {
-  transform: translateY(-8px) scale(1.24);
-  box-shadow: 0 0 0 2px var(--accent), 0 12px 26px rgba(0, 0, 0, 0.5);
-}
-
-/* 5. Nav capsules */
-.demo-nav {
-  position: relative;
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: var(--r-pill);
-  z-index: 3;
-}
-.demo-nav__ind {
-  position: absolute;
-  top: 4px;
-  height: calc(100% - 8px);
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--accent) 58%, transparent);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    width calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-  pointer-events: none;
-}
-.demo-nav__btn {
-  position: relative;
-  z-index: 2;
-  min-height: 40px;
-  padding: 0 var(--s-3);
-  border: 0;
-  background: transparent;
-  border-radius: var(--r-pill);
-  color: var(--text-dim);
-  font-size: 0.8125rem;
-  white-space: nowrap;
-}
-.demo-nav__btn[aria-selected="true"] { color: #14121a; font-weight: 600; }
-
-/* 6. Morphing shapes */
-.morph {
-  width: calc(130px * var(--size));
-  height: calc(130px * var(--size));
-  z-index: 3;
-  transition: border-radius calc(var(--dur-slow) * var(--speed-mul)) var(--ease-spring),
-    transform calc(var(--dur-slow) * var(--speed-mul)) var(--ease-spring);
-}
-
-/* 7. Radial menu — les fonds viennent du matériau (.m) */
-.radial { position: relative; width: 190px; height: 190px; z-index: 3; }
-.radial__item {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 46px;
-  height: 46px;
-  margin: -23px 0 0 -23px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: var(--text);
-  font-size: 0.625rem;
-  opacity: 0;
-  transform: translate(0, 0) scale(0.4);
-  pointer-events: none;
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    opacity calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-.radial--open .radial__item {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translate(var(--x), var(--y)) scale(1);
-}
-.radial__center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 58px;
-  height: 58px;
-  margin: -29px 0 0 -29px;
-  border-radius: 50%;
-  color: var(--text);
-  font-weight: 700;
-  display: grid;
-  place-items: center;
-  z-index: 3;
-}
-
-/* 8. Kinetic — les barres prennent le matériau (.m) */
-.kinetic {
-  width: 180px;
-  height: 96px;
-  position: relative;
-  z-index: 3;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  align-items: center;
-  gap: 5px;
-}
-.kinetic__bar {
-  border-radius: var(--r-pill);
-  min-width: 16px;
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-
-/* 9. Lens — le texte est borné pour ne jamais déborder du cadre. */
-.lens {
-  position: relative;
-  width: 190px;
-  height: 120px;
-  overflow: hidden;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  padding: var(--s-3);
-  font-size: 0.6875rem;
-  color: var(--text-dim);
-  letter-spacing: 0.06em;
-  touch-action: none;
-  text-align: center;
-  line-height: 1.4;
-}
-.lens > span:first-child {
-  display: block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.lens__glass {
-  position: absolute;
-  width: calc(78px * var(--size));
-  height: calc(78px * var(--size));
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(2px) brightness(1.4);
-  -webkit-backdrop-filter: blur(2px) brightness(1.4);
-  box-shadow: 0 0 0 9999px rgba(6, 5, 9, 0.38), inset 0 0 24px rgba(255, 255, 255, 0.24);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  transition: left calc(var(--dur-fast) * var(--speed-mul)) var(--ease-out),
-    top calc(var(--dur-fast) * var(--speed-mul)) var(--ease-out);
-  pointer-events: none;
-}
-
-/* 10. Collapsible */
-.collapse__panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-  width: 100%;
-  position: relative;
-  z-index: 3;
-}
-.collapse__panel--open { grid-template-rows: 1fr; }
-.collapse__panel > div { min-height: 0; overflow: hidden; }
-
-/* 11. Expressive motion */
-.spring-ball {
-  width: calc(64px * var(--size));
-  height: calc(64px * var(--size));
-  z-index: 3;
-  pointer-events: none;
-  transition: transform calc(var(--dur-slow) * var(--speed-mul))
-    cubic-bezier(0.34, calc(1 + var(--bounce)), 0.64, 1);
-}
-
-/* 12. Contextual toolbar */
-.ctx-bar {
-  position: absolute;
-  left: var(--s-3);
-  right: var(--s-3);
-  bottom: var(--s-3);
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-pill);
-  background: rgba(25, 23, 32, 0.9);
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  /* Le halo est porté par la barre, une seule fois : sinon Glow à 1.00
-     produit une masse lumineuse sur les patterns à plusieurs étages. */
-  box-shadow: 0 0 calc(var(--glow) * 24px) color-mix(in srgb, var(--accent) calc(var(--glow) * 55%), transparent);
-  animation: ctx-in calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-@keyframes ctx-in {
-  from { transform: translateY(14px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
-.ctx-bar__btn {
-  flex: 1;
-  min-height: 40px;
-  border-radius: var(--r-pill);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--text);
-  font-size: 0.6875rem;
-}
-
-/* ==========================================================================
-   APERÇUS DU CATALOGUE — famille distincte des composants vivants ci-dessus.
-   Le motif est posé en ABSOLU au centre : il ne partage plus le flux avec le
-   label, ce qui le décalait vers la droite et le faisait déborder.
-   Toutes les positions internes sont en PIXELS, jamais en pourcentage :
-   un point placé à « 94 % » d'un cadre de 88 px + son rayon de 11 px
-   sortait de son propre cadre.
-   ========================================================================== */
-.thumb {
-  position: relative;
-  height: 132px;
-  border-radius: var(--r-sm);
-  overflow: hidden;
-  background: linear-gradient(180deg, #17141f, #100e16);
-}
-.thumb__label {
-  position: absolute;
-  bottom: var(--s-2);
-  left: var(--s-3);
-  z-index: 2;
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  color: var(--text-faint);
-  text-transform: capitalize;
-}
-
-.motif {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100px;
-  height: 100px;
-  display: grid;
-  place-items: center;
-}
-
-/* 1. Liquid Glass : trois calques décalés et translucides */
-.motif--liquid-glass::before,
-.motif--liquid-glass::after {
-  content: "";
-  position: absolute;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-.motif--liquid-glass::before {
-  width: 84px; height: 44px;
-  transform: translate(-9px, -7px);
-  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
-}
-.motif--liquid-glass::after {
-  width: 84px; height: 44px;
-  transform: translate(4px, 4px);
-  background: color-mix(in srgb, var(--accent) 30%, transparent);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-}
-
-/* 2. Gooey : quatre cercles qui se touchent, reliés par un pont de matière */
-.motif--gooey::before {
-  content: "";
-  width: 88px; height: 40px;
-  background:
-    radial-gradient(circle 19px at 19px 20px, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 19px at 37px 20px, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 19px at 55px 20px, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 16px at 71px 20px, color-mix(in srgb, var(--accent) 70%, transparent) 98%, transparent 100%);
-  filter: blur(0.5px);
-}
-
-/* 3. Expandable Buttons : un bouton + deux lignes qui s'en échappent */
-.motif--expandable-button::before {
-  content: "";
-  width: 88px; height: 52px;
-  background:
-    linear-gradient(var(--accent), var(--accent)) 50% 0 / 58px 18px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 34%, transparent), color-mix(in srgb, var(--accent) 34%, transparent)) 50% 27px / 74px 9px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 24%, transparent), color-mix(in srgb, var(--accent) 24%, transparent)) 50% 42px / 74px 9px no-repeat;
-  border-radius: 12px;
-}
-
-/* 4. Floating Dock : quatre pastilles, la première soulevée.
-   Positions en PIXELS : la dernière pastille reste dans le cadre. */
-.motif--floating-dock::before {
-  content: "";
-  width: 88px; height: 40px;
-  background:
-    radial-gradient(circle 14px at 14px 14px, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 11px at 38px 25px, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 11px at 60px 25px, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 11px at 80px 25px, color-mix(in srgb, var(--accent) 46%, transparent) 98%, transparent 100%);
-}
-
-/* 5. Experimental Nav : trois capsules, indicateur sous la deuxième */
-.motif--experimental-nav::before {
-  content: "";
-  width: 90px; height: 28px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: linear-gradient(
-    90deg,
-    transparent 0 22px,
-    color-mix(in srgb, var(--accent) 62%, transparent) 22px 48px,
-    transparent 48px 100%
+/* ------------------------------------------------------------- Filtre goo */
+export function GooFilter() {
+  return (
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: "absolute" }}>
+      <defs>
+        <filter id="morph-goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+            result="goo"
+          />
+          <feBlend in="SourceGraphic" in2="goo" />
+        </filter>
+      </defs>
+    </svg>
   );
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 
-/* 6. Morphing Shapes : deux silhouettes superposées en fantôme */
-.motif--morphing-shapes::before,
-.motif--morphing-shapes::after {
-  content: "";
-  position: absolute;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 50%, transparent), transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-}
-.motif--morphing-shapes::before {
-  width: 64px; height: 64px;
-  border-radius: 50%;
-  transform: translate(-7px, -4px);
-  opacity: 0.45;
-}
-.motif--morphing-shapes::after {
-  width: 64px; height: 64px;
-  border-radius: 22% 78% 62% 38% / 46% 34% 66% 54%;
-  transform: translate(6px, 6px);
+/* ------------------------------------------------------- 1. Liquid Glass */
+function LiquidGlass({ bounce }: PatternProps) {
+  const { state } = useStudio();
+  const [pressed, setPressed] = useState(false);
+  const [tilt, setTilt] = useState(0);
+
+  const track = useCallback(
+    (clientX: number, el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      const rel = (clientX - r.left) / r.width - 0.5;
+      setTilt(-rel * 10 * (1 + bounce));
+    },
+    [bounce]
+  );
+
+  return (
+    <button
+      type="button"
+      className="glass-host"
+      style={{ transform: `scale(var(--size)) rotateX(${tilt}deg)` } as CSSProperties}
+      onPointerDown={(e) => {
+        setPressed(true);
+        track(e.clientX, e.currentTarget);
+      }}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => {
+        setPressed(false);
+        setTilt(0);
+      }}
+      onPointerMove={(e) => track(e.clientX, e.currentTarget)}
+      aria-pressed={pressed}
+    >
+      <span className="stack" aria-hidden="true">
+        <span
+          className={`stack__layer m m--${state.material} shape--${state.shape}`}
+          style={{ "--i": 2 } as CSSProperties}
+        />
+        <span
+          className={`stack__layer m m--${state.material} shape--${state.shape}`}
+          style={{ "--i": 1 } as CSSProperties}
+        />
+        <span
+          className={`stack__layer m m--${state.material} shape--${state.shape}`}
+          style={{ "--i": 0 } as CSSProperties}
+        />
+      </span>
+      <span className="subject__label">Liquid Glass</span>
+      <span className="subject__sub">
+        {pressed ? "Reflet incliné" : "Glissez le doigt : le reflet s'incline"}
+      </span>
+    </button>
+  );
 }
 
-/* 7. Radial Menu : un centre + cinq points en cercle.
-   Positions en PIXELS : centre à 44,44 pour un cadre de 88. */
-.motif--radial-menu::before {
-  content: "";
-  width: 88px; height: 88px;
-  background:
-    radial-gradient(circle 12px at 44px 44px, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 44px 12px, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 75px 34px, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 64px 74px, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 24px 74px, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 8px at 13px 34px, color-mix(in srgb, var(--accent) 60%, transparent) 98%, transparent 100%);
+/* ------------------------------------------------------------- 2. Gooey */
+function Gooey({ bounce }: PatternProps) {
+  const { state } = useStudio();
+  const [merged, setMerged] = useState(false);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setMerged((v) => !v), 1600 + (1 - bounce) * 900);
+    return () => window.clearInterval(id);
+  }, [bounce]);
+
+  return (
+    <button
+      type="button"
+      className={`goo${merged ? " goo--on" : ""}`}
+      onClick={() => setMerged((v) => !v)}
+      aria-pressed={merged}
+      aria-label={`Métaballes ${merged ? "fusionnées" : "séparées"}. Activer pour inverser.`}
+    >
+      <span className={`goo__blob m m--${state.material}`} />
+      <span className={`goo__blob m m--${state.material}`} />
+      <span className={`goo__blob m m--${state.material}`} />
+      <span className={`goo__blob m m--${state.material}`} />
+    </button>
+  );
 }
 
-/* 8. Kinetic : six barres de hauteurs franchement différentes */
-.motif--kinetic::before {
-  content: "";
-  width: 88px;
-  height: 64px;
-  background:
-    linear-gradient(var(--accent), var(--accent)) 0 50% / 9px 26px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 55%, transparent), color-mix(in srgb, var(--accent) 55%, transparent)) 15px 50% / 9px 50px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) 30px 50% / 9px 38px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 70%, transparent), color-mix(in srgb, var(--accent) 70%, transparent)) 45px 50% / 9px 60px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent) 40%, transparent)) 60px 50% / 9px 22px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) 75px 50% / 9px 44px no-repeat;
-  background-color: transparent;
-  border-radius: 6px;
+/* -------------------------------------------------- 3. Expandable Button */
+function ExpandableButton() {
+  const { state } = useStudio();
+  const [open, setOpen] = useState(false);
+  const [chosen, setChosen] = useState<string | null>(null);
+  const actions = ["Partager", "Épingler", "Exporter"];
+
+  return (
+    <div style={{ display: "grid", gap: "var(--s-2)", justifyItems: "center", width: "100%" }}>
+      <button
+        type="button"
+        className={`subject m m--${state.material} shape--${state.shape}`}
+        aria-expanded={open}
+        aria-controls="expand-extra"
+        onClick={() => setOpen((v) => !v)}
+        style={{ minWidth: 0, padding: "var(--s-3) var(--s-5)" }}
+      >
+        <span className="subject__label">{chosen ?? (open ? "Fermer" : "Actions rapides")}</span>
+        <span className="subject__sub" aria-hidden="true">{open ? "▲" : "▼"}</span>
+      </button>
+
+      <div id="expand-extra" className={`expand__extra${open ? " expand__extra--open" : ""}`}>
+        <div>
+          {actions.map((a) => (
+            <button
+              key={a}
+              type="button"
+              className={`btn btn--sm m m--${state.material}`}
+              style={{ minHeight: 40, justifyContent: "center" }}
+              onClick={() => {
+                setChosen(a);
+                setOpen(false);
+              }}
+            >
+              {a}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-/* 9. Lens : un rectangle + un cercle agrandi par-dessus */
-.motif--lens::before,
-.motif--lens::after {
-  content: "";
-  position: absolute;
-}
-.motif--lens::before {
-  width: 88px; height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(160deg, rgba(255,255,255,0.14), transparent);
-  border: 1px solid rgba(255,255,255,0.14);
-}
-.motif--lens::after {
-  width: 42px; height: 42px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  background: color-mix(in srgb, var(--accent) 34%, transparent);
-  box-shadow: 0 0 0 9999px rgba(6,5,9,0.28);
-  transform: translate(12px, 5px);
+/* ------------------------------------------------------ 4. Floating Dock */
+function FloatingDock() {
+  const { state } = useStudio();
+  const [active, setActive] = useState(0);
+  const items = ["Accueil", "Studio", "Docs", "Réglages"];
+  const glyphs = ["◇", "◈", "▤", "⚙"];
+
+  return (
+    <div style={{ display: "grid", gap: "var(--s-4)", justifyItems: "center" }}>
+      <div className="demo-dock" role="tablist" aria-label="Destinations de démonstration">
+        {items.map((label, i) => (
+          <button
+            key={label}
+            type="button"
+            role="tab"
+            aria-selected={i === active}
+            className={`demo-dock__item m m--${state.material} shape--${state.shape}`}
+            onClick={() => setActive(i)}
+            title={label}
+          >
+            <span aria-hidden="true" style={{ fontSize: "1.125rem" }}>{glyphs[i]}</span>
+            <span className="visually-hidden">{label}</span>
+          </button>
+        ))}
+      </div>
+      <p className="mono" style={{ color: "var(--text-dim)", fontSize: "0.75rem" }} aria-live="polite">
+        Destination : {items[active]}
+      </p>
+    </div>
+  );
 }
 
-/* 10. Collapsible : deux blocs, le second replié */
-.motif--collapsible::before {
-  content: "";
-  width: 88px; height: 60px;
-  background:
-    linear-gradient(var(--accent), var(--accent)) 0 0 / 88px 24px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent) 40%, transparent)) 0 33px / 88px 9px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent) 22%, transparent)) 0 48px / 88px 9px no-repeat;
-  border-radius: 10px;
+/* ------------------------------------------------- 5. Experimental Nav */
+function ExperimentalNav() {
+  const { state } = useStudio();
+  const [active, setActive] = useState(0);
+  const [rect, setRect] = useState({ x: 0, w: 0 });
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const tabs = ["Données", "Styles", "Motion"];
+
+  const measure = useCallback(() => {
+    const el = refs.current[active];
+    if (!el) return;
+    setRect({ x: el.offsetLeft, w: el.offsetWidth });
+  }, [active]);
+
+  useEffect(() => {
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [measure]);
+
+  return (
+    <div style={{ display: "grid", gap: "var(--s-3)", justifyItems: "center" }}>
+      <div
+        className={`demo-nav m m--${state.material} shape--${state.shape}`}
+        role="tablist"
+        aria-label="Onglets de démonstration"
+      >
+        <span
+          className="demo-nav__ind"
+          style={{ transform: `translateX(${rect.x}px)`, width: rect.w }}
+          aria-hidden="true"
+        />
+        {tabs.map((t, i) => (
+          <button
+            key={t}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            type="button"
+            role="tab"
+            aria-selected={i === active}
+            tabIndex={i === active ? 0 : -1}
+            className="demo-nav__btn"
+            onClick={() => setActive(i)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight") setActive((v) => (v + 1) % tabs.length);
+              if (e.key === "ArrowLeft") setActive((v) => (v - 1 + tabs.length) % tabs.length);
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      <p className="mono" style={{ color: "var(--text-dim)", fontSize: "0.75rem" }} aria-live="polite">
+        Panneau actif : {tabs[active]}
+      </p>
+    </div>
+  );
 }
 
-/* 11. Expressive Motion : un cercle + deux échos de rebond */
-.motif--expressive-motion::before {
-  content: "";
-  width: 88px; height: 72px;
-  background:
-    radial-gradient(circle 15px at 55px 25px, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 10px at 37px 45px, color-mix(in srgb, var(--accent) 42%, transparent) 98%, transparent 100%),
-    radial-gradient(circle 6px at 23px 59px, color-mix(in srgb, var(--accent) 22%, transparent) 98%, transparent 100%);
+/* ----------------------------------------------------- 6. Morphing Shapes */
+function MorphingShapes() {
+  const { state } = useStudio();
+  const stages = ["50%", "18px", "0px", "34%", "999px"];
+  const [i, setI] = useState(0);
+
+  return (
+    <button
+      type="button"
+      className="subject"
+      style={{
+        display: "grid",
+        gap: "var(--s-2)",
+        justifyItems: "center",
+        background: "none",
+        border: 0,
+        padding: 0,
+        minWidth: 0,
+      }}
+      onClick={() => setI((v) => (v + 1) % stages.length)}
+      aria-label="Morphing Shapes : toucher pour changer de forme"
+    >
+      <span
+        className={`morph m m--${state.material}`}
+        aria-hidden="true"
+        style={{ borderRadius: stages[i] } as CSSProperties}
+      />
+      <span className="subject__sub">Forme {i + 1}/{stages.length} — toucher</span>
+    </button>
+  );
 }
 
-/* 12. Contextual Toolbars : deux lignes + une barre flottante */
-.motif--contextual-toolbar::before {
-  content: "";
-  width: 88px; height: 62px;
-  background:
-    linear-gradient(color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent) 26%, transparent)) 50% 0 / 74px 11px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent) 26%, transparent)) 50% 16px / 74px 11px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) 50% 42px / 88px 18px no-repeat;
-  border-radius: 11px;
+/* --------------------------------------------------------- 7. Radial Menu */
+function RadialMenu({ bounce }: PatternProps) {
+  const { state } = useStudio();
+  const [open, setOpen] = useState(false);
+  const actions = ["Copier", "Partager", "Nouveau", "Supprimer", "Favori"];
+
+  return (
+    <div className={`radial${open ? " radial--open" : ""}`}>
+      <button
+        type="button"
+        className={`radial__center m m--${state.material} shape--circle`}
+        aria-expanded={open}
+        aria-label={open ? "Fermer le menu radial" : "Ouvrir le menu radial"}
+        onClick={() => setOpen((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
+      >
+        {open ? "×" : "+"}
+      </button>
+      {actions.map((a, i) => {
+        const angle = (-90 + (360 / actions.length) * i) * (Math.PI / 180);
+        const r = 78 * (1 + bounce * 0.1);
+        const style: CSSProperties = {
+          "--x": `${Math.cos(angle) * r}px`,
+          "--y": `${Math.sin(angle) * r}px`,
+          transitionDelay: `${i * 26}ms`,
+        } as CSSProperties;
+        return (
+          <button
+            key={a}
+            type="button"
+            className={`radial__item m m--${state.material} shape--circle`}
+            style={style}
+            tabIndex={open ? 0 : -1}
+            onClick={() => setOpen(false)}
+            title={a}
+          >
+            <span aria-hidden="true">{a.slice(0, 2)}</span>
+            <span className="visually-hidden">{a}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
-/* 13. Sheet Drag : un panneau bas avec sa poignée */
-.motif--sheet-drag::before,
-.motif--sheet-drag::after {
-  content: "";
-  position: absolute;
-}
-.motif--sheet-drag::before {
-  width: 88px; height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(160deg, rgba(255,255,255,0.12), transparent);
-  border: 1px solid rgba(255,255,255,0.14);
-}
-.motif--sheet-drag::after {
-  width: 68px; height: 25px;
-  border-radius: 12px 12px 6px 6px;
-  background: var(--accent);
-  transform: translate(0, 17px);
-  box-shadow: inset 0 5px 0 -3px rgba(255,255,255,0.55);
+/* ------------------------------------------------- 8. Kinetic Interactions */
+function Kinetic() {
+  const { state } = useStudio();
+  const [amp, setAmp] = useState(0.2);
+  const base = [0.3, 0.55, 0.85, 0.6, 0.35, 0.5];
+
+  return (
+    <div style={{ display: "grid", gap: "var(--s-3)", width: "100%", justifyItems: "center" }}>
+      <p className="mono" style={{ color: "var(--text-dim)", fontSize: "0.75rem" }}>Force</p>
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.01}
+        value={amp}
+        aria-label="Force de la déformation cinétique"
+        onChange={(e) => setAmp(Number.parseFloat(e.target.value))}
+        style={{ width: "70%", accentColor: "var(--accent)" }}
+      />
+      <div className="kinetic" aria-hidden="true">
+        {base.map((h, i) => (
+          <span
+            key={i}
+            className={`kinetic__bar m m--${state.material}`}
+            style={
+              {
+                height: `${24 + h * 62 * (0.4 + amp)}px`,
+                animation: `kinetic-${i % 3} ease-in-out infinite`,
+                "--kinetic-dur": `${(2.4 - amp * 1.4).toFixed(2)}s`,
+              } as CSSProperties
+            }
+          />
+        ))}
+      </div>
+    </div>
+  );
 }
 
-/* 14. Parallax Layers : trois plans décalés horizontalement */
-.motif--parallax-layers::before {
-  content: "";
-  width: 88px; height: 56px;
-  background:
-    linear-gradient(color-mix(in srgb, var(--accent) 76%, transparent), color-mix(in srgb, var(--accent) 76%, transparent)) 0 0 / 54px 34px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 46%, transparent), color-mix(in srgb, var(--accent) 46%, transparent)) 21px 11px / 54px 34px no-repeat,
-    linear-gradient(color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent) 22%, transparent)) 42px 22px / 46px 34px no-repeat;
-  border-radius: 10px;
+/* ------------------------------------------------------- 9. Lens / Loupe */
+function Lens() {
+  const { state } = useStudio();
+  const [pos, setPos] = useState({ x: 50, y: 50 });
+
+  const move = useCallback((clientX: number, clientY: number, el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    setPos({
+      x: ((clientX - r.left) / r.width) * 100,
+      y: ((clientY - r.top) / r.height) * 100,
+    });
+  }, []);
+
+  return (
+    <div
+      className={`lens m m--${state.material} shape--${state.shape}`}
+      onPointerDown={(e) => move(e.clientX, e.clientY, e.currentTarget)}
+      onPointerMove={(e) => move(e.clientX, e.clientY, e.currentTarget)}
+      onPointerLeave={() => setPos({ x: 50, y: 50 })}
+    >
+      <span aria-hidden="true">DÉTAIL · 0123</span>
+      <span className="lens__glass" style={{ left: `${pos.x}%`, top: `${pos.y}%` }} aria-hidden="true" />
+    </div>
+  );
 }
 
-/* 15. Swipe Stack : trois cartes en éventail */
-.motif--swipe-stack::before,
-.motif--swipe-stack::after {
-  content: "";
-  position: absolute;
-  border-radius: 12px;
-}
-.motif--swipe-stack::before {
-  width: 74px; height: 46px;
-  border: 1px solid rgba(255,255,255,0.16);
-  transform: translate(7px, -9px) rotate(6deg);
-}
-.motif--swipe-stack::after {
-  width: 74px; height: 46px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 62%, transparent), transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 44%, transparent);
-  transform: translate(-6px, 4px) rotate(-7deg);
+/* ------------------------------------------------------ 10. Collapsible */
+function Collapsible() {
+  const { state } = useStudio();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{ display: "grid", gap: "var(--s-2)", width: "100%", maxWidth: 260 }}>
+      <button
+        type="button"
+        className={`subject m m--${state.material} shape--${state.shape}`}
+        aria-expanded={open}
+        aria-controls="collapse-panel"
+        onClick={() => setOpen((v) => !v)}
+        style={{ minWidth: 0, width: "100%" }}
+      >
+        <span className="subject__label">Réglages avancés</span>
+        <span className="subject__sub" aria-hidden="true">{open ? "▲" : "▼"}</span>
+      </button>
+      <div id="collapse-panel" className={`collapse__panel${open ? " collapse__panel--open" : ""}`}>
+        <div>
+          <p className="mono" style={{ color: "var(--text-dim)", fontSize: "0.6875rem", lineHeight: 1.6 }}>
+            Contenu réellement révélé : la hauteur est animée par grid-template-rows 0fr → 1fr,
+            sans hauteur fixe codée en dur.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-/* 16. Ripple Surface : un centre + trois ondes concentriques */
-.motif--ripple-surface::before {
-  content: "";
-  width: 88px; height: 88px;
-  background:
-    radial-gradient(circle 6px at 44px 44px, var(--accent) 98%, transparent 100%),
-    radial-gradient(circle 16px at 44px 44px, transparent 96%, color-mix(in srgb, var(--accent) 58%, transparent) 97%, transparent 100%),
-    radial-gradient(circle 29px at 44px 44px, transparent 96%, color-mix(in srgb, var(--accent) 34%, transparent) 97%, transparent 100%),
-    radial-gradient(circle 42px at 44px 44px, transparent 96%, color-mix(in srgb, var(--accent) 18%, transparent) 97%, transparent 100%);
+/* ----------------------------------------------- 11. Expressive Motion */
+function ExpressiveMotion({ bounce }: PatternProps) {
+  const { state } = useStudio();
+  const [fired, setFired] = useState(false);
+
+  return (
+    <button
+      type="button"
+      className="subject"
+      style={{
+        display: "grid",
+        gap: "var(--s-2)",
+        justifyItems: "center",
+        background: "none",
+        border: 0,
+        padding: 0,
+        minWidth: 0,
+      }}
+      onClick={() => {
+        setFired(false);
+        window.requestAnimationFrame(() => setFired(true));
+      }}
+      aria-label="Déclencher l'animation élastique"
+    >
+      <span
+        className={`spring-ball m m--${state.material}`}
+        aria-hidden="true"
+        style={{
+          borderRadius: "50%",
+          transform: fired
+            ? `translateY(${(-16 * (1 + bounce)).toFixed(1)}px) scale(1.12)`
+            : "translateY(0) scale(1)",
+        }}
+      />
+      <span className="subject__sub">Rebond ×{(1 + bounce).toFixed(2)} — toucher</span>
+    </button>
+  );
 }
 
-/* ==========================================================================
-   13-16. PATTERNS AJOUTÉS : Sheet Drag, Parallax, Swipe Stack, Ripple.
-   Aucun de ces conteneurs ne définit background-color ou background-image :
-   la surface appartient au matériau (.m), sinon il serait écrasé.
-   ========================================================================== */
+/* --------------------------------------------- 12. Contextual Toolbar ---
+   La barre apparaît quand au moins un élément est sélectionné, et CHAQUE
+   bouton agit réellement. Aucune action n'est décorative. */
+const INITIAL_ITEMS = ["Élément A", "Élément B", "Élément C"];
 
-.sheet-demo {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--s-2);
-  align-content: start;
-}
-.sheet-demo:not(.sheet-demo--top) { align-content: end; }
-.sheet-demo--top { align-content: start; }
+function ContextualToolbar() {
+  const { state } = useStudio();
+  const [items, setItems] = useState<string[]>(INITIAL_ITEMS);
+  const [selected, setSelected] = useState<number[]>([]);
+  const [flash, setFlash] = useState<string | null>(null);
 
-.sheet {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  align-self: end;
-  transition: height calc(var(--dur) * var(--speed-mul)) var(--ease-spring);
-}
-.sheet-demo--top .sheet { align-self: start; }
+  const selecting = selected.length > 0;
 
-.sheet__handle {
-  display: grid;
-  place-items: center;
-  min-height: 48px;
-  cursor: grab;
-  touch-action: none;
-  position: relative;
-  z-index: 3;
-}
-.sheet__handle:active { cursor: grabbing; }
+  const toggle = (i: number) => {
+    setSelected((prev) => (prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i]));
+  };
 
-.sheet__grip {
-  width: 44px;
-  height: 5px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.4);
-  pointer-events: none;
-}
+  const duplicate = () => {
+    const copies = selected.map((i) => `${items[i]} (copie)`);
+    setItems((prev) => [...prev, ...copies]);
+    setFlash(`${copies.length} élément${copies.length > 1 ? "s" : ""} dupliqué${copies.length > 1 ? "s" : ""}`);
+    setSelected([]);
+  };
 
-.parallax {
-  position: relative;
-  width: 100%;
-  height: 140px;
-  overflow: hidden;
-  isolation: isolate;
-}
+  const remove = () => {
+    const n = selected.length;
+    setItems((prev) => prev.filter((_, i) => !selected.includes(i)));
+    setFlash(`${n} élément${n > 1 ? "s" : ""} supprimé${n > 1 ? "s" : ""}`);
+    setSelected([]);
+  };
 
-.parallax__layer {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 110px;
-  height: 90px;
-  margin: -45px 0 0 -55px;
-  border-radius: calc(var(--radius) * 1px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-out);
-}
-.parallax__layer:nth-child(1) { width: 136px; height: 100px; margin: -50px 0 0 -68px; }
-.parallax__layer:nth-child(2) { width: 120px; height: 95px; margin: -47px 0 0 -60px; }
-.parallax__layer:nth-child(3) { width: 104px; height: 90px; margin: -45px 0 0 -52px; }
+  const clearSelection = () => {
+    setSelected([]);
+    setFlash(null);
+  };
 
-.stack-demo {
-  position: relative;
-  width: 100%;
-  max-width: 220px;
-  height: 150px;
-  display: grid;
-  place-items: center;
-}
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
+      <div style={{ display: "grid", gap: "var(--s-2)", width: "100%", maxWidth: 240 }}>
+        {items.map((label, i) => {
+          const on = selected.includes(i);
+          return (
+            <button
+              key={`${label}-${i}`}
+              type="button"
+              className={`subject m m--${state.material} shape--${state.shape}`}
+              aria-pressed={on}
+              onClick={() => toggle(i)}
+              style={{
+                minWidth: 0,
+                width: "100%",
+                padding: items.length <= 4 ? "var(--s-3)" : "10px",
+                boxShadow: on ? "0 0 0 2px var(--accent)" : undefined,
+              }}
+            >
+              <span className="subject__label" style={{ fontSize: "0.8125rem" }}>
+                {on ? "✓ " : ""}{label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-.stack-demo__card {
-  position: absolute;
-  width: 100%;
-  min-height: 98px;
-  display: grid;
-  place-items: center;
-  padding: var(--s-3);
-  transition: transform calc(var(--dur) * var(--speed-mul)) var(--ease-spring),
-    opacity var(--dur) var(--ease-out);
-  touch-action: none;
-  cursor: grab;
-}
-.stack-demo__card:active { cursor: grabbing; }
+      {selecting && (
+        <div className="ctx-bar" role="toolbar" aria-label="Actions sur la sélection">
+          <button type="button" className="ctx-bar__btn" onClick={duplicate}>
+            Dupliquer
+          </button>
+          <button type="button" className="ctx-bar__btn" onClick={remove}>
+            Supprimer
+          </button>
+          <button type="button" className="ctx-bar__btn" onClick={clearSelection}>
+            Désélectionner
+          </button>
+          <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }} aria-live="polite">
+            {selected.length}
+          </span>
+        </div>
+      )}
 
-.ripple { position: relative; overflow: hidden; }
-
-.ripple__wave {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  margin: -5px 0 0 -5px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  pointer-events: none;
-  z-index: 2;
-  animation: ripple-out calc(900ms * var(--speed-mul)) var(--ease-out) forwards;
+      {flash && (
+        <p
+          className="mono"
+          style={{ position: "absolute", bottom: 0, fontSize: "0.625rem", color: "var(--accent)" }}
+          aria-live="polite"
+        >
+          {flash}
+        </p>
+      )}
+    </div>
+  );
 }
 
-@keyframes ripple-out {
-  from { transform: scale(1); opacity: 0.85; }
-  to   { transform: scale(calc(18 * var(--ripple-scale, 1))); opacity: 0; }
-}
+/* ------------------------------------------------------------ Registre */
+export const PATTERN_RENDERERS: Record<PatternId, (p: PatternProps) => JSX.Element> = {
+  "liquid-glass": LiquidGlass,
+  gooey: Gooey,
+  "expandable-button": ExpandableButton,
+  "floating-dock": FloatingDock,
+  "experimental-nav": ExperimentalNav,
+  "morphing-shapes": MorphingShapes,
+  "radial-menu": RadialMenu,
+  kinetic: Kinetic,
+  lens: Lens,
+  collapsible: Collapsible,
+  "expressive-motion": ExpressiveMotion,
+  "contextual-toolbar": ContextualToolbar,
+  "sheet-drag": SheetDrag,
+  "parallax-layers": ParallaxLayers,
+  "swipe-stack": SwipeStack,
+  "ripple-surface": RippleSurface,
+};
