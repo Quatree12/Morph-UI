@@ -1,5 +1,7 @@
 import { PATTERNS, PATTERN_MAP } from "../data/patterns";
-import { MATERIAL_MAP } from "../data/materials";
+import { MATERIALS, MATERIAL_MAP } from "../data/materials";
+import { SHAPES } from "../data/shapes";
+import { COLORS } from "../data/colors";
 import { useStudio } from "../state/context";
 import { PhoneFrame } from "../previews/PhoneFrame";
 import { PATTERN_RENDERERS } from "../previews";
@@ -16,6 +18,7 @@ export function Home({ onNavigate }: Props) {
 
   return (
     <section style={{ display: "grid", gap: "var(--s-6)" }}>
+      {/* ------------------------------------------------------ Héro */}
       <header style={{ display: "grid", gap: "var(--s-4)", paddingTop: "var(--s-4)" }}>
         <div className="eyebrow">Experimental Design Atlas</div>
         <h1 style={{ maxWidth: "18ch" }}>
@@ -42,14 +45,17 @@ export function Home({ onNavigate }: Props) {
       {/* Statistiques calculées depuis le contenu réel, jamais en dur. */}
       <div className="grid-stats">
         <Stat label="Patterns" value={String(PATTERNS.length)} note="familles d'interaction" />
-        <Stat label="Materials" value="9" note="matières numériques" />
+        <Stat label="Materials" value={String(MATERIALS.length)} note="matières numériques" />
+        <Stat label="Shapes" value={String(SHAPES.length)} note="géométries d'objet" />
+        <Stat label="Accents" value={String(COLORS.length)} note="couleurs d'accent" />
         <Stat label="Favorites" value={String(favorites.length)} note="patterns enregistrés" />
         <Stat label="Saved" value={String(creations.length)} note="créations personnelles" />
       </div>
 
+      {/* -------------------------------------------- Familles d'interaction */}
       <div className="section-head">
         <h2>Sélection à découvrir</h2>
-        <p className="muted">Aperçus animés en direct sur la maquette.</p>
+        <p className="muted">Trois patterns choisis pour leur comportement distinctif.</p>
       </div>
 
       <div className="grid-cards">
@@ -75,6 +81,7 @@ export function Home({ onNavigate }: Props) {
         })}
       </div>
 
+      {/* --------------------------------------------- Dernières expérimentations */}
       <div className="section-head">
         <h2>Dernières expérimentations</h2>
         <p className="muted">Votre configuration courante et vos créations enregistrées.</p>
@@ -118,6 +125,7 @@ export function Home({ onNavigate }: Props) {
         )}
       </div>
 
+      {/* ---------------------------------------- Accès rapide */}
       <div className="section-head">
         <h2>Accès rapide</h2>
       </div>
@@ -136,9 +144,12 @@ export function Home({ onNavigate }: Props) {
         </button>
       </div>
 
+      {/* --------------------------------------------- Familles d'interactions */}
       <div className="section-head">
         <h2>Familles d'interaction</h2>
-        <p className="muted">Toutes implémentées avec de vrais composants HTML/CSS/JS.</p>
+        <p className="muted">
+          {PATTERNS.length} patterns, tous implémentés avec de vrais composants HTML/CSS/JS.
+        </p>
       </div>
       <div className="table-scroll card">
         <table className="doc-table">
@@ -161,9 +172,11 @@ export function Home({ onNavigate }: Props) {
         </table>
       </div>
 
+      {/* ------------------------------------------ Aperçu de la configuration */}
       <div className="panel">
         <div className="panel__head">
-          <div className="eyebrow">Aperçu de la maquette</div>
+          <div className="eyebrow">Aperçu de la configuration courante</div>
+          <span className="chip">{MATERIAL_MAP[state.material].name}</span>
         </div>
         <div className="panel__body">
           <PhoneFrame showBadges={false}>
@@ -172,6 +185,17 @@ export function Home({ onNavigate }: Props) {
               return <R bounce={state.spring} />;
             })()}
           </PhoneFrame>
+          <p
+            className="mono"
+            style={{
+              fontSize: "0.6875rem",
+              color: "var(--text-faint)",
+              textAlign: "center",
+              margin: 0,
+            }}
+          >
+            {PATTERN_MAP[state.pattern].name} · {state.shape} · {state.color}
+          </p>
         </div>
       </div>
     </section>
