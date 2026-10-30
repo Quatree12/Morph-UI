@@ -62,20 +62,11 @@ export function Playground() {
             </div>
           </div>
           <div className="panel__body">
+            {/* Aucune consigne générique ici : chaque pattern affiche la sienne,
+                exacte, dans son propre sous-titre. */}
             <PhoneFrame>
               <Renderer bounce={state.spring} />
             </PhoneFrame>
-            <p
-              className="mono"
-              style={{
-                fontSize: "0.6875rem",
-                color: "var(--text-faint)",
-                textAlign: "center",
-                margin: 0,
-              }}
-            >
-              Touchez les composants dans la maquette
-            </p>
           </div>
         </div>
       </div>
