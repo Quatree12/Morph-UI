@@ -7,42 +7,40 @@ import {
   exportTailwind,
   exportLimitations,
 } from "../lib/exporters";
-import { downloadCode } from "../lib/download";
+import { downloadCode, prepareExport } from "../lib/download";
 import type { ExportFormat } from "../lib/download";
 import { CopyButton } from "../components/ClipboardButton";
+import { Group } from "../components/Controls";
 import { PATTERN_MAP } from "../data/patterns";
 import { MATERIAL_MAP } from "../data/materials";
 
-const FORMATS: Array<{ id: ExportFormat; label: string; hint: string; file: string }> = [
+const FORMATS: Array<{ id: ExportFormat; label: string; hint: string }> = [
   {
     id: "css",
     label: "CSS",
     hint: "Styles, matériau, ombres, transitions et états actifs.",
-    file: "un fichier .css",
   },
   {
     id: "tailwind",
     label: "Tailwind",
     hint: "Classes utilitaires en valeurs arbitraires, avec la correspondance des réglages.",
-    file: "un fichier .jsx",
   },
   {
     id: "react",
     label: "React",
     hint: "Structure du composant, état et attributs d'accessibilité.",
-    file: "un fichier .tsx",
   },
   {
     id: "framer",
     label: "Framer Motion",
     hint: "Structure React + animations et transitions physiques.",
-    file: "un fichier .tsx",
   },
 ];
 
 export function CodeExport() {
   const { state } = useStudio();
   const [format, setFormat] = useState<ExportFormat>("css");
+  /** Nom du dernier fichier produit, pour l'accusé de réception. */
   const [saved, setSaved] = useState<string | null>(null);
 
   const code =
@@ -57,6 +55,9 @@ export function CodeExport() {
   const limitations = exportLimitations(state, format);
   const active = FORMATS.find((f) => f.id === format)!;
   const pattern = PATTERN_MAP[state.pattern];
+
+  /* Le nom et l'extension viennent de prepareExport : rien en dur ici. */
+  const file = prepareExport(format, state.pattern);
 
   return (
     <section style={{ display: "grid", gap: "var(--s-5)" }}>
@@ -101,20 +102,35 @@ export function CodeExport() {
               type="button"
               className="btn btn--sm btn--outline"
               onClick={() => {
-                downloadCode(format, state.pattern, code);
-                setSaved(active.file);
+                const produced = downloadCode(format, state.pattern, code);
+                setSaved(produced.name);
               }}
             >
-              Télécharger {active.file}
+              Télécharger .{file.ext}
             </button>
+          </div>
+
+          {/* Le détail : nom exact du fichier, et rappel de ce qu'il contient. */}
+          <div
+            className="mono"
+            style={{
+              display: "grid",
+              gap: 4,
+              fontSize: "0.6875rem",
+              color: "var(--text-faint)",
+              lineHeight: 1.6,
+            }}
+          >
+            <span>
+              Fichier :{" "}
+              <span style={{ color: "var(--brand-light)" }}>{file.name}</span>
+            </span>
+            <span>
+              Format {active.label} · {file.mime} · {code.length.toLocaleString("fr-CH")} caractères
+            </span>
             {saved && (
-              <span
-                role="status"
-                aria-live="polite"
-                className="mono"
-                style={{ fontSize: "0.6875rem", color: "var(--brand-light)" }}
-              >
-                Fichier généré.
+              <span role="status" aria-live="polite" style={{ color: "var(--brand-light)" }}>
+                {saved} téléchargé.
               </span>
             )}
           </div>
