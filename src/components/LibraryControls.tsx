@@ -10,7 +10,7 @@ import type { MaterialId, PatternId, ShapeId } from "../state/types";
 export function PatternPicker() {
   const { state, set } = useStudio();
   return (
-    <Group title="Interaction Pattern" badge={String(PATTERNS.length)} defaultOpen>
+    <Group title="Interaction Pattern" badge={String(PATTERNS.length)}>
       <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0, lineHeight: 1.5 }}>
         Choisit le comportement de la maquette : chaque pattern a sa propre composition,
         sa géométrie et son animation.
@@ -31,8 +31,10 @@ export function PatternPicker() {
                 padding: "8px 12px",
                 textAlign: "left",
                 borderRadius: "var(--r-sm)",
-                border: `1px solid ${active ? "color-mix(in srgb, var(--accent) 46%, transparent)" : "var(--border)"}`,
-                background: active ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "var(--surface-2)",
+                border: `1px solid ${active ? "var(--brand-light)" : "var(--border)"}`,
+                background: active
+                  ? "color-mix(in srgb, var(--brand) 45%, transparent)"
+                  : "var(--surface-2)",
                 color: "var(--text)",
               }}
             >
@@ -52,7 +54,7 @@ export function PatternPicker() {
 export function MaterialPicker() {
   const { state, set } = useStudio();
   return (
-    <Group title="Material" badge={String(MATERIALS.length)} defaultOpen>
+    <Group title="Material" badge={String(MATERIALS.length)}>
       <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0, lineHeight: 1.5 }}>
         Peint la surface de l'objet principal : transparence, reflets, texture et profondeur.
       </p>
@@ -71,7 +73,7 @@ export function MaterialPicker() {
                 gap: 6,
                 padding: 6,
                 borderRadius: "var(--r-sm)",
-                border: `1px solid ${active ? "color-mix(in srgb, var(--accent) 60%, transparent)" : "var(--border)"}`,
+                border: `1px solid ${active ? "var(--brand-light)" : "var(--border)"}`,
                 background: "transparent",
                 color: active ? "var(--text)" : "var(--text-dim)",
               }}
@@ -120,8 +122,8 @@ export function ShapePicker() {
                 justifyItems: "center",
                 padding: 6,
                 borderRadius: "var(--r-sm)",
-                border: `1px solid ${on ? "color-mix(in srgb, var(--accent) 60%, transparent)" : "var(--border)"}`,
-                background: on ? "color-mix(in srgb, var(--accent) 12%, transparent)" : "transparent",
+                border: `1px solid ${on ? "var(--brand-light)" : "var(--border)"}`,
+                background: on ? "color-mix(in srgb, var(--brand) 32%, transparent)" : "transparent",
                 color: on ? "var(--text)" : "var(--text-dim)",
               }}
             >
@@ -132,7 +134,7 @@ export function ShapePicker() {
                   width: 34,
                   height: 34,
                   display: "block",
-                  background: on ? undefined : "color-mix(in srgb, var(--accent) 26%, transparent)",
+                  background: on ? undefined : "color-mix(in srgb, var(--text) 14%, transparent)",
                   border: on ? undefined : "1px solid var(--border)",
                 }}
               />
@@ -164,13 +166,16 @@ export function ShapePicker() {
   );
 }
 
-/* ------------------------------------------------- Color (§10) */
+/* ------------------------------------------------- Color (§10)
+   SEUL endroit de l'interface où --accent est légitime : la pastille
+   sélectionnée est l'indicateur de VOTRE choix. */
 export function ColorPicker() {
   const { state, patch } = useStudio();
   return (
     <Group title="Color" badge={String(COLORS.length)}>
       <p className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)", margin: 0, lineHeight: 1.5 }}>
-        Couleur d'accent : bordures, halos, indicateurs actifs et états interactifs.
+        Couleur d'accent, appliquée à la maquette : bordures, halos, indicateurs actifs
+        et états interactifs.
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
         {COLORS.map((c) => {
@@ -189,7 +194,7 @@ export function ColorPicker() {
                 borderRadius: "50%",
                 background: c.hex,
                 border: active ? "3px solid var(--text)" : "1px solid var(--border)",
-                outline: active ? "2px solid color-mix(in srgb, var(--accent) 70%, transparent)" : "none",
+                outline: active ? "2px solid var(--brand-light)" : "none",
                 outlineOffset: 2,
               }}
             />
