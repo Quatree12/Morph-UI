@@ -56,16 +56,15 @@ function LiquidGlass({ bounce }: PatternProps) {
     (clientX: number, el: HTMLElement) => {
       const r = el.getBoundingClientRect();
       const rel = (clientX - r.left) / r.width - 0.5;
-      setTilt(-rel * 10 * (1 + bounce));
+      setTilt(-rel * 8 * (1 + bounce));
     },
     [bounce]
   );
 
   return (
-    <button
-      type="button"
+    <div
       className="glass-host"
-      style={{ transform: `scale(var(--size)) rotateX(${tilt}deg)` } as CSSProperties}
+      style={{ transform: `rotateX(${tilt}deg) scale(var(--size))` } as CSSProperties}
       onPointerDown={(e) => {
         setPressed(true);
         track(e.clientX, e.currentTarget);
@@ -76,27 +75,27 @@ function LiquidGlass({ bounce }: PatternProps) {
         setTilt(0);
       }}
       onPointerMove={(e) => track(e.clientX, e.currentTarget)}
-      aria-pressed={pressed}
     >
-      <span className="stack" aria-hidden="true">
-        <span
-          className={`stack__layer m m--${state.material} shape--${state.shape}`}
-          style={{ "--i": 2 } as CSSProperties}
-        />
-        <span
-          className={`stack__layer m m--${state.material} shape--${state.shape}`}
-          style={{ "--i": 1 } as CSSProperties}
-        />
-        <span
-          className={`stack__layer m m--${state.material} shape--${state.shape}`}
-          style={{ "--i": 0 } as CSSProperties}
-        />
-      </span>
-      <span className="subject__label">Liquid Glass</span>
-      <span className="subject__sub">
-        {pressed ? "Reflet incliné" : "Glissez le doigt : le reflet s'incline"}
-      </span>
-    </button>
+      {/* Le cadre contraint la pile : sans lui, les couches en position
+          absolue prennent la largeur du panneau et le backdrop-filter du
+          matériau déborde — c'est ce qui produisait le rectangle blanc. */}
+      <div className="glass-frame">
+        {[2, 1, 0].map((i) => (
+          <span
+            key={i}
+            className={`stack__layer m m--${state.material} shape--${state.shape}`}
+            style={{ "--i": i } as CSSProperties}
+            aria-hidden="true"
+          />
+        ))}
+        <span className="glass-frame__label">
+          <span className="subject__label">Liquid Glass</span>
+          <span className="subject__sub">
+            {pressed ? "Reflet incliné" : "Glissez le doigt : le reflet s'incline"}
+          </span>
+        </span>
+      </div>
+    </div>
   );
 }
 
