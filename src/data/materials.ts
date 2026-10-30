@@ -106,8 +106,6 @@ export const MATERIALS: MaterialDef[] = [
     alphaReactive: false,
     glowReactive: false,
   },
-
-  /* ------------------------- 6 nouveaux matériaux ------------------------- */
   {
     id: "holographic-foil",
     name: "Holographic Foil",
