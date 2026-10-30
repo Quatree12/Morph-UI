@@ -7,13 +7,15 @@ interface Props {
   children: ReactNode;
   expanded?: boolean;
   showBadges?: boolean;
-  /** Consigne affichée sous la maquette (remplace l'ancienne phrase creuse). */
-  hint?: string;
 }
 
 /** Le cadre de la maquette. Il ne porte NI matériau NI forme : ce sont les
- *  patterns qui les appliquent à leur objet principal, chacun à sa manière. */
-export function PhoneFrame({ children, expanded = false, showBadges = true, hint }: Props) {
+ *  patterns qui les appliquent à leur objet principal, chacun à sa manière.
+ *
+ *  La consigne d'usage n'est PAS rendue ici : elle appartient au Playground,
+ *  sous le cadre. L'insérer dans .phone__screen ajoutait un enfant au flex
+ *  column et faisait s'effondrer .phone__stage. */
+export function PhoneFrame({ children, expanded = false, showBadges = true }: Props) {
   const { state } = useStudio();
   const pattern = PATTERN_MAP[state.pattern];
   const material = MATERIAL_MAP[state.material];
@@ -36,22 +38,6 @@ export function PhoneFrame({ children, expanded = false, showBadges = true, hint
             <span className="chip">{material.name}</span>
             <span className="chip">{state.shape}</span>
           </div>
-        )}
-        {hint && (
-          <p
-            className="mono"
-            style={{
-              position: "relative",
-              zIndex: 6,
-              margin: 0,
-              padding: "0 var(--s-3) var(--s-3)",
-              fontSize: "0.625rem",
-              color: "var(--text-faint)",
-              textAlign: "center",
-            }}
-          >
-            {hint}
-          </p>
         )}
       </div>
     </div>
