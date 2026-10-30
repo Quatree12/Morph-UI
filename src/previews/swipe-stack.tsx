@@ -15,21 +15,15 @@ export function SwipeStack({ bounce }: PatternProps) {
     e.currentTarget.setPointerCapture(e.pointerId);
   }, []);
 
-  const onMove = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      setDx(e.clientX - startX.current);
-    },
-    []
-  );
+  const onMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    setDx(e.clientX - startX.current);
+  }, []);
 
-  const commit = useCallback(
-    (dir: -1 | 1) => {
-      setIndex((i) => (i + 1) % CARDS.length);
-      setDx(0);
-      void dir;
-    },
-    []
-  );
+  const commit = useCallback((dir: -1 | 1) => {
+    setIndex((i) => (i + 1) % CARDS.length);
+    setDx(0);
+    void dir;
+  }, []);
 
   const onUp = useCallback(() => {
     // Seuil prudent : 40 px de déplacement.
@@ -40,13 +34,15 @@ export function SwipeStack({ bounce }: PatternProps) {
   return (
     <div style={{ display: "grid", gap: "var(--s-3)", width: "100%", justifyItems: "center" }}>
       <div className="stack-demo">
-        {CARDS.map((label, i) => {
-          const depth = (i - index + CARDS.length) % CARDS.length;
+        {CARDS.map((label) => {
+          const depth = (CARDS.indexOf(label) - index + CARDS.length) % CARDS.length;
           const top = depth === 0;
           return (
             <div
               key={label}
-              className="stack-demo__card m shape--rounded"
+              /* Seule la carte du dessus porte le matériau : les cartes
+                 empilées dessous ne doivent pas recouvrir sa texture. */
+              className={`stack-demo__card shape--rounded${top ? " m" : ""}`}
               style={
                 {
                   transform: top
@@ -54,6 +50,9 @@ export function SwipeStack({ bounce }: PatternProps) {
                     : `translateY(${depth * -8}px) scale(${1 - depth * 0.06})`,
                   zIndex: CARDS.length - depth,
                   opacity: depth > 2 ? 0 : 1,
+                  /* Les cartes non actives : contour seul, sans fond opaque. */
+                  background: top ? undefined : "transparent",
+                  border: top ? undefined : "1px solid var(--border)",
                 } as CSSProperties
               }
               onPointerDown={top ? onDown : undefined}
