@@ -3,26 +3,27 @@
 
    AMBIANCE : Graphite — noir neutre, sans aucune teinte.
    Le fond ne colore rien : les 12 accents et les 15 matériaux sont les
-   seules sources de couleur de l'application. C'est ce qui rend leurs
-   teintes justes et leurs textures lisibles.
+   seules sources de couleur de l'application.
 
-   L'accent violet reste inchangé : il ne fait pas partie de l'ambiance.
+   CONTRASTE DES SURFACES : l'écart entre --bg et --surface est poussé à
+   18 niveaux de luminance (contre 10 auparavant), pour que les panneaux se
+   détachent nettement du fond sans avoir à éclaircir l'ensemble.
    ========================================================================== */
 
 :root {
-  /* --- Surfaces : gris purs, aucun canal dominant --- */
-  --bg: #121212;
-  --surface: #1c1c1e;
-  --surface-2: #242426;
-  --border: #2e2e30;
-  --border-soft: rgba(255, 255, 255, 0.14);
+  /* --- Surfaces : gris purs, fond plus profond, panneaux plus clairs --- */
+  --bg: #0c0c0d;
+  --surface: #1e1e21;
+  --surface-2: #2a2a2e;
+  --border: #3a3a3f;
+  --border-soft: rgba(255, 255, 255, 0.16);
 
   /* --- Texte --- */
   --text: #f2f2f4;
-  --text-dim: #a0a0a4;
-  --text-faint: #6c6c70;
+  --text-dim: #a4a4a8;
+  --text-faint: #707074;
 
-  /* --- Accents (inchangés : hors périmètre de l'ambiance) --- */
+  /* --- Accents (inchangés : ce sont les 12 choix de l'utilisateur) --- */
   --accent: #c1a8ff;
   --lime: #d6fa72;
   --turquoise: #6fe3d2;
@@ -48,9 +49,9 @@
   --s-8: 72px;
 
   /* --- Ombres --- */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.6);
 
   /* --- Typo --- */
   --font-sans: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont,
