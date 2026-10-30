@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useStudio } from "../state/context";
 import type { PatternProps } from "./types";
 
 /** Trois plans qui glissent à des vitesses différentes.
- *  Seul l'élément .parallax porte le matériau : les couches intérieures
- *  dessinent le décalage sans recouvrir la texture du conteneur. */
+ *  Le conteneur porte le matériau ET la forme : c'est lui qui est l'objet
+ *  principal du pattern, et c'est lui que le sélecteur Material doit peindre. */
 export function ParallaxLayers({ bounce }: PatternProps) {
+  const { state } = useStudio();
   const [offset, setOffset] = useState(0);
 
   const speeds = [0.18, 0.38, 0.72];
@@ -33,8 +35,11 @@ export function ParallaxLayers({ bounce }: PatternProps) {
         />
       </label>
 
-      {/* Une seule surface matérielle : le conteneur. */}
-      <div className="parallax m shape--rounded" aria-hidden="true">
+      {/* La classe est construite depuis l'état partagé : matériau + forme. */}
+      <div
+        className={`parallax m m--${state.material} shape--${state.shape}`}
+        aria-hidden="true"
+      >
         {speeds.map((speed, i) => (
           <span
             key={i}
