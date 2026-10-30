@@ -35,6 +35,15 @@
   z-index: 2;
 }
 
+/* Les matériaux à texture portent leur propre relief : le voile blanc
+   du reflet les laverait et rendrait les neuf surfaces indistinguables. */
+.m--liquid-chrome::after,
+.m--brushed-metal::after,
+.m--iridescent-crystal::after,
+.m--neon-glow::after {
+  opacity: 0.15;
+}
+
 /* ---------------------------------------------------------- 1. Frosted */
 .m--frosted-glass {
   background-color: color-mix(in srgb, var(--surface) calc(var(--alpha) * 62%), transparent);
@@ -67,6 +76,7 @@
 
 /* ----------------------------------------------------------- 3. Chrome */
 .m--liquid-chrome {
+  background-color: #7b7787;
   background-image: linear-gradient(
     118deg,
     #6d6a78 0%,
@@ -88,10 +98,6 @@
     inset 0 2px 4px rgba(255, 255, 255, 0.5),
     0 0 calc(var(--glow) * 22px) color-mix(in srgb, var(--accent) calc(var(--glow) * 45%), transparent),
     0 calc(var(--shadow) * 18px) calc(var(--shadow) * 36px) rgba(0, 0, 0, calc(var(--shadow) * 0.45));
-}
-.m--liquid-chrome::after {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 45%);
-  opacity: 0.5;
 }
 
 /* ------------------------------------------------------------ 4. Matte */
@@ -124,13 +130,10 @@
     inset 0 0 calc(var(--glow) * 22px) color-mix(in srgb, var(--accent) calc(var(--glow) * 45%), transparent),
     0 calc(var(--shadow) * 16px) calc(var(--shadow) * 30px) rgba(0, 0, 0, calc(var(--shadow) * 0.4));
 }
-.m--neon-glow::after {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 40%);
-  opacity: 0.35;
-}
 
 /* ------------------------------------------------------ 6. Iridescent */
 .m--iridescent-crystal {
+  background-color: #a78bfa;
   background-image: linear-gradient(
     135deg,
     #a78bfa 0%,
@@ -152,12 +155,6 @@
     0 calc(var(--shadow) * 20px) calc(var(--shadow) * 40px) rgba(0, 0, 0, calc(var(--shadow) * 0.45));
   transition: background-position calc(var(--dur-slow) * var(--speed-mul)) var(--ease-out),
     box-shadow var(--dur) var(--ease-out);
-}
-.m--iridescent-crystal::after {
-  background:
-    linear-gradient(115deg, rgba(255, 255, 255, 0.55) 0%, transparent 30%),
-    linear-gradient(295deg, rgba(255, 255, 255, 0.35) 0%, transparent 26%);
-  opacity: 0.75;
 }
 
 /* ------------------------------------------------------------ 7. Metal */
@@ -184,10 +181,6 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     inset 0 -1px 0 rgba(0, 0, 0, 0.45),
     0 calc(var(--shadow) * 18px) calc(var(--shadow) * 32px) rgba(0, 0, 0, calc(var(--shadow) * 0.48));
-}
-.m--brushed-metal::after {
-  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.35) 46%, transparent 66%);
-  opacity: var(--spec, 0.55);
 }
 
 /* --------------------------------------------------------------- 8. Gel */
@@ -236,27 +229,22 @@
     background-color: color-mix(in srgb, var(--surface-2) 92%, var(--accent) 8%);
   }
 }
-/* Petites surfaces (icônes, barres) : la texture doit rester lisible
-   quand la surface est réduite. On accentue le contraste du matériau. */
-.demo-dock__item.m,
-.radial__item.m,
-.radial__center.m,
-.kinetic__bar.m,
-.goo__blob.m {
-  background-blend-mode: normal;
-  filter: saturate(calc(100% + var(--glow) * 30%));
-}
-/* Les matériaux à texture (métal, chrome, irisé) ont besoin d'une surface
-   minimale et d'un fond opaque pour que la texture soit lisible sur les
-   éléments étroits (barres, icônes, pastilles). */
-.m--brushed-metal,
-.m--liquid-chrome,
-.m--iridescent-crystal,
-.m--neon-glow {
-  background-color: #4a4753;
-  min-height: 18px;
-}
 
-.m--liquid-chrome { background-color: #7b7787; }
-.m--iridescent-crystal { background-color: #a78bfa; }
-.m--neon-glow { background-color: color-mix(in srgb, var(--accent) 24%, #0c0a11); }
+/* -------------------------------------------------- Petites surfaces */
+/* Sur une surface réduite (icône, barre), la texture a besoin d'un fond
+   opaque pour rester lisible. On ne touche PAS au background-image. */
+.demo-dock__item.m--brushed-metal,
+.demo-dock__item.m--liquid-chrome,
+.demo-dock__item.m--iridescent-crystal,
+.demo-dock__item.m--neon-glow,
+.kinetic__bar.m--brushed-metal,
+.kinetic__bar.m--liquid-chrome,
+.kinetic__bar.m--iridescent-crystal,
+.kinetic__bar.m--neon-glow,
+.radial__item.m--brushed-metal,
+.radial__item.m--liquid-chrome,
+.radial__item.m--iridescent-crystal,
+.radial__item.m--neon-glow {
+  min-height: 18px;
+  min-width: 18px;
+}
