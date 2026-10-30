@@ -1,10 +1,12 @@
 import { useCallback, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import type { PatternProps } from "./types";
+import { useStudio } from "../state/context";
 
 const CARDS = ["Première carte", "Deuxième carte", "Troisième carte"];
 
 export function SwipeStack({ bounce }: PatternProps) {
+  const { state } = useStudio();
   const [index, setIndex] = useState(0);
   const [dx, setDx] = useState(0);
   const startX = useRef(0);
@@ -39,9 +41,13 @@ export function SwipeStack({ bounce }: PatternProps) {
           return (
             <div
               key={label}
-              /* Seule la carte du dessus porte le matériau : les cartes
-                 empilées dessous ne doivent pas recouvrir sa texture. */
-              className={`stack-demo__card shape--rounded${top ? " m" : ""}`}
+              /* Seule la carte du dessus porte le matériau, avec la forme
+                 choisie : les cartes dessous ne recouvrent pas sa texture. */
+              className={
+                top
+                  ? `stack-demo__card m m--${state.material} shape--${state.shape}`
+                  : "stack-demo__card shape--rounded"
+              }
               style={
                 {
                   transform: top
