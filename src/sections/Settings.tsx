@@ -44,6 +44,56 @@ export function Settings() {
         </p>
       </header>
 
+      {/* ===================== DIAGNOSTIC TECHNIQUE =====================
+          Lit le CSS RÉELLEMENT calculé par le navigateur sur l'élément du
+          pattern, plutôt que ce que la feuille de style est censée contenir. */}
+      <div className="panel">
+        <div className="panel__head">
+          <div className="eyebrow">Diagnostic technique</div>
+          <span className="chip">CSS calculé</span>
+        </div>
+        <div className="panel__body">
+          <p className="muted" style={{ fontSize: "0.8125rem" }}>
+            Ce bloc affiche les valeurs que le navigateur applique réellement à un conteneur de
+            pattern. C'est la source de vérité : si <code>background-image</code> vaut
+            <code> none</code> alors qu'un dégradé est attendu, une règle l'annule.
+          </p>
+          <pre
+            style={{
+              margin: 0,
+              padding: "var(--s-3)",
+              borderRadius: "var(--r-sm)",
+              border: "1px solid var(--border)",
+              background: "#0b0a10",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.6875rem",
+              lineHeight: 1.7,
+              whiteSpace: "pre-wrap",
+              overflowX: "auto",
+            }}
+          >
+            {(() => {
+              if (typeof document === "undefined") return "(pas de DOM)";
+              const el = document.querySelector(".parallax.m") as HTMLElement | null;
+              if (!el) return "Aucun élément .parallax.m trouvé dans le DOM.";
+              const cs = window.getComputedStyle(el);
+              return [
+                `classe      : ${el.className}`,
+                `tag         : ${el.tagName.toLowerCase()}`,
+                ``,
+                `bg-color    : ${cs.backgroundColor}`,
+                `bg-image    : ${cs.backgroundImage.slice(0, 100)}`,
+                `border-top  : ${cs.borderTopColor}`,
+                `opacity     : ${cs.opacity}`,
+                `filter      : ${cs.filter}`,
+                `isolation   : ${cs.isolation}`,
+                `style inline: ${el.getAttribute("style") || "(aucun)"}`,
+              ].join("\n");
+            })()}
+          </pre>
+        </div>
+      </div>
+
       {/* ====================== DIAGNOSTIC MATÉRIAUX ====================== */}
       <div className="panel">
         <div className="panel__head">
@@ -93,15 +143,9 @@ export function Settings() {
             })}
           </div>
 
-          {/* ================= REPRODUCTION : conteneur de pattern ================= */}
+          {/* ================= REPRODUCTION : conteneurs de pattern ================= */}
           <div style={{ display: "grid", gap: "var(--s-3)", marginTop: "var(--s-4)" }}>
-            <div className="eyebrow">Reproduction · conteneur de pattern</div>
-            <p className="muted" style={{ fontSize: "0.8125rem" }}>
-              Ce bloc utilise exactement les mêmes classes que le pattern Parallax dans le
-              Studio. Comparez-le aux neuf blocs ci-dessus : s'il est texturé, le CSS est bon
-              et le problème est dans le fichier du pattern. S'il est gris, une règle neutralise
-              le matériau sur les conteneurs de pattern.
-            </p>
+            <div className="eyebrow">Reproduction · conteneurs de pattern</div>
 
             <div style={{ display: "grid", gap: 6 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -110,7 +154,7 @@ export function Settings() {
                   .parallax m shape--rounded
                 </span>
               </div>
-              <div className="parallax m shape--rounded" style={{ height: 86, position: "relative" }}>
+              <div className="parallax m shape--rounded" style={{ height: 86 }}>
                 <span className="parallax__layer" />
               </div>
             </div>
@@ -131,7 +175,9 @@ export function Settings() {
 
             <div style={{ display: "grid", gap: 6 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <span style={{ fontSize: "0.8125rem" }}>Témoin — <code>subject</code></span>
+                <span style={{ fontSize: "0.8125rem" }}>
+                  Témoin <code>subject</code>
+                </span>
                 <span className="mono" style={{ fontSize: "0.625rem", color: "var(--text-faint)" }}>
                   .subject m
                 </span>
