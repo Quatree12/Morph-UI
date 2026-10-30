@@ -137,7 +137,11 @@ export function Docs({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
 
       {/* Accordéons transverses */}
       <div style={{ display: "grid", gap: "var(--s-3)" }}>
-        <Group title="Matériaux, formes et accents" badge={`${MATERIALS.length} · ${SHAPES.length} · ${COLORS.length}`} defaultOpen={false}>
+        <Group
+          title="Matériaux, formes et accents"
+          badge={`${MATERIALS.length} · ${SHAPES.length} · ${COLORS.length}`}
+          defaultOpen={false}
+        >
           <div style={{ display: "grid", gap: "var(--s-4)" }}>
             <div>
               <div className="eyebrow" style={{ marginBottom: 8 }}>
@@ -297,12 +301,6 @@ const PERFORMANCE: Record<PatternId, string> = {
   "parallax-layers": "Trois couches en transform : acceptable. Le coût vient des images, pas du décalage.",
   "swipe-stack": "setPointerCapture évite les événements perdus, mais la rotation calculée à chaque frame doit rester une transform.",
   "ripple-surface": "Une animation de scale sur un élément positionné en absolu est peu coûteuse. On garde trois ondes au maximum.",
-  "holographic-foil": "Le dégradé spectral est une background-size de 240 % déplacée par Glow. Le déplacement est composé par le GPU, coût négligeable.",
-  "frosted-acrylic": "Comme le verre dépoli mais avec une bordure de 2 px en plus : le coût vient du backdrop-filter et de la bordure, pas de la texture.",
-  "carbon-fiber": "Deux repeating-linear-gradient croisés : aucune image chargée, coût nul. Le repaint est stable car le fond ne se déplace pas.",
-  "ceramic-glaze": "Dégradés radiaux et ombres internes uniquement : très léger, aucun backdrop-filter, aucune image.",
-  "sandblasted-stone": "Le grain est un bruit SVG en data-URI répété sur la surface. C'est le point coûteux : évitez de l'appliquer sur une surface défilante.",
-  "liquid-mercury": "Trois dégradés superposés dont un radial qui suit Glow. Évitez de l'animer en boucle.",
 };
 
 /* 16 clés — même exigence. */
@@ -323,10 +321,4 @@ const EXAMPLES: Record<PatternId, string> = {
   "parallax-layers": "Une page produit où le packshot, le titre et le fond doré glissent à trois vitesses différentes.",
   "swipe-stack": "Une file de modération : on rejette à gauche, on valide à droite, la carte suivante remonte.",
   "ripple-surface": "Un pavé de commande domotique qui confirme le toucher par une onde partant du point exact pressé.",
-  "holographic-foil": "Une carte de fidélité d'une app de mode : la surface arc-en-ciel attire l'œil sans image ni logo.",
-  "frosted-acrylic": "Un panneau de réglages flottant au-dessus d'une photo, qui laisse deviner l'arrière-plan tout en gardant ses contours.",
-  "carbon-fiber": "Le tableau de bord d'une app de sport automobile, où la texture évoque la matière sans la photographier.",
-  "ceramic-glaze": "Un badge de statut « vérifié » posé sur une fiche produit, avec un relief doux qui invite au toucher.",
-  "sandblasted-stone": "Un choix de matière dans un configurateur : la surface mate et sans reflet évoque la pierre brute.",
-  "liquid-mercury": "Un bouton d'action principal dans une app de paiement : le métal liquide donne une impression de valeur sans être criard.",
 };
