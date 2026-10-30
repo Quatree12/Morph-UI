@@ -12,9 +12,8 @@ interface Props {
 /** Le cadre de la maquette. Il ne porte NI matériau NI forme : ce sont les
  *  patterns qui les appliquent à leur objet principal, chacun à sa manière.
  *
- *  La consigne d'usage n'est PAS rendue ici : elle appartient au Playground,
- *  sous le cadre. L'insérer dans .phone__screen ajoutait un enfant au flex
- *  column et faisait s'effondrer .phone__stage. */
+ *  La consigne d'usage n'est PAS rendue ici : l'insérer dans .phone__screen
+ *  ajoutait un enfant au flex column et faisait s'effondrer .phone__stage. */
 export function PhoneFrame({ children, expanded = false, showBadges = true }: Props) {
   const { state } = useStudio();
   const pattern = PATTERN_MAP[state.pattern];
