@@ -20,7 +20,7 @@ export type PatternId =
   | "swipe-stack"
   | "ripple-surface";
 
-/** 15 matériaux : les 9 d'origine + 6 nouveaux. */
+/** 16 matériaux : les 15 existants + Clay Porcelain. */
 export type MaterialId =
   | "frosted-glass"
   | "clear-glass"
@@ -36,7 +36,8 @@ export type MaterialId =
   | "carbon-fiber"
   | "ceramic-glaze"
   | "sandblasted-stone"
-  | "liquid-mercury";
+  | "liquid-mercury"
+  | "clay-porcelain";
 
 /** 9 formes : les 5 d'origine + 4 nouvelles. */
 export type ShapeId =
@@ -50,12 +51,10 @@ export type ShapeId =
   | "arch"
   | "notched";
 
-/** Ancrage du panneau : le contrôle Anchor n'agit que sur Sheet Drag. */
 export type AnchorId = "bottom" | "top";
 
 export type Complexity = "simple" | "intermédiaire" | "avancé";
 
-/** Champs de réglages avancés. */
 export type ControlKey =
   | "blur"
   | "speed"
