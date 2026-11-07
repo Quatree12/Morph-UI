@@ -18,9 +18,12 @@ export type PatternId =
   | "sheet-drag"
   | "parallax-layers"
   | "swipe-stack"
-  | "ripple-surface";
+  | "ripple-surface"
+  | "clay-button"
+  | "clay-switch"
+  | "clay-slider"
+  | "clay-card";
 
-/** 16 matériaux : les 15 existants + Clay Porcelain. */
 export type MaterialId =
   | "frosted-glass"
   | "clear-glass"
@@ -39,7 +42,6 @@ export type MaterialId =
   | "liquid-mercury"
   | "clay-porcelain";
 
-/** 9 formes : les 5 d'origine + 4 nouvelles. */
 export type ShapeId =
   | "pill"
   | "rounded"
