@@ -299,6 +299,10 @@ const PERFORMANCE: Record<PatternId, string> = {
   "parallax-layers": "Trois couches en transform : acceptable. Le coût vient des images, pas du décalage.",
   "swipe-stack": "setPointerCapture évite les événements perdus, mais la rotation calculée à chaque frame doit rester une transform.",
   "ripple-surface": "Une animation de scale sur un élément positionné en absolu est peu coûteuse. On garde trois ondes au maximum.",
+    "clay-button": "Le relief repose sur trois ombres internes recalculées au toucher. Léger, mais la transition de 300 ms doit rester en box-shadow et transform, jamais en filtre.",
+  "clay-switch": "Deux éléments animés : le curseur (transform) et la piste (background). Sur cinquante switchs en liste, le coût devient visible — n'animez que le curseur si la liste est longue.",
+  "clay-slider": "L'écrasement est un scaleX/scaleY sur la bille. Composé par le GPU, mais surveillez le nombre d'événements de pointeur : throttle à ~60 Hz si besoin.",
+  "clay-card": "Le dépliement utilise grid-template-rows, comme le Collapsible. Le relief lui-même ne coûte rien tant que la carte n'est pas animée.",
 };
 
 const EXAMPLES: Record<PatternId, string> = {
