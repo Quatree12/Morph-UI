@@ -92,7 +92,7 @@ export const PATTERNS: PatternDef[] = [
     useCases: ["Navigation principale mobile", "Barre d'outils d'édition", "Sélecteur de mode"],
     complexity: "simple",
     contexts: ["Navigation", "Toolbar", "Mobile"],
-    mobile: "Excellent : cibles de 56 px, zone sûre respectée.",
+    mobile: "Excellent : cibles de 48 px, zone sûre respectée.",
     desktop: "Excellent, magnification au survol en bonus.",
     pros: ["Familier", "Très tactile", "État actif immédiatement lisible"],
     cons: ["Occupe de la hauteur", "Icônes seules = sens à expliciter"],
@@ -337,18 +337,6 @@ export const PATTERNS: PatternDef[] = [
       "Limiter à trois ondes simultanées",
     ],
   },
-];
-
-export const PATTERN_MAP: Record<PatternId, PatternDef> = Object.fromEntries(
-  PATTERNS.map((p) => [p.id, p])
-) as Record<PatternId, PatternDef>;
-
-export const COMPLEXITIES: Complexity[] = ["simple", "intermédiaire", "avancé"];
-
-/** Catégories dérivées des patterns : pas de liste en dur à maintenir. */
-export const CATEGORIES: string[] = Array.from(
-  new Set(PATTERNS.map((p) => p.category))
-).sort((a, b) => a.localeCompare(b, "fr"));
   {
     id: "clay-button",
     name: "Clay Button",
@@ -385,14 +373,14 @@ export const CATEGORIES: string[] = Array.from(
     ],
     complexity: "intermédiaire",
     contexts: ["Action", "Réglage", "Mobile"],
-    mobile: "Excellent : cible de 56 px de haut, geste de balayage naturel.",
+    mobile: "Excellent : cible de 50 px de haut, geste de balayage naturel.",
     desktop: "Bon : le clic fonctionne, le glissement aussi.",
     pros: ["Ambiguïté zéro sur l'état", "Très satisfaisant à manipuler", "Grande cible tactile"],
     cons: ["Prend plus de place qu'un interrupteur plat", "Peu adapté aux listes denses"],
     a11y: [
       "Rôle switch avec aria-checked, pas un simple bouton",
       "Espace et Entrée basculent l'état",
-      "La position du curseur ne doit pas être le seul signal : le libellé l'accompagne",
+      "La position du curseur n'est pas le seul signal : le libellé l'accompagne",
     ],
   },
   {
@@ -408,14 +396,14 @@ export const CATEGORIES: string[] = Array.from(
     ],
     complexity: "intermédiaire",
     contexts: ["Action", "Réglage", "Mobile"],
-    mobile: "Excellent : piste de 8 px de haut mais cible de 44 px, geste naturel.",
+    mobile: "Excellent : piste de 14 px de haut mais cible de 44 px, geste naturel.",
     desktop: "Très bon à la souris, avec un curseur plus précis.",
     pros: ["Très expressif", "Le track creusé rend la position évidente", "Solutionne le problème des sliders plats"],
     cons: ["Déformation coûteuse si mal optimisée", "Nécessite une piste large sur petit écran"],
     a11y: [
       "Le déplacement au doigt doit être doublé par les flèches du clavier",
-      "Le geste tactile est équivalent au trackpad, aucune dépendance au survol",
-      "Le contrôle répond à prefers-reduced-motion en gardant le déplacement sans l'écrasement",
+      "Aucune dépendance au survol : le geste tactile vaut le trackpad",
+      "Répond à prefers-reduced-motion en gardant le déplacement sans l'écrasement",
     ],
   },
   {
@@ -437,7 +425,19 @@ export const CATEGORIES: string[] = Array.from(
     cons: ["Prend beaucoup de place", "Le relief devient lourd si répété"],
     a11y: [
       "Si la carte n'est pas interactive, ne pas lui donner de relief au toucher",
-      "Si elle est cliquable, un role button explicite est requis",
+      "Si elle est cliquable, un rôle button explicite est requis",
       "Le contenu doit rester lisible même quand le relief est marqué",
     ],
   },
+];
+
+export const PATTERN_MAP: Record<PatternId, PatternDef> = Object.fromEntries(
+  PATTERNS.map((p) => [p.id, p])
+) as Record<PatternId, PatternDef>;
+
+export const COMPLEXITIES: Complexity[] = ["simple", "intermédiaire", "avancé"];
+
+/** Catégories dérivées des patterns : pas de liste en dur à maintenir. */
+export const CATEGORIES: string[] = Array.from(
+  new Set(PATTERNS.map((p) => p.category))
+).sort((a, b) => a.localeCompare(b, "fr"));
