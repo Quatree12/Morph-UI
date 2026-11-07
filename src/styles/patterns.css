@@ -887,3 +887,222 @@
   from { transform: scale(1); opacity: 0.85; }
   to   { transform: scale(calc(18 * var(--ripple-scale, 1))); opacity: 0; }
 }
+/* ==========================================================================
+   17-20. PATTERNS CLAY
+   Comportements d'enfoncement propres à la matière molle. Aucun de ces blocs
+   ne définit de background : la surface appartient au matériau (.m).
+   ========================================================================== */
+
+/* --- 17. Clay Button ---
+   Le bouton n'a pas de CSS propre : tout l'effet vient de .m--clay-porcelain.
+   On ajoute seulement un léger agrandissement au relâchement, pour que le
+   retour soit visible même sur un matériau qui n'est pas du clay. */
+.subject.m:active {
+  transform: translateY(2px) scale(calc(var(--size) * 0.985));
+  transition: transform 240ms var(--ease-spring);
+}
+
+/* --- 18. Clay Switch ---
+   La piste est creusée ; la bille est une boule de pâte qui roule. */
+.clay-switch {
+  position: relative;
+  width: 92px;
+  height: 50px;
+  border-radius: var(--r-pill);
+  border: 0;
+  padding: 0;
+  display: grid;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  touch-action: manipulation;
+}
+
+.clay-switch__track {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-pill);
+  /* Piste creusée : deux ombres internes opposées à celles du bouton. */
+  box-shadow:
+    inset 4px 5px 10px rgba(0, 0, 0, 0.24),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.16);
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--accent) 18%);
+  transition: background 300ms var(--ease-out);
+}
+
+.clay-switch[aria-checked="true"] .clay-switch__track {
+  background: color-mix(in srgb, var(--accent) 42%, var(--surface-2));
+}
+
+.clay-switch__ball {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  margin-left: 5px;
+  border-radius: 50%;
+  transition: transform 340ms var(--ease-spring);
+  will-change: transform;
+}
+
+/* --- 19. Clay Slider ---
+   Piste creusée, bille écrasée dans le sens du geste. */
+.clay-slider__track {
+  position: relative;
+  width: 100%;
+  height: 14px;
+  border-radius: var(--r-pill);
+  touch-action: none;
+  cursor: grab;
+  /* Le creux : deux ombres internes inversées. */
+  box-shadow:
+    inset 3px 4px 8px rgba(0, 0, 0, 0.26),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, var(--surface-2) 84%, var(--accent) 16%);
+}
+.clay-slider__track:active { cursor: grabbing; }
+
+.clay-slider__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent) 55%, var(--surface-2));
+  transition: width 120ms var(--ease-out);
+}
+
+.clay-slider__ball {
+  position: absolute;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  /* L'écrasement est appliqué en inline : scaleX s'allonge dans le sens du
+     mouvement, scaleY s'aplatit. C'est ce qui fait « pâte qu'on pousse ». */
+  transition: transform 180ms var(--ease-spring), left 120ms var(--ease-out);
+  will-change: transform, left;
+}
+
+/* --- 20. Clay Card ---
+   Grande surface : c'est ici que le relief se lit le mieux. */
+.clay-card {
+  position: relative;
+  width: 100%;
+  max-width: 240px;
+  min-height: 120px;
+  border: 0;
+  padding: var(--s-4);
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+  justify-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 260ms var(--ease-spring);
+}
+
+.clay-card__title {
+  position: relative;
+  z-index: 3;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.clay-card__sub {
+  position: relative;
+  z-index: 3;
+  font-size: 0.6875rem;
+  color: color-mix(in srgb, var(--accent) 30%, var(--text-dim));
+}
+
+.clay-card__extra {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms var(--ease-spring),
+    opacity 300ms var(--ease-out);
+  opacity: 0;
+  width: 100%;
+  position: relative;
+  z-index: 3;
+}
+.clay-card__extra--open { grid-template-rows: 1fr; opacity: 1; }
+.clay-card__extra > div { min-height: 0; overflow: hidden; }
+
+/* Motifs de la Library pour les 4 patterns Clay. */
+.motif--clay-button::before {
+  content: "";
+  width: 84px; height: 40px;
+  border-radius: 999px;
+  background:
+    radial-gradient(48% 60% at 30% 18%, rgba(255, 255, 255, 0.7), transparent 66%),
+    color-mix(in srgb, var(--accent) 34%, #ded5c8);
+  box-shadow:
+    inset -6px -7px 12px color-mix(in srgb, var(--accent) 42%, rgba(150, 132, 108, 0.6)),
+    inset 5px 6px 10px rgba(255, 255, 255, 0.6),
+    0 6px 12px rgba(0, 0, 0, 0.28);
+}
+
+.motif--clay-switch::before {
+  content: "";
+  width: 80px; height: 42px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 80%, var(--accent) 20%);
+  box-shadow:
+    inset 4px 5px 10px rgba(0, 0, 0, 0.26),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.14);
+}
+.motif--clay-switch::after {
+  content: "";
+  position: absolute;
+  width: 32px; height: 32px;
+  margin-left: -38px;
+  border-radius: 50%;
+  background:
+    radial-gradient(48% 60% at 30% 18%, rgba(255, 255, 255, 0.75), transparent 66%),
+    color-mix(in srgb, var(--accent) 40%, #ded5c8);
+  box-shadow:
+    inset -4px -5px 9px color-mix(in srgb, var(--accent) 45%, rgba(150, 132, 108, 0.6)),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.6);
+}
+
+.motif--clay-slider::before {
+  content: "";
+  width: 88px; height: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 84%, var(--accent) 16%);
+  box-shadow:
+    inset 3px 4px 8px rgba(0, 0, 0, 0.28),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.12);
+}
+.motif--clay-slider::after {
+  content: "";
+  position: absolute;
+  width: 34px; height: 34px;
+  margin-left: 16px;
+  border-radius: 50%;
+  /* Bille écrasée : c'est la signature du pattern. */
+  transform: scaleX(1.16) scaleY(0.86);
+  background:
+    radial-gradient(48% 60% at 30% 18%, rgba(255, 255, 255, 0.75), transparent 66%),
+    color-mix(in srgb, var(--accent) 46%, #ded5c8);
+  box-shadow:
+    inset -4px -4px 9px color-mix(in srgb, var(--accent) 48%, rgba(150, 132, 108, 0.6)),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.6);
+}
+
+.motif--clay-card::before {
+  content: "";
+  width: 76px; height: 62px;
+  border-radius: 16px;
+  background:
+    radial-gradient(72% 54% at 26% 12%, rgba(255, 255, 255, 0.86), transparent 68%),
+    linear-gradient(
+      158deg,
+      color-mix(in srgb, var(--accent) 20%, #f4efe7) 0%,
+      color-mix(in srgb, var(--accent) 44%, #cec3b2) 100%
+    );
+  box-shadow:
+    inset -6px -7px 13px color-mix(in srgb, var(--accent) 44%, rgba(150, 132, 108, 0.6)),
+    inset 5px 6px 11px rgba(255, 255, 255, 0.62),
+    0 7px 14px rgba(0, 0, 0, 0.3);
+}
