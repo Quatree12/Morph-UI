@@ -349,3 +349,95 @@ export const COMPLEXITIES: Complexity[] = ["simple", "intermédiaire", "avancé"
 export const CATEGORIES: string[] = Array.from(
   new Set(PATTERNS.map((p) => p.category))
 ).sort((a, b) => a.localeCompare(b, "fr"));
+  {
+    id: "clay-button",
+    name: "Clay Button",
+    category: "Action",
+    description:
+      "Un bouton de pâte à modeler qui s'enfonce franchement quand on le presse, puis remonte avec un léger rebond. Le relief s'inverse au contact : les ombres internes se creusent, la forme descend et se rétracte.",
+    useCases: [
+      "Action principale d'une app ludique",
+      "Confirmation d'envoi sur un formulaire enfant",
+      "Bouton de jeu ou d'apprentissage",
+    ],
+    complexity: "simple",
+    contexts: ["Action", "Feedback", "Mobile"],
+    mobile: "Excellent : le geste est immédiat et le retour très marqué.",
+    desktop: "Très bon, le rebond au relâchement est plus visible à la souris.",
+    pros: ["Retour tactile très lisible", "Aucune librairie", "Fonctionne avec tous les matériaux"],
+    cons: ["Peu adapté aux interfaces denses", "Le relief demande de l'espace"],
+    a11y: [
+      "Le retour visuel est doublé par aria-pressed",
+      "Pas d'animation en boucle : le relief ne bouge qu'au toucher",
+      "Le texte reste contrasté sur toutes les teintes de pâte",
+    ],
+  },
+  {
+    id: "clay-switch",
+    name: "Clay Switch",
+    category: "Action",
+    description:
+      "Une bascule dont le curseur est une bille de pâte qui roule d'un côté à l'autre et s'écrase légèrement contre la paroi. La piste se creuse quand elle est active.",
+    useCases: [
+      "Réglage on/off dans une app ludique",
+      "Activation d'un mode",
+      "Préférence binaire dans une app enfant",
+    ],
+    complexity: "intermédiaire",
+    contexts: ["Action", "Réglage", "Mobile"],
+    mobile: "Excellent : cible de 56 px de haut, geste de balayage naturel.",
+    desktop: "Bon : le clic fonctionne, le glissement aussi.",
+    pros: ["Ambiguïté zéro sur l'état", "Très satisfaisant à manipuler", "Grande cible tactile"],
+    cons: ["Prend plus de place qu'un interrupteur plat", "Peu adapté aux listes denses"],
+    a11y: [
+      "Rôle switch avec aria-checked, pas un simple bouton",
+      "Espace et Entrée basculent l'état",
+      "La position du curseur ne doit pas être le seul signal : le libellé l'accompagne",
+    ],
+  },
+  {
+    id: "clay-slider",
+    name: "Clay Slider",
+    category: "Action",
+    description:
+      "Un curseur de pâte qu'on pousse du doigt. La bille s'écrase dans le sens du mouvement quand on la déplace, comme une boule de matière molle qu'on pousse sur une piste creusée.",
+    useCases: [
+      "Réglage de volume ou d'intensité",
+      "Sélecteur de taille dans une app de création",
+      "Réglage de luminosité",
+    ],
+    complexity: "intermédiaire",
+    contexts: ["Action", "Réglage", "Mobile"],
+    mobile: "Excellent : piste de 8 px de haut mais cible de 44 px, geste naturel.",
+    desktop: "Très bon à la souris, avec un curseur plus précis.",
+    pros: ["Très expressif", "Le track creusé rend la position évidente", "Solutionne le problème des sliders plats"],
+    cons: ["Déformation coûteuse si mal optimisée", "Nécessite une piste large sur petit écran"],
+    a11y: [
+      "Le déplacement au doigt doit être doublé par les flèches du clavier",
+      "Le geste tactile est équivalent au trackpad, aucune dépendance au survol",
+      "Le contrôle répond à prefers-reduced-motion en gardant le déplacement sans l'écrasement",
+    ],
+  },
+  {
+    id: "clay-card",
+    name: "Clay Card",
+    category: "Structure",
+    description:
+      "Une carte épaisse qui se soulève légèrement quand on la touche et s'aplatit franchement quand on la presse. La grande surface montre tout le relief du matériau : lumière concentrée, ombre portée épaisse, pâte légèrement teintée.",
+    useCases: [
+      "Carte produit dans une app de commerce",
+      "Fiche de profil dans une app enfant",
+      "Tuile de tableau de bord ludique",
+    ],
+    complexity: "simple",
+    contexts: ["Structure", "Contenu", "Surfaces"],
+    mobile: "Excellent : grande surface, le relief est très lisible.",
+    desktop: "Excellent, avec un effet de soulèvement au survol.",
+    pros: ["Grande surface : montre vraiment le matériau", "Interaction claire au toucher", "Fonctionne avec beaucoup de contenus"],
+    cons: ["Prend beaucoup de place", "Le relief devient lourd si répété"],
+    a11y: [
+      "Si la carte n'est pas interactive, ne pas lui donner de relief au toucher",
+      "Si elle est cliquable, un role button explicite est requis",
+      "Le contenu doit rester lisible même quand le relief est marqué",
+    ],
+  },
