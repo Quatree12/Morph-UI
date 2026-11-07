@@ -322,4 +322,8 @@ const EXAMPLES: Record<PatternId, string> = {
   "parallax-layers": "Une page produit où le packshot, le titre et le fond doré glissent à trois vitesses différentes.",
   "swipe-stack": "Une file de modération : on rejette à gauche, on valide à droite, la carte suivante remonte.",
   "ripple-surface": "Un pavé de commande domotique qui confirme le toucher par une onde partant du point exact pressé.",
+    "clay-button": "Le bouton « Jouer » d'une app pour enfants : il s'enfonce sous le doigt comme une pastille de pâte, avec un rebond au relâchement.",
+  "clay-switch": "Un réglage « Sons » dans une app ludique : la bille roule d'un côté à l'autre et la piste se teinte quand le mode est actif.",
+  "clay-slider": "Un réglage de volume dans un lecteur de musique enfant : la bille s'écrase dans le sens du geste quand on la pousse.",
+  "clay-card": "Une carte produit dans une app de commerce ludique : elle se soulève légèrement au toucher et se déplie pour montrer le détail.",
 };
