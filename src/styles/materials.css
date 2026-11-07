@@ -7,7 +7,7 @@
 
    CONTRASTE DES TEXTURES : une texture calibrée pour une pastille de 34 px
    devient invisible sur un panneau de 380 px. Les rayures et les dégradés
-   sont donc volontairement marqués (écarts de 30 à 90 % de luminance).
+   sont donc volontairement marqués.
    ========================================================================== */
 
 /* Surface de base commune : toutes les matières s'appliquent par-dessus. */
@@ -45,7 +45,8 @@
 .m--brushed-metal::after,
 .m--iridescent-crystal::after,
 .m--neon-glow::after,
-.m--carbon-fiber::after {
+.m--carbon-fiber::after,
+.m--clay-porcelain::after {
   opacity: 0.12;
 }
 
@@ -228,14 +229,7 @@
 }
 .m--solid-surface::after { opacity: 0.14; }
 
-/* ==========================================================================
-   10-15. NOUVEAUX MATÉRIAUX
-   Chacun apporte une matière réellement différente — pas une variante des
-   neuf existants. Les positions et les contrastes sont calibrés pour des
-   surfaces de 100 px et plus.
-   ========================================================================== */
-
-/* 10. Holographic Foil : dégradé spectral qui glisse avec Glow. */
+/* ------------------------------------------------------- 10. Holo Foil */
 .m--holographic-foil {
   background-color: #b8a4e8;
   background-image: linear-gradient(
@@ -260,7 +254,7 @@
     box-shadow var(--dur) var(--ease-out);
 }
 
-/* 11. Frosted Acrylic : dépoli épais, bordure claire marquée. */
+/* --------------------------------------------------- 11. Frosted Acrylic */
 .m--frosted-acrylic {
   background-color: color-mix(in srgb, var(--surface) calc(var(--alpha) * 78%), transparent);
   background-image: linear-gradient(
@@ -280,9 +274,7 @@
 }
 .m--frosted-acrylic::after { opacity: 0.35; }
 
-/* 12. Carbon Fiber : trame croisée à 45°, teinte froide.
-   Deux repeating-linear-gradient croisés : c'est ce qui distingue la trame
-   tissée des stries verticales du métal brossé. */
+/* ------------------------------------------------------ 12. Carbon Fiber */
 .m--carbon-fiber {
   background-color: #22242a;
   background-image:
@@ -314,7 +306,7 @@
     0 calc(var(--shadow) * 18px) calc(var(--shadow) * 34px) rgba(0, 0, 0, calc(var(--shadow) * 0.5));
 }
 
-/* 13. Ceramic Glaze : émail lisse, reflet mou, ombre interne. */
+/* ----------------------------------------------------- 13. Ceramic Glaze */
 .m--ceramic-glaze {
   background-color: color-mix(in srgb, var(--accent) 26%, #f0ecf4);
   background-image:
@@ -337,8 +329,7 @@
   opacity: 0.85;
 }
 
-/* 14. Sandblasted Stone : grain fin, zéro brillance.
-   Le grain est un bruit SVG en data-URI, répété sur la surface. */
+/* --------------------------------------------------- 14. Sandblasted Stone */
 .m--sandblasted-stone {
   background-color: color-mix(in srgb, var(--surface-2) 88%, var(--accent) 12%);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
@@ -349,10 +340,9 @@
   box-shadow:
     0 calc(var(--shadow) * 16px) calc(var(--shadow) * 30px) rgba(0, 0, 0, calc(var(--shadow) * 0.4));
 }
-/* Aucun reflet spéculaire : c'est la définition de ce matériau. */
 .m--sandblasted-stone::after { opacity: 0; }
 
-/* 15. Liquid Mercury : reflets larges et étirés, sans arêtes franches. */
+/* ------------------------------------------------------ 15. Liquid Mercury */
 .m--liquid-mercury {
   background-color: #9a97a3;
   background-image:
@@ -380,6 +370,130 @@
 .m--liquid-mercury::after {
   background: radial-gradient(80% 34% at 26% 6%, rgba(255, 255, 255, 0.6), transparent 60%);
   opacity: 0.6;
+}
+
+/* ==========================================================================
+   16. CLAY PORCELAIN — pâte à modeler, accordée à l'accent
+
+   Le claymorphisme n'est PAS un dégradé clair : c'est un VOLUME construit en
+   trois couches, plus un enfoncement au toucher.
+
+   1. Une lumière très concentrée en haut-gauche (une tache, pas une bande).
+   2. Une pâte teintée par l'accent, jamais un blanc neutre.
+   3. Deux ombres opposées, internes, qui font « déborder » la forme.
+   4. Au toucher : le relief s'inverse, comme une pastille qu'on presse.
+
+   La teinte suit l'accent à hauteur de 30 % : assez pour que la couleur se
+   voie, assez peu pour que la matière reste de la porcelaine.
+   ========================================================================== */
+
+.m--clay-porcelain {
+  /* Pâte teintée : la base est un mélange accent + porcelaine. */
+  background-color: color-mix(in srgb, var(--accent) 30%, #e6dfd5);
+  background-image:
+    /* La lumière : une tache très concentrée, en haut-gauche. */
+    radial-gradient(
+      52% 40% at 26% 12%,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.35) 34%,
+      transparent 68%
+    ),
+    /* La pâte elle-même : dégradé diagonal, accent sur la basse lumière. */
+    linear-gradient(
+      152deg,
+      color-mix(in srgb, var(--accent) 18%, #f6f1e9) 0%,
+      color-mix(in srgb, var(--accent) 34%, #ded5c8) 62%,
+      color-mix(in srgb, var(--accent) 52%, #c4b8a6) 100%
+    );
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  /* Aucune bordure : la forme n'existe que par son relief. */
+  border: 0;
+  color: color-mix(in srgb, var(--accent) 30%, #3a332b);
+  /* Trois ombres : deux internes opposées (le volume) + une portée épaisse. */
+  box-shadow:
+    inset calc(-8px - var(--shadow) * 6px) calc(-10px - var(--shadow) * 7px) calc(16px + var(--shadow) * 14px)
+      color-mix(in srgb, var(--accent) 42%, rgba(150, 132, 108, 0.7)),
+    inset calc(7px + var(--shadow) * 5px) calc(8px + var(--shadow) * 6px) calc(14px + var(--shadow) * 12px)
+      rgba(255, 255, 255, calc(0.7 * var(--shadow) + 0.3)),
+    0 calc(6px + var(--shadow) * 8px) calc(12px + var(--shadow) * 18px)
+      rgba(0, 0, 0, calc(0.26 * var(--shadow) + 0.14));
+  transition:
+    box-shadow calc(var(--dur-fast) * var(--speed-mul)) var(--ease-out),
+    background-image calc(var(--dur) * var(--speed-mul)) var(--ease-out),
+    transform calc(var(--dur-fast) * var(--speed-mul)) var(--ease-out);
+}
+
+/* Le reflet du clay : une tache douce, pas la bande blanche commune. */
+.m--clay-porcelain::after {
+  background: radial-gradient(
+    58% 44% at 27% 11%,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.28) 40%,
+    transparent 68%
+  );
+  opacity: 0.85;
+}
+
+/* ENFONCEMENT : au toucher, le relief s'inverse et la pâte s'assombrit.
+   C'est ce geste qui fait vraiment « pâte à modeler ». */
+.m--clay-porcelain:active,
+.m--clay-porcelain[aria-pressed="true"],
+.m--clay-porcelain[aria-selected="true"],
+.m--clay-porcelain[aria-current="true"],
+.m--clay-porcelain[aria-current="page"] {
+  background-color: color-mix(in srgb, var(--accent) 38%, #ddd4c6);
+  background-image:
+    radial-gradient(
+      46% 34% at 30% 16%,
+      rgba(255, 255, 255, 0.55) 0%,
+      transparent 62%
+    ),
+    linear-gradient(
+      152deg,
+      color-mix(in srgb, var(--accent) 40%, #d6cbbc) 0%,
+      color-mix(in srgb, var(--accent) 56%, #c0b3a0) 100%
+    );
+  box-shadow:
+    inset calc(6px + var(--shadow) * 6px) calc(7px + var(--shadow) * 7px) calc(14px + var(--shadow) * 12px)
+      color-mix(in srgb, var(--accent) 48%, rgba(140, 122, 98, 0.75)),
+    inset calc(-4px - var(--shadow) * 3px) calc(-4px - var(--shadow) * 4px) calc(10px + var(--shadow) * 8px)
+      rgba(255, 255, 255, 0.55),
+    0 calc(1px + var(--shadow) * 2px) calc(4px + var(--shadow) * 6px)
+      rgba(0, 0, 0, calc(0.18 * var(--shadow) + 0.08));
+  transform: translateY(1px);
+}
+
+/* Sur les grandes surfaces, la lumière est plus large : sur 300 px, une tache
+   concentrée deviendrait un point isolé. */
+.sheet.m--clay-porcelain,
+.stack-demo__card.m--clay-porcelain,
+.parallax.m--clay-porcelain,
+.motif--clay-porcelain {
+  background-image:
+    radial-gradient(
+      78% 56% at 24% 10%,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.3) 42%,
+      transparent 72%
+    ),
+    linear-gradient(
+      158deg,
+      color-mix(in srgb, var(--accent) 16%, #f6f1e9) 0%,
+      color-mix(in srgb, var(--accent) 32%, #ded5c8) 60%,
+      color-mix(in srgb, var(--accent) 48%, #c4b8a6) 100%
+    );
+}
+
+/* Sur les petites surfaces, on impose une dimension minimale pour que le
+   volume ait de la place. */
+.demo-dock__item.m--clay-porcelain,
+.radial__item.m--clay-porcelain,
+.radial__center.m--clay-porcelain,
+.kinetic__bar.m--clay-porcelain,
+.goo__blob.m--clay-porcelain {
+  min-height: 24px;
+  min-width: 24px;
 }
 
 /* ------------------------------------------------- Repli sans backdrop */
