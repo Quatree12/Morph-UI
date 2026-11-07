@@ -1,13 +1,11 @@
 /* ==========================================================================
-   MORPH/UI — Les 16 comportements de pattern.
-   Chaque composant a une composition, une géométrie et une animation propres.
+   MORPH/UI — Les 20 comportements de pattern.
 
-   RÈGLE MATÉRIAU : tout élément qui doit être peint par le sélecteur Material
-   reçoit la classe de matériau INTERPOLÉE depuis l'état partagé :
+   RÈGLE MATÉRIAU : tout élément peint par le sélecteur Material reçoit la
+   classe INTERPOLÉE depuis l'état partagé :
      `m m--${state.material} shape--${state.shape}`
 
-   RÈGLE D'OBJET : le matériau et la forme vont sur l'OBJET PRINCIPAL du
-   pattern, jamais sur le bouton qui l'enveloppe.
+   RÈGLE D'OBJET : le matériau et la forme vont sur L'OBJET PRINCIPAL.
 
    RÈGLE DE CONSIGNE : chaque sous-titre décrit EXACTEMENT le geste disponible.
    ========================================================================== */
@@ -22,6 +20,10 @@ import { SheetDrag } from "./sheet-drag";
 import { ParallaxLayers } from "./parallax-layers";
 import { SwipeStack } from "./swipe-stack";
 import { RippleSurface } from "./ripple-surface";
+import { ClayButton } from "./clay-button";
+import { ClaySwitch } from "./clay-switch";
+import { ClaySlider } from "./clay-slider";
+import { ClayCard } from "./clay-card";
 
 export type { PatternProps };
 
@@ -352,7 +354,7 @@ function Kinetic() {
         value={amp}
         aria-label="Force de la déformation cinétique"
         onChange={(e) => setAmp(Number.parseFloat(e.target.value))}
-        style={{ width: "70%", accentColor: "var(--accent)" }}
+        style={{ width: "70%", accentColor: "var(--brand-light)" }}
       />
       <div className="kinetic" aria-hidden="true">
         {base.map((h, i) => (
@@ -393,8 +395,6 @@ function Lens() {
       onPointerMove={(e) => move(e.clientX, e.clientY, e.currentTarget)}
       onPointerLeave={() => setPos({ x: 50, y: 50 })}
     >
-      {/* Un motif discret remplace le texte : la lentille agrandit une
-          surface, sans qu'aucune inscription ne traverse le cadre. */}
       <span className="lens__target" aria-hidden="true">
         <span />
         <span />
@@ -474,9 +474,7 @@ function ExpressiveMotion({ bounce }: PatternProps) {
   );
 }
 
-/* --------------------------------------------- 12. Contextual Toolbar ---
-   La barre apparaît quand au moins un élément est sélectionné, et CHAQUE
-   bouton agit réellement. Aucune action n'est décorative. */
+/* --------------------------------------------- 12. Contextual Toolbar */
 const INITIAL_ITEMS = ["Élément A", "Élément B", "Élément C"];
 
 function ContextualToolbar() {
@@ -526,7 +524,7 @@ function ContextualToolbar() {
                 minWidth: 0,
                 width: "100%",
                 padding: items.length <= 4 ? "var(--s-3)" : "10px",
-                boxShadow: on ? "0 0 0 2px var(--accent)" : undefined,
+                boxShadow: on ? "0 0 0 2px var(--brand-light)" : undefined,
               }}
             >
               <span className="subject__label" style={{ fontSize: "0.8125rem" }}>
@@ -557,7 +555,7 @@ function ContextualToolbar() {
       {flash && (
         <p
           className="mono"
-          style={{ position: "absolute", bottom: 0, fontSize: "0.625rem", color: "var(--accent)" }}
+          style={{ position: "absolute", bottom: 0, fontSize: "0.625rem", color: "var(--brand-light)" }}
           aria-live="polite"
         >
           {flash}
@@ -585,4 +583,8 @@ export const PATTERN_RENDERERS: Record<PatternId, (p: PatternProps) => JSX.Eleme
   "parallax-layers": ParallaxLayers,
   "swipe-stack": SwipeStack,
   "ripple-surface": RippleSurface,
+  "clay-button": ClayButton,
+  "clay-switch": ClaySwitch,
+  "clay-slider": ClaySlider,
+  "clay-card": ClayCard,
 };
